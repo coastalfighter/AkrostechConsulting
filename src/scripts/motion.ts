@@ -53,11 +53,27 @@ function initSmoothScroll(): void {
   document.addEventListener('menu:toggle', (e) => ((e as CustomEvent<boolean>).detail ? lenis?.stop() : lenis?.start()));
   if (document.documentElement.classList.contains('is-preloading')) {
     lenis.stop();
-    setTimeout(() => lenis?.start(), 1700);
+    setTimeout(() => lenis?.start(), 1100);
   }
 }
 
 /* -------------------------------------------------------------- reveals */
+
+/** One shared observer: run `fn` once when an element nears the viewport, then stop watching it. */
+function onceVisible(selector: string, fn: (el: HTMLElement) => void, rootMargin = '0px 0px -10% 0px'): void {
+  const els = document.querySelectorAll<HTMLElement>(selector);
+  if (!els.length) return;
+  const io = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        io.unobserve(entry.target);
+        fn(entry.target as HTMLElement);
+      }),
+    { rootMargin },
+  );
+  els.forEach((el) => io.observe(el));
+}
 
 function initReveals(): void {
   document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
@@ -65,88 +81,91 @@ function initReveals(): void {
       el.style.setProperty('--reveal-delay', `${Math.min(i, 8) * 75}ms`);
     });
   });
-
-  ScrollTrigger.batch('[data-reveal]', {
-    start: 'top 88%',
-    once: true,
-    onEnter: (els) => els.forEach((el) => el.classList.add('is-revealed')),
-  });
+  onceVisible('[data-reveal]', (el) => el.classList.add('is-revealed'), '0px 0px -8% 0px');
 }
 
 function initSplits(): void {
-  document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
-    const type = el.dataset.split === 'words' ? 'words' : 'lines';
-    // Splitting is visual only; the original text stays the accessible name.
-    el.setAttribute('aria-label', el.textContent?.trim() ?? '');
-    SplitText.create(el, {
-      type: type === 'words' ? 'words,lines' : 'lines',
-      mask: 'lines',
-      linesClass: 'split-line',
-      autoSplit: true,
-      aria: 'hidden',
-      onSplit(self) {
-        const targets = type === 'words' ? self.words : self.lines;
-        el.classList.add('is-split');
-        return gsap.from(targets, {
-          yPercent: 110,
-          duration: 1.05,
-          ease: 'expo.out',
-          stagger: type === 'words' ? 0.035 : 0.09,
-          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        });
-      },
-    });
-  });
+  // Split lazily, just before each headline scrolls in: splitting measures layout, so doing it
+  // for every heading at boot would block the main thread.
+  onceVisible(
+    '[data-split]',
+    (el) => {
+      const type = el.dataset.split === 'words' ? 'words' : 'lines';
+      el.setAttribute('aria-label', el.textContent?.trim() ?? '');
+      SplitText.create(el, {
+        type: type === 'words' ? 'words,lines' : 'lines',
+        mask: 'lines',
+        linesClass: 'split-line',
+        autoSplit: true,
+        aria: 'hidden',
+        onSplit(self) {
+          el.classList.add('is-split');
+          return gsap.from(type === 'words' ? self.words : self.lines, {
+            yPercent: 110,
+            duration: 1.05,
+            ease: 'expo.out',
+            stagger: type === 'words' ? 0.035 : 0.09,
+          });
+        },
+      });
+    },
+    '0px 0px -6% 0px',
+  );
 }
 
 function initWipes(): void {
-  document.querySelectorAll<HTMLElement>('[data-wipe]').forEach((el) => {
+  onceVisible('[data-wipe]', (el) => {
     const from = el.dataset.wipe === 'up' ? 'inset(100% 0% 0% 0%)' : 'inset(0% 100% 0% 0%)';
     const img = el.querySelector('img, canvas, svg');
-    const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 85%', once: true } });
+    const tl = gsap.timeline();
     tl.fromTo(el, { clipPath: from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.inOut' });
     if (img) tl.fromTo(img, { scale: 1.18 }, { scale: 1, duration: 1.6, ease: 'expo.out' }, 0.1);
   });
 }
 
+// Scroll-scrubbed effects measure layout when created, so each is created only as its
+// section comes within a screen of the viewport.
+const NEAR = '100% 0px 100% 0px';
+
 function initParallax(): void {
-  document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
-    const depth = Number(el.dataset.parallax) || 0.15;
-    gsap.fromTo(
-      el,
-      { yPercent: -depth * 50 },
-      {
-        yPercent: depth * 50,
-        ease: 'none',
-        scrollTrigger: { trigger: el.closest('section') ?? el, start: 'top bottom', end: 'bottom top', scrub: true },
-      },
-    );
-  });
+  onceVisible(
+    '[data-parallax]',
+    (el) => {
+      const depth = Number(el.dataset.parallax) || 0.15;
+      gsap.fromTo(
+        el,
+        { yPercent: -depth * 50 },
+        {
+          yPercent: depth * 50,
+          ease: 'none',
+          scrollTrigger: { trigger: el.closest('section') ?? el, start: 'top bottom', end: 'bottom top', scrub: true },
+        },
+      );
+    },
+    NEAR,
+  );
 }
 
 function initCounters(): void {
-  document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
-    const final = el.textContent?.trim() ?? '';
-    const match = final.match(/^(\D*)([\d,.]+)(.*)$/);
-    if (!match) return;
-    const [, prefix = '', num = '0', suffix = ''] = match;
-    const target = Number(num.replace(/,/g, ''));
-    const decimals = (num.split('.')[1] ?? '').length;
-    const state = { v: 0 };
-    el.setAttribute('aria-label', final);
-    const render = () => {
-      el.textContent = `${prefix}${state.v.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
-    };
-    ScrollTrigger.create({
-      trigger: el,
-      start: 'top 90%',
-      once: true,
-      onEnter: () => {
-        render();
-        gsap.to(state, { v: target, duration: 1.8, ease: 'power3.out', onUpdate: render, onComplete: () => (el.textContent = final) });
-      },
-    });
-  });
+  onceVisible(
+    '[data-count]',
+    (el) => {
+      const final = el.textContent?.trim() ?? '';
+      const match = final.match(/^(\D*)([\d,.]+)(.*)$/);
+      if (!match) return;
+      const [, prefix = '', num = '0', suffix = ''] = match;
+      const target = Number(num.replace(/,/g, ''));
+      const decimals = (num.split('.')[1] ?? '').length;
+      const state = { v: 0 };
+      el.setAttribute('aria-label', final);
+      const render = () => {
+        el.textContent = `${prefix}${state.v.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+      };
+      render();
+      gsap.to(state, { v: target, duration: 1.8, ease: 'power3.out', onUpdate: render, onComplete: () => void (el.textContent = final) });
+    },
+    '0px 0px -5% 0px',
+  );
 }
 
 function initHorizontal(mm: gsap.MatchMedia): void {
@@ -174,17 +193,21 @@ function initHorizontal(mm: gsap.MatchMedia): void {
 }
 
 function initPerspective(): void {
-  document.querySelectorAll<HTMLElement>('[data-perspective]').forEach((el) => {
-    gsap.fromTo(
-      el,
-      { rotateX: 16, scale: 0.9, transformPerspective: 1400, transformOrigin: '50% 100%' },
-      { rotateX: 0, scale: 1, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'top 35%', scrub: true } },
-    );
-  });
+  onceVisible(
+    '[data-perspective]',
+    (el) => {
+      gsap.fromTo(
+        el,
+        { rotateX: 16, scale: 0.9, transformPerspective: 1400, transformOrigin: '50% 100%' },
+        { rotateX: 0, scale: 1, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'top 35%', scrub: true } },
+      );
+    },
+    NEAR,
+  );
 }
 
 function initTimelines(): void {
-  document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((tl) => {
+  onceVisible('[data-timeline]', (tl) => {
     const line = tl.querySelector<HTMLElement>('[data-timeline-line]');
     const steps = tl.querySelectorAll<HTMLElement>('[data-timeline-step]');
     if (line) {
@@ -208,7 +231,7 @@ function initTimelines(): void {
         onEnter: () => step.classList.add('is-past'),
       });
     });
-  });
+  }, NEAR);
 }
 
 /* ---------------------------------------------------------- interaction */
@@ -311,26 +334,31 @@ function initHeroExit(): void {
 
 /* ----------------------------------------------------------------- boot */
 
-export function initMotion(): void {
+const yieldToMain = (): Promise<void> => {
+  const sched = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+  return sched?.yield ? sched.yield() : new Promise((r) => setTimeout(r, 0));
+};
+
+export async function initMotion(): Promise<void> {
   window.__akMotion = true;
-  const mm = gsap.matchMedia();
-  initSmoothScroll();
+  // Cheap, observer-based work first so content reveals as soon as possible.
   initReveals();
   initSplits();
   initWipes();
-  initParallax();
   initCounters();
-  initHorizontal(mm);
-  initPerspective();
-  initTimelines();
+  await yieldToMain();
+  initSmoothScroll();
+  initCursor();
   initMagnetic();
   initTilt();
-  initCursor();
-  initMarqueeVelocity();
-  initHeroExit();
-
-  // Re-measure once fonts and late images have settled.
+  await yieldToMain();
+  // Scroll-scrubbed effects measure layout when created: spread them across tasks.
+  const mm = gsap.matchMedia();
+  const steps = [initParallax, () => initHorizontal(mm), initPerspective, initTimelines, initHeroExit, initMarqueeVelocity];
+  for (const step of steps) {
+    step();
+    await yieldToMain();
+  }
   void document.fonts?.ready.then(() => ScrollTrigger.refresh());
-  window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
   document.dispatchEvent(new CustomEvent('motion:ready'));
 }

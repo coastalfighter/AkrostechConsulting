@@ -104,7 +104,7 @@ const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
                   <p class="wd-tabs__body">{w.body}</p>
                   <div class="wd-tabs__cols">
                     <div>
-                      <h4 class="wd-tabs__label">You get</h4>
+                      <p class="wd-tabs__label">You get</p>
                       <ul role="list" class="wd-tabs__deliver">
                         {w.deliverables.map((d) => (
                           <li>
@@ -115,7 +115,7 @@ const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
                       </ul>
                     </div>
                     <div>
-                      <h4 class="wd-tabs__label">Typical stack</h4>
+                      <p class="wd-tabs__label">Typical stack</p>
                       <ul role="list" class="wd-tabs__stack">
                         {w.stack.map((t) => (
                           <li>{t}</li>
@@ -412,9 +412,8 @@ const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
   .wd-process__rail { position: absolute; left: 0; top: 0.5rem; bottom: 0.5rem; width: 3px; background: var(--surface-strong); }
   .wd-process__rail span { display: block; width: 100%; height: 100%; background: var(--accent); transform-origin: 50% 0; }
   .wd-process__list { display: grid; gap: var(--space-xl); }
-  .wd-process__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); opacity: 0.45; transition: opacity 500ms var(--ease-out); }
-  .wd-process__item:global(.is-past), .wd-process__item:global(.is-active) { opacity: 1; }
-  :global(html:not(.motion-ready)) .wd-process__item { opacity: 1; }
+  .wd-process__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); transition: translate 500ms var(--ease-out); }
+  .wd-process__item:global(.is-active) { translate: 0.5rem 0; }
   .wd-process__when { font-weight: 600; color: var(--accent-text); }
   .wd-process__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1; letter-spacing: -0.04em; color: var(--ink-strong); }
   .wd-process__body { margin-top: 0.5rem; max-width: 46ch; }

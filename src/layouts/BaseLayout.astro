@@ -71,12 +71,12 @@ const jsonLd = graph(
         if (reduce) return;
         d.classList.add('motion-ready');
         // Failsafe: never leave content hidden if the motion bundle fails to load.
-        setTimeout(() => { if (!window.__akMotion) d.classList.remove('motion-ready'); }, 4000);
+        setTimeout(() => { if (!window.__akMotion) d.classList.remove('motion-ready'); }, 5000);
         let first = false;
         try { first = !sessionStorage.getItem('ak-visited'); sessionStorage.setItem('ak-visited', '1'); } catch {}
         if (first && d.dataset.preloader === 'true') {
           d.classList.add('is-preloading');
-          setTimeout(() => d.classList.remove('is-preloading'), 2200);
+          setTimeout(() => d.classList.remove('is-preloading'), 1400);
         }
       })();
     </script>

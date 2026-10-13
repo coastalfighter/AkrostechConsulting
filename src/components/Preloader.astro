@@ -31,7 +31,7 @@ const lit = (i: number) => i >= 9 && i < 17;
   }
   :global(html.is-preloading) .preloader {
     display: grid;
-    animation: preloader-exit 800ms var(--ease-in-out) 1250ms forwards;
+    animation: preloader-exit 650ms var(--ease-in-out) 650ms forwards;
   }
   .preloader__inner { width: min(88vw, 56rem); }
   .preloader__word {
@@ -42,7 +42,7 @@ const lit = (i: number) => i >= 9 && i < 17;
     line-height: 0.95;
     letter-spacing: -0.05em;
   }
-  .preloader__word span { display: block; animation: rise 900ms var(--ease-out) both; }
+  .preloader__word span { display: block; animation: rise 650ms var(--ease-out) both; }
   .preloader__band {
     display: grid;
     grid-template-columns: repeat(24, 1fr);
@@ -53,11 +53,11 @@ const lit = (i: number) => i >= 9 && i < 17;
     height: clamp(10px, 1.6vw, 18px);
     background: var(--moss-800);
     animation: cell 300ms var(--ease-out) both;
-    animation-delay: calc(var(--i) * 32ms + 150ms);
+    animation-delay: calc(var(--i) * 18ms + 60ms);
   }
   .preloader__cell.is-lit { animation-name: cell-lit; }
   .preloader__line { overflow: hidden; color: var(--moss-200); font-size: var(--step-0); }
-  .preloader__line span { display: block; animation: rise 800ms var(--ease-out) 300ms both; }
+  .preloader__line span { display: block; animation: rise 600ms var(--ease-out) 150ms both; }
 
   @keyframes rise { from { translate: 0 105%; } }
   @keyframes cell { from { opacity: 0; scale: 1 0.2; } }

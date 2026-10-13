@@ -49,12 +49,18 @@ function boot(): void {
   hiddenUntilFoundFallback();
 
   if (!reduceMotion()) {
-    import('./motion')
-      .then((m) => m.initMotion())
-      .catch((err: unknown) => {
-        document.documentElement.classList.remove('motion-ready');
-        console.error('Motion layer failed to load', err);
-      });
+    // The motion layer is enhancement: load it once the page itself has finished loading.
+    const loadMotion = () =>
+      idle(() =>
+        void import('./motion')
+          .then((m) => m.initMotion())
+          .catch((err: unknown) => {
+            document.documentElement.classList.remove('motion-ready');
+            console.error('Motion layer failed to load', err);
+          }),
+      600);
+    if (document.readyState === 'complete') loadMotion();
+    else window.addEventListener('load', loadMotion, { once: true });
   }
 
   const hero = document.querySelector<HTMLElement>('[data-hero-3d]');

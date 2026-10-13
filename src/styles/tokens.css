@@ -5,8 +5,6 @@
    accent, reserved for actions and live state. Ink is a warm charcoal.
    ========================================================================== */
 
-@property --mesh-a { syntax: '<percentage>'; inherits: true; initial-value: 20%; }
-@property --mesh-b { syntax: '<percentage>'; inherits: true; initial-value: 80%; }
 
 :root {
   /* ---- Primitive: sand (warm neutral) ---- */

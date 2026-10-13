@@ -352,18 +352,24 @@ select.field__control {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+.mesh::before {
+  content: '';
+  position: absolute;
+  inset: -25%;
   background:
-    radial-gradient(60% 55% at var(--mesh-a) 30%, var(--mesh-1), transparent 70%),
-    radial-gradient(50% 60% at var(--mesh-b) 70%, var(--mesh-2), transparent 70%),
-    radial-gradient(70% 50% at 50% 110%, var(--mesh-3), transparent 70%);
+    radial-gradient(40% 38% at 30% 32%, var(--mesh-1), transparent 70%),
+    radial-gradient(34% 40% at 74% 66%, var(--mesh-2), transparent 70%),
+    radial-gradient(46% 32% at 50% 96%, var(--mesh-3), transparent 70%);
+  will-change: transform;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .mesh { animation: mesh-drift 18s var(--ease-in-out) infinite alternate; }
+  .mesh::before { animation: mesh-drift 22s var(--ease-in-out) infinite alternate; }
 }
 @keyframes mesh-drift {
-  0% { --mesh-a: 18%; --mesh-b: 82%; }
-  50% { --mesh-a: 42%; --mesh-b: 58%; }
-  100% { --mesh-a: 26%; --mesh-b: 90%; }
+  0% { transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(5%, 3%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(-2%, 5%, 0) rotate(-6deg) scale(1.02); }
 }
 
 /* ---------- Glass ----------

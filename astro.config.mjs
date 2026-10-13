@@ -11,7 +11,8 @@ export default defineConfig({
   output: 'static',
   adapter: vercel({ imageService: false }),
   compressHTML: true,
-  build: { format: 'directory', inlineStylesheets: 'auto' },
+  // Inline all CSS: removes render-blocking requests (critical CSS) at ~12 kB gzip per page.
+  build: { format: 'directory', inlineStylesheets: 'always' },
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   image: {
     responsiveStyles: true,

@@ -86,8 +86,8 @@ const lines = Array.isArray(title) ? title : [title];
   @media (prefers-reduced-motion: no-preference) {
     .phero__line > span { animation: phero-rise 1s var(--ease-out) calc(var(--i) * 110ms + 120ms) both; }
     .phero__foot { animation: phero-fade 0.8s var(--ease-out) 450ms both; }
-    :global(html.is-preloading) .phero__line > span { animation-delay: calc(var(--i) * 110ms + 1.45s); }
-    :global(html.is-preloading) .phero__foot { animation-delay: 1.8s; }
+    :global(html.is-preloading) .phero__line > span { animation-delay: calc(var(--i) * 110ms + 0.85s); }
+    :global(html.is-preloading) .phero__foot { animation-delay: 1.2s; }
   }
   @keyframes phero-rise { from { translate: 0 105%; } }
   @keyframes phero-fade { from { opacity: 0; translate: 0 16px; } }

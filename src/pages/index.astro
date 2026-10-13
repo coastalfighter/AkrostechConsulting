@@ -337,7 +337,7 @@ const process = [
     overflow: clip;
     isolation: isolate;
   }
-  :global(html.is-preloading) .hero { --intro-delay: 1.45s; }
+  :global(html.is-preloading) .hero { --intro-delay: 0.85s; }
   .hero__mesh { z-index: -2; }
   .hero__globe {
     position: absolute;
@@ -576,16 +576,18 @@ const process = [
   .process__line { display: block; width: 100%; height: 100%; background: var(--accent); transform-origin: 50% 0; }
   :global(html:not(.motion-ready)) .process__line { scale: 1 1; }
   .process__steps { display: grid; gap: var(--space-2xl); padding-left: clamp(1.5rem, 3vw, 3rem); }
-  .process__step { margin-left: calc(var(--step) * clamp(0px, 7vw, 14rem)); max-width: 46rem; opacity: 0.45; transition: opacity var(--dur-slow) var(--ease-out); }
-  .process__step:global(.is-active), .process__step:global(.is-past) { opacity: 1; }
-  :global(html:not(.motion-ready)) .process__step { opacity: 1; }
+  .process__step { --step-ink: var(--muted); margin-left: calc(var(--step) * clamp(0px, 7vw, 14rem)); max-width: 46rem; transition: translate var(--dur-slow) var(--ease-out); }
+  .process__step:global(.is-active), .process__step:global(.is-past) { --step-ink: var(--ink-strong); }
+  .process__step:global(.is-active) { translate: 0.5rem 0; }
+  :global(html:not(.motion-ready)) .process__step { --step-ink: var(--ink-strong); }
   .process__line-text {
     font-family: var(--font-display);
     font-size: clamp(2.125rem, 1rem + 3.8vw, 4.75rem);
     font-weight: 600;
     line-height: 1;
     letter-spacing: -0.045em;
-    color: var(--ink-strong);
+    color: var(--step-ink);
+    transition: color var(--dur-slow) var(--ease-out);
     max-width: 24ch;
   }
   .process__step:last-child .process__line-text { color: var(--accent-text); }

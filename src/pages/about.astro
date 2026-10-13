@@ -221,9 +221,10 @@ const year = [
   .story__frame.is-active { opacity: 1; scale: 1; }
   :global(html:not(.js)) .story__frame:first-child { opacity: 1; }
   .story__chapters { display: grid; gap: 30svh; padding-block: 10svh 30svh; }
-  .story__chapter { opacity: 0.35; transition: opacity 600ms var(--ease-out); }
-  .story__chapter.is-active { opacity: 1; }
-  :global(html:not(.js)) .story__chapter { opacity: 1; }
+  .story__chapter { --ch-ink: var(--muted); transition: translate 600ms var(--ease-out); }
+  .story__chapter.is-active { --ch-ink: var(--ink-strong); translate: 0.5rem 0; }
+  .story__chapter .story__title { color: var(--ch-ink); transition: color 600ms var(--ease-out); }
+  :global(html:not(.js)) .story__chapter { --ch-ink: var(--ink-strong); }
   .story__when { font-weight: 600; color: var(--accent-text); margin-bottom: var(--space-xs); }
   .story__title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.04; letter-spacing: -0.035em; color: var(--ink-strong); }
   .story__body { margin-top: var(--space-m); max-width: 46ch; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem); }
@@ -231,7 +232,7 @@ const year = [
     .story__inner { grid-template-columns: 1fr; }
     .story__sticky { position: relative; top: 0; max-width: 26rem; }
     .story__chapters { gap: var(--space-2xl); padding-block: var(--space-xl) 0; }
-    .story__chapter { opacity: 1; }
+    .story__chapter { --ch-ink: var(--ink-strong); }
   }
 
   /* Mission and vision */
@@ -312,9 +313,8 @@ const year = [
   .year__rail { position: absolute; left: 0; top: 0.6rem; bottom: 0.6rem; width: 3px; background: light-dark(var(--char-700), var(--sand-400)); }
   .year__rail span { display: block; width: 100%; height: 100%; background: var(--inverse-accent); transform-origin: 50% 0; }
   .year__list { display: grid; gap: var(--space-xl); }
-  .year__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); opacity: 0.45; transition: opacity 500ms var(--ease-out); }
-  .year__item:global(.is-past), .year__item:global(.is-active) { opacity: 1; }
-  :global(html:not(.motion-ready)) .year__item { opacity: 1; }
+  .year__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); transition: translate 500ms var(--ease-out); }
+  .year__item:global(.is-active) { translate: 0.5rem 0; }
   .year__when { font-weight: 600; color: var(--inverse-accent); }
   .year__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
   .year__body { margin-top: 0.35rem; color: var(--inverse-muted); max-width: 50ch; }

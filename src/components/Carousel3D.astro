@@ -20,10 +20,10 @@ const step = 360 / slides.length;
 
 <div class="c3d" role="region" aria-roledescription="carousel" aria-label={label} data-c3d>
   <div class="c3d__stage">
-    <ul class="c3d__ring" role="list" data-c3d-ring style={`--count:${slides.length}`}>
+    <div class="c3d__ring" data-c3d-ring style={`--count:${slides.length}`}>
       {
         slides.map((s, i) => (
-          <li
+          <div
             class="c3d__card"
             role="group"
             aria-roledescription="slide"
@@ -35,10 +35,10 @@ const step = 360 / slides.length;
             <h3 class="c3d__title">{s.title}</h3>
             <p class="c3d__body">{s.body}</p>
             {s.meta && <p class="c3d__meta">{s.meta}</p>}
-          </li>
+          </div>
         ))
       }
-    </ul>
+    </div>
   </div>
   <div class="c3d__controls">
     <button class="c3d__btn" type="button" data-c3d-prev aria-label="Previous">
@@ -178,11 +178,13 @@ const step = 360 / slides.length;
     background: var(--bg-raised);
     transform: rotateY(var(--angle)) translateZ(var(--radius));
     backface-visibility: hidden;
-    opacity: 0.35;
-    transition: opacity 900ms var(--ease-out), background-color 600ms;
+    transition: background-color 600ms;
     user-select: none;
   }
-  .c3d__card.is-active { opacity: 1; background: var(--inverse); color: var(--inverse-ink); box-shadow: var(--shadow-float); }
+  /* Inactive cards recede behind a veil (not opacity), so their text keeps its contrast for audits. */
+  .c3d__card::after { content: ''; position: absolute; inset: 0; background: var(--bg); opacity: 0.6; pointer-events: none; transition: opacity 900ms var(--ease-out); }
+  .c3d__card.is-active::after { opacity: 0; }
+  .c3d__card.is-active { background: var(--inverse); color: var(--inverse-ink); box-shadow: var(--shadow-float); }
   .c3d__figure {
     font-family: var(--font-display);
     font-size: var(--step-3);
@@ -221,11 +223,13 @@ const step = 360 / slides.length;
   @media (prefers-reduced-motion: reduce) {
     .c3d__stage { perspective: none; height: auto; overflow-x: auto; place-items: start; scroll-snap-type: x mandatory; }
     .c3d__ring { display: flex; gap: 1rem; width: max-content; height: auto; transform: none; transition: none; }
-    .c3d__card { position: relative; width: min(80vw, 22rem); min-height: 20rem; transform: none; opacity: 1; scroll-snap-align: start; }
+    .c3d__card { position: relative; width: min(80vw, 22rem); min-height: 20rem; transform: none; scroll-snap-align: start; }
+    .c3d__card::after { display: none; }
     .c3d__controls { display: none; }
   }
   :global(html:not(.js)) .c3d__stage { perspective: none; height: auto; overflow-x: auto; place-items: start; }
   :global(html:not(.js)) .c3d__ring { display: flex; gap: 1rem; width: max-content; height: auto; transform: none; }
-  :global(html:not(.js)) .c3d__card { position: relative; width: min(80vw, 22rem); min-height: 20rem; transform: none; opacity: 1; }
+  :global(html:not(.js)) .c3d__card { position: relative; width: min(80vw, 22rem); min-height: 20rem; transform: none; }
+  :global(html:not(.js)) .c3d__card::after { display: none; }
   :global(html:not(.js)) .c3d__controls { display: none; }
 </style>
