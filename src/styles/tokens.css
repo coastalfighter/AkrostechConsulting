@@ -1,0 +1,167 @@
+/* ==========================================================================
+   Akrostech design tokens
+   Primitive scales → semantic roles (light-dark) → component tokens.
+   Palette: "Sand and moss". Sand is the paper of a ledger; moss is the one
+   accent, reserved for actions and live state. Ink is a warm charcoal.
+   ========================================================================== */
+
+@property --mesh-a { syntax: '<percentage>'; inherits: true; initial-value: 20%; }
+@property --mesh-b { syntax: '<percentage>'; inherits: true; initial-value: 80%; }
+
+:root {
+  /* ---- Primitive: sand (warm neutral) ---- */
+  --sand-50: #f8f6f1;
+  --sand-100: #f0ece3;
+  --sand-200: #e7e1d4;
+  --sand-300: #ddd6c6;
+  --sand-400: #cbc1ab;
+  --sand-500: #aea38a;
+  --sand-600: #8d836b;
+  --sand-700: #6c6553;
+  --sand-800: #4d483c;
+  --sand-900: #333028;
+  --sand-950: #1c1a15;
+
+  /* ---- Primitive: moss (accent) ---- */
+  --moss-50: #f1f4ea;
+  --moss-100: #e0e8d2;
+  --moss-200: #c3d3a9;
+  --moss-300: #a2ba7c;
+  --moss-400: #819f55;
+  --moss-500: #66833f;
+  --moss-600: #4f6238;
+  --moss-700: #3f5a2a;
+  --moss-800: #2f4220;
+  --moss-900: #212e17;
+  --moss-950: #131b0d;
+
+  /* ---- Primitive: char (ink) ---- */
+  --char-50: #f3f3f1;
+  --char-100: #e4e4e0;
+  --char-200: #c8c8c1;
+  --char-300: #a5a59c;
+  --char-400: #7f7f76;
+  --char-500: #5f5f57;
+  --char-600: #4a4a43;
+  --char-700: #393933;
+  --char-800: #2a2a26;
+  --char-900: #1d1d1a;
+  --char-950: #121210;
+
+  /* ---- Primitive: clay (errors only) ---- */
+  --clay-300: #e8a28f;
+  --clay-500: #b5452c;
+  --clay-700: #8a2f1b;
+
+  /* ---- Semantic colour roles ---- */
+  color-scheme: light dark;
+  --bg: light-dark(var(--sand-300), #151611);
+  --bg-raised: light-dark(var(--sand-200), #1d1f18);
+  --surface: light-dark(#d2cab8, #23261d);
+  --surface-strong: light-dark(var(--sand-400), #2c3024);
+  --ink: light-dark(var(--char-800), #ece7da);
+  --ink-strong: light-dark(var(--char-950), #faf7ef);
+  --muted: light-dark(#59574e, #b3ad9a);
+  --accent: light-dark(var(--moss-600), var(--moss-300));
+  --accent-hover: light-dark(var(--moss-700), var(--moss-200));
+  --accent-ink: light-dark(#ffffff, var(--moss-950));
+  --accent-text: light-dark(var(--moss-700), var(--moss-300));
+  --field: light-dark(var(--moss-700), #26341a);
+  --field-ink: light-dark(#ffffff, #eef3e3);
+  --field-muted: light-dark(var(--moss-100), var(--moss-200));
+  --inverse: light-dark(var(--char-900), var(--sand-200));
+  --inverse-ink: light-dark(var(--sand-200), var(--char-900));
+  --inverse-muted: light-dark(var(--sand-500), var(--char-500));
+  --danger: light-dark(var(--clay-700), var(--clay-300));
+  --line: light-dark(rgb(42 42 38 / 0.14), rgb(236 231 218 / 0.14));
+  --focus: light-dark(var(--moss-800), var(--moss-200));
+  --selection-bg: light-dark(var(--moss-700), var(--moss-300));
+  --selection-ink: light-dark(#ffffff, var(--moss-950));
+  --scrim: light-dark(rgb(221 214 198 / 0.72), rgb(21 22 17 / 0.72));
+  --glass: light-dark(rgb(232 226 213 / 0.62), rgb(29 31 24 / 0.6));
+  --glass-edge: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08));
+  --mesh-1: light-dark(rgb(129 159 85 / 0.32), rgb(129 159 85 / 0.22));
+  --mesh-2: light-dark(rgb(203 193 171 / 0.9), rgb(63 90 42 / 0.4));
+  --mesh-3: light-dark(rgb(240 236 227 / 0.9), rgb(44 48 36 / 0.7));
+
+  /* ---- Typography ---- */
+  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', system-ui, sans-serif;
+  --font-text: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+
+  /* Fluid type scale (320px → 1920px). Five working steps plus display. */
+  --step--1: clamp(0.8125rem, 0.79rem + 0.11vw, 0.9375rem); /* 13 → 15 */
+  --step-0: clamp(1rem, 0.96rem + 0.19vw, 1.1875rem); /* 16 → 19 */
+  --step-1: clamp(1.25rem, 1.13rem + 0.56vw, 1.75rem); /* 20 → 28 */
+  --step-2: clamp(1.75rem, 1.42rem + 1.63vw, 3.375rem); /* 28 → 54 */
+  --step-3: clamp(2.5rem, 1.83rem + 3.33vw, 5.5rem); /* 40 → 88 */
+  --step-display: clamp(3.5rem, 0.8rem + 12.4vw, 13rem); /* 56 → 208 */
+  --step-poster: clamp(3rem, 1rem + 9.6vw, 9.5rem);
+
+  --leading-display: 0.88;
+  --leading-heading: 1.02;
+  --leading-snug: 1.25;
+  --leading-text: 1.55;
+  --tracking-display: -0.045em;
+  --tracking-heading: -0.03em;
+  --tracking-text: -0.006em;
+  --measure: 62ch;
+
+  /* ---- Space (4px base, fluid at the large end) ---- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2rem;
+  --space-xl: clamp(2.5rem, 2rem + 2.5vw, 4rem);
+  --space-2xl: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
+  --space-3xl: clamp(5rem, 3rem + 10vw, 11rem);
+  --section-gap: clamp(6rem, 3.5rem + 10vw, 13.5rem);
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+  --page-max: 1920px;
+  --header-h: 4.5rem;
+
+  /* ---- Shape ---- */
+  --radius-0: 0;
+  --radius-s: 2px;
+  --radius-round: 999px;
+
+  /* ---- Elevation: only for things that float (menus, dialogs, the cursor ring) ---- */
+  --shadow-1: 0 1px 2px rgb(28 26 21 / 0.08), 0 2px 6px rgb(28 26 21 / 0.06);
+  --shadow-2: 0 4px 10px rgb(28 26 21 / 0.08), 0 12px 28px rgb(28 26 21 / 0.1);
+  --shadow-3: 0 10px 24px rgb(28 26 21 / 0.12), 0 32px 64px rgb(28 26 21 / 0.16);
+  --shadow-float: 0 24px 80px -16px rgb(19 27 13 / 0.35);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --dur-instant: 120ms;
+  --dur-fast: 200ms;
+  --dur-base: 360ms;
+  --dur-slow: 700ms;
+  --dur-slower: 1100ms;
+  --stagger: 70ms;
+
+  /* ---- Layers ---- */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-header: 100;
+  --z-menu: 200;
+  --z-progress: 250;
+  --z-noise: 300;
+  --z-cursor: 400;
+  --z-preloader: 500;
+}
+
+/* The toggle writes the <meta name="color-scheme">; the cascade follows it. */
+:root:has(> head > meta[name='color-scheme'][content='dark']) { color-scheme: dark; }
+:root:has(> head > meta[name='color-scheme'][content='light']) { color-scheme: light; }
+
+@media (prefers-contrast: more) {
+  :root {
+    --muted: light-dark(var(--char-700), var(--sand-200));
+    --line: light-dark(rgb(42 42 38 / 0.4), rgb(236 231 218 / 0.4));
+  }
+}
