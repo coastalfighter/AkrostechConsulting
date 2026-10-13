@@ -51,7 +51,7 @@ const areaNode = {
 };
 ---
 
-<BaseLayout {...l.meta} path={path} image={`/og/location-${l.slug}.png`} breadcrumbs={crumbs} schema={[areaNode, faqSchema(l.faqs)]}>
+<BaseLayout {...l.meta} path={path} heroTone={l.isHeadquarters ? 'field' : 'default'} image={`/og/location-${l.slug}.png`} breadcrumbs={crumbs} schema={[areaNode, faqSchema(l.faqs)]}>
   <PageHero title={l.headline} lede={l.intro} crumbs={crumbs} tone={l.isHeadquarters ? 'field' : 'default'}>
     <Fragment slot="actions">
       <a class:list={['btn', { 'btn--light': l.isHeadquarters }]} href={site.calendly} target="_blank" rel="noopener" data-magnetic>

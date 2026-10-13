@@ -153,6 +153,8 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
   .wordmark__a { stroke: var(--bg); }
   .wordmark__bar { fill: light-dark(var(--moss-300), var(--moss-600)); }
 
+  /* Over a moss-field hero, the bar uses light ink until it gains its glass background. */
+  :global(html[data-hero-tone='field']) .header:not(:global(.is-scrolled)) { --ink-strong: var(--field-ink); --bg: var(--field); }
   .header__nav { margin-inline: auto; }
   .header__nav ul { display: flex; gap: clamp(1rem, 2vw, 2.25rem); }
   .header__link {

@@ -339,26 +339,35 @@ const yieldToMain = (): Promise<void> => {
   return sched?.yield ? sched.yield() : new Promise((r) => setTimeout(r, 0));
 };
 
+/** Run one boot step as its own measured task (visible in DevTools > Performance > Timings). */
+async function step(name: string, fn: () => void): Promise<void> {
+  const t0 = performance.now();
+  fn();
+  performance.measure(`motion:${name}`, { start: t0, end: performance.now() });
+  await yieldToMain();
+}
+
 export async function initMotion(): Promise<void> {
   window.__akMotion = true;
   // Cheap, observer-based work first so content reveals as soon as possible.
-  initReveals();
-  initSplits();
-  initWipes();
-  initCounters();
-  await yieldToMain();
-  initSmoothScroll();
-  initCursor();
-  initMagnetic();
-  initTilt();
-  await yieldToMain();
+  await step('reveals', initReveals);
+  await step('splits', initSplits);
+  await step('wipes', initWipes);
+  await step('counters', initCounters);
+  await step('smooth-scroll', initSmoothScroll);
+  await step('pointer', () => {
+    initCursor();
+    initMagnetic();
+    initTilt();
+  });
   // Scroll-scrubbed effects measure layout when created: spread them across tasks.
   const mm = gsap.matchMedia();
-  const steps = [initParallax, () => initHorizontal(mm), initPerspective, initTimelines, initHeroExit, initMarqueeVelocity];
-  for (const step of steps) {
-    step();
-    await yieldToMain();
-  }
+  await step('parallax', initParallax);
+  await step('horizontal', () => initHorizontal(mm));
+  await step('perspective', initPerspective);
+  await step('timelines', initTimelines);
+  await step('hero-exit', initHeroExit);
+  await step('marquee', initMarqueeVelocity);
   void document.fonts?.ready.then(() => ScrollTrigger.refresh());
   document.dispatchEvent(new CustomEvent('motion:ready'));
 }

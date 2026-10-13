@@ -40,7 +40,7 @@ const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
 } };
 ---
 
-<BaseLayout {...s.meta} path={path} image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(webFaqs)]}>
+<BaseLayout {...s.meta} path={path} heroTone="field" image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(webFaqs)]}>
   <PageHero title={s.headline} lede="Custom websites, online stores and web applications, designed and built by a senior team in India that works your U.S. hours. Fast, accessible, built to rank, and yours to keep." crumbs={crumbs} tone="field">
     <Fragment slot="actions">
       <a class="btn btn--light" href={site.calendly} target="_blank" rel="noopener" data-magnetic>

@@ -33,7 +33,8 @@ const lit = (i: number) => i >= 9 && i < 17;
     display: grid;
     animation: preloader-exit 650ms var(--ease-in-out) 650ms forwards;
   }
-  .preloader__inner { width: min(88vw, 56rem); }
+  /* Absolutely placed at fixed coordinates so font loading can never move it (no layout shift). */
+  .preloader__inner { position: absolute; left: max(6vw, calc(50vw - 28rem)); top: 32svh; width: min(88vw, 56rem); }
   .preloader__word {
     overflow: hidden;
     font-family: var(--font-display);
