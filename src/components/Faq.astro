@@ -1,0 +1,103 @@
+---
+/**
+ * FAQ accordion on native <details>: searchable with Find-in-page, indexable, keyboard-ready.
+ * The FAQPage JSON-LD for the same questions is emitted by the page.
+ */
+import type { Faq } from '@/data/services';
+
+interface Props {
+  faqs: Faq[];
+  name: string;
+  heading?: string;
+  intro?: string;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { faqs, name, heading = 'Questions, answered', intro, headingLevel: H = 'h2' } = Astro.props;
+const headingId = `${name}-faq-heading`;
+---
+
+<section class="faq wrap section" aria-labelledby={headingId}>
+  <div class="faq__head">
+    <H class="h2" id={headingId} data-split>{heading}</H>
+    {intro && <p class="faq__intro" data-reveal>{intro}</p>}
+  </div>
+  <div class="faq__list" data-reveal-group>
+    {
+      faqs.map((f, i) => (
+        <details class="faq__item" name={name} data-reveal open={i === 0}>
+          <summary class="faq__q">
+            <span>{f.q}</span>
+            <span class="faq__icon" aria-hidden="true" />
+          </summary>
+          <div class="faq__a">
+            <p>{f.a}</p>
+          </div>
+        </details>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .faq {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--space-xl) var(--gutter);
+  }
+  .faq__head { grid-column: 1 / span 4; align-self: start; position: sticky; top: calc(var(--header-h) + 2rem); }
+  .faq__intro { margin-top: var(--space-m); color: var(--muted); max-width: 32ch; }
+  .faq__list { grid-column: 6 / -1; display: grid; gap: 0.5rem; }
+  .faq__item { background: var(--bg-raised); transition: background-color var(--dur-base) var(--ease-out); }
+  .faq__item[open] { background: var(--surface); }
+  .faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    min-height: 44px;
+    padding: 1.35rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+  }
+  .faq__q::-webkit-details-marker { display: none; }
+  .faq__q:focus-visible { outline-offset: -3px; }
+  .faq__icon { position: relative; flex: none; width: 1.1rem; height: 1.1rem; }
+  .faq__icon::before, .faq__icon::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 2px;
+    margin-top: -1px;
+    background: currentColor;
+    transition: rotate var(--dur-base) var(--ease-out);
+  }
+  .faq__icon::after { rotate: 90deg; }
+  .faq__item[open] .faq__icon::after { rotate: 0deg; }
+  .faq__a { padding: 0 1.5rem 1.5rem; max-width: 64ch; color: var(--ink); }
+  .faq__item::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    transition: block-size var(--dur-base) var(--ease-out), content-visibility var(--dur-base) allow-discrete;
+  }
+  .faq__item[open]::details-content { block-size: auto; }
+  @supports (interpolate-size: allow-keywords) {
+    .faq { interpolate-size: allow-keywords; }
+  }
+  @supports not (interpolate-size: allow-keywords) {
+    .faq__item[open]::details-content { block-size: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq__item::details-content { transition: none; }
+  }
+  @media (max-width: 1023px) {
+    .faq__head, .faq__list { grid-column: 1 / -1; }
+    .faq__head { position: static; }
+  }
+</style>

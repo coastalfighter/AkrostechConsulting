@@ -1,0 +1,231 @@
+---
+/**
+ * 3D ring carousel. Cards sit around a cylinder and rotate into view.
+ * Keyboard (arrow keys), buttons, drag and autoplay (with a pause control) are supported;
+ * reduced-motion visitors get a flat, scrollable list.
+ */
+interface Slide {
+  figure: string;
+  title: string;
+  body: string;
+  meta?: string;
+}
+interface Props {
+  slides: Slide[];
+  label: string;
+}
+const { slides, label } = Astro.props;
+const step = 360 / slides.length;
+---
+
+<div class="c3d" role="region" aria-roledescription="carousel" aria-label={label} data-c3d>
+  <div class="c3d__stage">
+    <ul class="c3d__ring" role="list" data-c3d-ring style={`--count:${slides.length}`}>
+      {
+        slides.map((s, i) => (
+          <li
+            class="c3d__card"
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} of ${slides.length}: ${s.title}`}
+            style={`--angle:${(step * i).toFixed(2)}deg`}
+            data-c3d-card
+          >
+            <p class="c3d__figure" aria-hidden="true">{s.figure}</p>
+            <h3 class="c3d__title">{s.title}</h3>
+            <p class="c3d__body">{s.body}</p>
+            {s.meta && <p class="c3d__meta">{s.meta}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <div class="c3d__controls">
+    <button class="c3d__btn" type="button" data-c3d-prev aria-label="Previous">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4M10 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
+    </button>
+    <p class="c3d__count" aria-live="polite" data-c3d-status>1 / {slides.length}</p>
+    <button class="c3d__btn" type="button" data-c3d-next aria-label="Next">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
+    </button>
+    <button class="c3d__btn c3d__play" type="button" aria-pressed="false" data-c3d-pause>
+      <span class="sr-only" data-c3d-pause-label>Pause autoplay</span>
+      <svg class="c3d__icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.5"></path></svg>
+      <svg class="c3d__icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l12-7z" fill="currentColor"></path></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-c3d]').forEach((root) => {
+    const ring = root.querySelector<HTMLElement>('[data-c3d-ring]')!;
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-c3d-card]')];
+    const status = root.querySelector<HTMLElement>('[data-c3d-status]')!;
+    const pauseBtn = root.querySelector<HTMLButtonElement>('[data-c3d-pause]')!;
+    const count = cards.length;
+    const step = 360 / count;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let index = 0;
+    let rotation = 0;
+    let paused = reduce;
+    let timer: number | undefined;
+
+    const render = () => {
+      ring.style.setProperty('--rotation', `${rotation}deg`);
+      const active = ((index % count) + count) % count;
+      cards.forEach((c, i) => {
+        const on = i === active;
+        c.classList.toggle('is-active', on);
+        c.setAttribute('aria-hidden', String(!on && !reduce));
+      });
+      status.textContent = `${active + 1} / ${count}`;
+    };
+    const go = (delta: number) => {
+      index += delta;
+      rotation -= delta * step;
+      render();
+    };
+    const schedule = () => {
+      window.clearInterval(timer);
+      if (!paused) timer = window.setInterval(() => go(1), 5200);
+    };
+
+    root.querySelector('[data-c3d-prev]')?.addEventListener('click', () => {
+      go(-1);
+      schedule();
+    });
+    root.querySelector('[data-c3d-next]')?.addEventListener('click', () => {
+      go(1);
+      schedule();
+    });
+    pauseBtn.addEventListener('click', () => {
+      paused = !paused;
+      pauseBtn.setAttribute('aria-pressed', String(paused));
+      pauseBtn.querySelector('[data-c3d-pause-label]')!.textContent = paused ? 'Play autoplay' : 'Pause autoplay';
+      root.classList.toggle('is-paused', paused);
+      schedule();
+    });
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { go(1); schedule(); }
+      if (e.key === 'ArrowLeft') { go(-1); schedule(); }
+    });
+    // Pause while the visitor is reading or interacting.
+    root.addEventListener('pointerenter', () => window.clearInterval(timer));
+    root.addEventListener('pointerleave', schedule);
+    root.addEventListener('focusin', () => window.clearInterval(timer));
+    root.addEventListener('focusout', schedule);
+
+    // Drag to rotate.
+    let startX = 0;
+    let dragging = false;
+    ring.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      startX = e.clientX;
+      ring.setPointerCapture(e.pointerId);
+    });
+    ring.addEventListener('pointerup', (e) => {
+      if (!dragging) return;
+      dragging = false;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 40) {
+        go(dx < 0 ? 1 : -1);
+        schedule();
+      }
+    });
+
+    if (reduce) {
+      root.classList.add('is-static', 'is-paused');
+    }
+    // Only autoplay while visible.
+    new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) schedule();
+      else window.clearInterval(timer);
+    }).observe(root);
+    render();
+  });
+</script>
+
+<style>
+  .c3d { position: relative; }
+  .c3d__stage {
+    perspective: 1800px;
+    perspective-origin: 50% 40%;
+    height: clamp(24rem, 46vw, 34rem);
+    display: grid;
+    place-items: center;
+    overflow: clip;
+    overflow-clip-margin: 2rem;
+  }
+  .c3d__ring {
+    --radius: clamp(16rem, 34vw, 30rem);
+    position: relative;
+    width: clamp(16rem, 28vw, 24rem);
+    height: clamp(20rem, 32vw, 26rem);
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--radius) * -1)) rotateY(var(--rotation, 0deg));
+    transition: transform 1100ms var(--ease-out);
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .c3d__ring:active { cursor: grabbing; }
+  .c3d__card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    padding: clamp(1.5rem, 2.5vw, 2.25rem);
+    background: var(--bg-raised);
+    transform: rotateY(var(--angle)) translateZ(var(--radius));
+    backface-visibility: hidden;
+    opacity: 0.35;
+    transition: opacity 900ms var(--ease-out), background-color 600ms;
+    user-select: none;
+  }
+  .c3d__card.is-active { opacity: 1; background: var(--inverse); color: var(--inverse-ink); box-shadow: var(--shadow-float); }
+  .c3d__figure {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    color: var(--accent-text);
+    margin-bottom: auto;
+  }
+  .c3d__card.is-active .c3d__figure { color: var(--moss-300); }
+  .c3d__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; }
+  .c3d__body { font-size: var(--step-0); }
+  .c3d__card.is-active .c3d__body { color: var(--inverse-muted); }
+  .c3d__meta { font-size: var(--step--1); color: var(--muted); }
+
+  .c3d__controls { display: flex; align-items: center; justify-content: center; gap: var(--space-xs); margin-top: var(--space-l); }
+  .c3d__btn {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--ink-strong);
+    color: var(--ink-strong);
+    transition: background-color var(--dur-fast), color var(--dur-fast), scale var(--dur-fast);
+  }
+  .c3d__btn:hover { background: var(--ink-strong); color: var(--bg); }
+  .c3d__btn:active { scale: 0.94; }
+  .c3d__btn svg { width: 1.15rem; height: 1.15rem; }
+  .c3d__count { min-width: 4.5rem; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .c3d__icon-play { display: none; }
+  .c3d.is-paused .c3d__icon-play { display: block; }
+  .c3d.is-paused .c3d__icon-pause { display: none; }
+
+  /* Reduced motion and no-JS: a flat, horizontally scrollable list. */
+  @media (prefers-reduced-motion: reduce) {
+    .c3d__stage { perspective: none; height: auto; overflow-x: auto; place-items: start; scroll-snap-type: x mandatory; }
+    .c3d__ring { display: flex; gap: 1rem; width: max-content; height: auto; transform: none; transition: none; }
+    .c3d__card { position: relative; width: min(80vw, 22rem); min-height: 20rem; transform: none; opacity: 1; scroll-snap-align: start; }
+    .c3d__controls { display: none; }
+  }
+  :global(html:not(.js)) .c3d__stage { perspective: none; height: auto; overflow-x: auto; place-items: start; }
+  :global(html:not(.js)) .c3d__ring { display: flex; gap: 1rem; width: max-content; height: auto; transform: none; }
+  :global(html:not(.js)) .c3d__card { position: relative; width: min(80vw, 22rem); min-height: 20rem; transform: none; opacity: 1; }
+  :global(html:not(.js)) .c3d__controls { display: none; }
+</style>

@@ -1,0 +1,72 @@
+---
+/**
+ * Branded preloader. Runs once per browser session, on the first page a visitor opens.
+ * Entirely CSS-driven so it finishes and gets out of the way even if JavaScript fails;
+ * skipped for reduced-motion users by the inline head script.
+ */
+const cells = Array.from({ length: 24 }, (_, i) => i);
+const lit = (i: number) => i >= 9 && i < 17;
+---
+
+<div class="preloader" aria-hidden="true" data-preloader>
+  <div class="preloader__inner">
+    <p class="preloader__word"><span>Akrostech</span></p>
+    <div class="preloader__band">
+      {cells.map((i) => <span class:list={['preloader__cell', { 'is-lit': lit(i) }]} style={`--i:${i}`} />)}
+    </div>
+    <p class="preloader__line"><span>Your team in India. Working your U.S. hours.</span></p>
+  </div>
+</div>
+
+<style>
+  .preloader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-preloader);
+    place-items: center;
+    background: var(--moss-950);
+    color: var(--sand-100);
+    pointer-events: none;
+  }
+  :global(html.is-preloading) .preloader {
+    display: grid;
+    animation: preloader-exit 800ms var(--ease-in-out) 1250ms forwards;
+  }
+  .preloader__inner { width: min(88vw, 56rem); }
+  .preloader__word {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(3rem, 14vw, 10rem);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+  }
+  .preloader__word span { display: block; animation: rise 900ms var(--ease-out) both; }
+  .preloader__band {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 4px;
+    margin-block: clamp(1.25rem, 3vw, 2rem);
+  }
+  .preloader__cell {
+    height: clamp(10px, 1.6vw, 18px);
+    background: var(--moss-800);
+    animation: cell 300ms var(--ease-out) both;
+    animation-delay: calc(var(--i) * 32ms + 150ms);
+  }
+  .preloader__cell.is-lit { animation-name: cell-lit; }
+  .preloader__line { overflow: hidden; color: var(--moss-200); font-size: var(--step-0); }
+  .preloader__line span { display: block; animation: rise 800ms var(--ease-out) 300ms both; }
+
+  @keyframes rise { from { translate: 0 105%; } }
+  @keyframes cell { from { opacity: 0; scale: 1 0.2; } }
+  @keyframes cell-lit {
+    0% { opacity: 0; scale: 1 0.2; background: var(--moss-800); }
+    60% { opacity: 1; scale: 1 1; background: var(--moss-800); }
+    100% { background: var(--moss-300); }
+  }
+  @keyframes preloader-exit {
+    to { clip-path: inset(0 0 100% 0); visibility: hidden; }
+  }
+</style>

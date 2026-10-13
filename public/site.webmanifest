@@ -1,0 +1,14 @@
+{
+  "name": "Akrostech Consulting",
+  "short_name": "Akrostech",
+  "description": "Your team in India. Working your U.S. hours.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ddd6c6",
+  "theme_color": "#3f5a2a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

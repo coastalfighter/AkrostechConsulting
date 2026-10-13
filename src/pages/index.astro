@@ -1,0 +1,673 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import GlobePoster from '@/components/GlobePoster.astro';
+import Marquee from '@/components/Marquee.astro';
+import Media from '@/components/Media.astro';
+import ShiftPlanner from '@/components/ShiftPlanner.astro';
+import Carousel3D from '@/components/Carousel3D.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
+import { pages } from '@/data/pages';
+import { services, serviceHref } from '@/data/services';
+import { work } from '@/data/work';
+import { commitments, teamRoles, vetting } from '@/data/company';
+import { testimonials } from '@/data/reviews';
+import { getPosts, postHref, readingMinutes, formatDate } from '@/lib/blog';
+import { faqSchema } from '@/lib/seo';
+import { generalFaqs } from '@/data/company';
+
+const posts = (await getPosts()).slice(0, 5);
+
+// Balanced masonry: place each card in the currently shortest of three columns,
+// using each artwork's known aspect ratio (plus a fixed allowance for the caption).
+const art = (await import('@/assets/art/manifest.json')).default as Record<string, { width: number; height: number }>;
+const columns: { items: (typeof work)[number][]; height: number }[] = [0, 1, 2].map(() => ({ items: [], height: 0 }));
+for (const w of work) {
+  const a = art[`work-${w.slug}`];
+  const ratio = a ? a.height / a.width : 1;
+  const shortest = columns.reduce((min, c) => (c.height < min.height ? c : min), columns[0]!);
+  shortest.items.push(w);
+  shortest.height += ratio + 0.32;
+}
+const f = site.figures;
+
+const slides = testimonials.length
+  ? testimonials.map((t) => ({ figure: '★'.repeat(t.rating), title: t.body, body: `${t.author}, ${t.role}`, meta: t.company }))
+  : commitments;
+
+const marquee = [
+  'Virtual assistants',
+  'Recruiters',
+  'Bookkeepers',
+  'Accountants',
+  'Legal assistants',
+  'Web developers',
+  'Eastern',
+  'Central',
+  'Mountain',
+  'Pacific',
+];
+
+const process = [
+  { line: 'First, a 30‑minute call.', body: 'You list the work, the tools and the hours. We listen for what a good week looks like.' },
+  { line: 'Then a shortlist in a day.', body: 'Two or three vetted professionals who have done this exact work, with samples.' },
+  { line: 'They start in 48 hours.', body: 'Access set up, procedures drafted, first tasks closed on day one.' },
+  { line: 'Every week, a report.', body: 'What was done, what is waiting on you, what changes next. Written by their team lead.' },
+];
+---
+
+<BaseLayout {...pages.home} image="/og/home.png" schema={[faqSchema(generalFaqs)]}>
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="mesh hero__mesh" aria-hidden="true"></div>
+    <div class="hero__globe" data-hero-3d aria-hidden="true">
+      <GlobePoster />
+      <canvas class="hero__canvas"></canvas>
+    </div>
+    <div class="hero__content wrap" data-hero-exit>
+      <h1 class="hero__title" id="hero-title">
+        <span class="hero__line"><span>Your team.</span></span>
+        <span class="hero__line hero__line--end"><span>Your hours.</span></span>
+        <span class="sr-only">Offshore professionals in India working U.S. business hours</span>
+      </h1>
+      <div class="hero__foot">
+        <p class="hero__lede">
+          Vetted virtual assistants, recruiters, accountants, legal assistants and web developers in India, working your U.S. business day.
+          Matched in {f.matchHours} hours, onboarded in {f.onboardingHours}.
+        </p>
+        <div class="hero__actions">
+          <a class="btn" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
+            <span class="btn__label">Book a discovery call <Icon name="arrow-up-right" class="btn__arrow" /></span>
+          </a>
+          <a class="btn btn--ghost" href="/services" data-magnetic>
+            <span class="btn__label">Explore services</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <p class="hero__legend" aria-hidden="true"><span>Wilmington, DE</span><span>India</span></p>
+  </section>
+
+  <Marquee items={marquee} label="Roles we staff and the U.S. time zones we cover" />
+
+  <!-- About intro: heavy paragraph with parallax chips and figures in a sentence -->
+  <section class="intro" id="intro" aria-labelledby="intro-title">
+    <h2 class="sr-only" id="intro-title">Why Akrostech</h2>
+    <div class="intro__chips" aria-hidden="true">
+      <div class="intro__chip intro__chip--a" data-parallax="-0.5">
+        <Media id="about-accounting" alt="" ratio="4 / 5" sizes="(min-width: 768px) 12vw, 30vw" widths={[320, 480, 640]} />
+      </div>
+      <div class="intro__chip intro__chip--b" data-parallax="0.6">
+        <Media id="about-legal" alt="" ratio="1 / 1" sizes="(min-width: 768px) 9vw, 22vw" widths={[240, 360, 480]} />
+      </div>
+    </div>
+    <div class="wrap">
+      <p class="intro__statement" data-reveal>
+        Most growing companies run out of hours long before they run out of work. We give you the hours back: trained people in India who work
+        your day, use your tools, follow your playbook and report to you every week.
+      </p>
+      <p class="intro__figures" data-reveal>
+        Today more than <strong data-count>{f.professionals}+</strong>&nbsp;vetted professionals work across <strong data-count
+          >{f.projects}+</strong
+        >&nbsp;running projects at <strong data-count>{f.accuracy}%</strong>&nbsp;task accuracy, and most start within <strong data-count
+          >{f.onboardingHours}</strong
+        >&nbsp;hours of a first call.
+      </p>
+      <a class="arrow-link intro__link" href="/about">How we work <Icon name="arrow-up-right" /></a>
+    </div>
+  </section>
+
+  <!-- Services: statement cell + dark rows with 3D tilt -->
+  <section class="services" aria-labelledby="services-title">
+    <div class="services__cell">
+      <h2 class="services__title" id="services-title">
+        <span>Five practices.</span>
+        <span class="services__title--end">One standard.</span>
+        <span>Your hours.</span>
+      </h2>
+      <div class="services__cell-foot">
+        <p data-reveal>
+          Every practice runs the same way: vetted people, a team lead on every pod, written procedures and a weekly report. Pick one specialist or
+          build a team across all five.
+        </p>
+        <a class="btn btn--ink" href="/services" data-magnetic>
+          <span class="btn__label">All services <Icon name="arrow-right" class="btn__arrow" /></span>
+        </a>
+      </div>
+    </div>
+    <ul class="services__rows" role="list">
+      {
+        services.map((s, i) => (
+          <li class="services__row" style={`--i:${i}`}>
+            <a class="service-card" href={serviceHref(s.slug)} data-tilt="5" data-cursor-label="Open">
+              <span class="service-card__glare" aria-hidden="true" />
+              <div class="service-card__head">
+                <h3 class="service-card__title">
+                  {s.name}
+                  {s.isNew && <span class="service-card__new">New</span>}
+                </h3>
+                <span class="service-card__meta">{s.startsIn}</span>
+              </div>
+              <p class="service-card__body">{s.summary}</p>
+              <p class="service-card__terms">
+                {s.slug === 'website-development'
+                  ? 'Custom sites, e-commerce, web apps'
+                  : s.capabilities
+                      .slice(0, 3)
+                      .map((c) => c.title)
+                      .join(', ')}
+              </p>
+              <Icon name="arrow-up-right" class="icon service-card__arrow" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- The live thing -->
+  <div class="wrap section planner-wrap">
+    <ShiftPlanner />
+  </div>
+
+  <!-- Portfolio masonry -->
+  <section class="work wrap section" aria-labelledby="work-title">
+    <div class="work__head">
+      <h2 class="h1 work__title" id="work-title" data-split>Work, planned in the open.</h2>
+      <p class="work__intro" data-reveal>
+        Engagement blueprints: how we staff, start and measure each kind of engagement, from one executive assistant to a twelve-week client
+        portal. Plans, not promises.
+      </p>
+    </div>
+    <div class="work__grid">
+      {
+        columns.map((col, ci) => (
+          <ul class="work__col" role="list">
+            {col.items.map((w, i) => (
+              <li class="work__item">
+                <a class="work-card" href={`/work/${w.slug}`} data-cursor-label="View">
+                  <Media
+                    id={`work-${w.slug}`}
+                    alt={`Illustration for ${w.title}`}
+                    sizes="(min-width: 1024px) 31vw, (min-width: 768px) 46vw, 92vw"
+                    wipe={(ci + i) % 2 ? 'up' : 'left'}
+                    widths={[480, 720, 960, 1280]}
+                  />
+                  <div class="work-card__text">
+                    <h3 class="work-card__title">{w.title}</h3>
+                    <p class="work-card__meta">
+                      {services.find((s) => s.slug === w.service)?.shortName} · {w.format} · {w.duration}
+                    </p>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+    <a class="arrow-link" href="/work">All blueprints <Icon name="arrow-up-right" /></a>
+  </section>
+
+  <!-- Process: lines that step across, scroll-driven -->
+  <section class="process section" aria-labelledby="process-title" data-timeline>
+    <div class="process__rail" aria-hidden="true"><span class="process__line" data-timeline-line></span></div>
+    <div class="wrap">
+      <h2 class="sr-only" id="process-title">How an engagement starts</h2>
+      <ol class="process__steps" role="list">
+        {
+          process.map((p, i) => (
+            <li class="process__step" style={`--step:${i}`} data-timeline-step>
+              <p class="process__line-text" data-split="words">
+                {p.line}
+              </p>
+              <p class="process__body">{p.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Commitments / testimonials 3D carousel -->
+  <section class="promises section" aria-labelledby="promises-title">
+    <div class="wrap promises__head">
+      <h2 class="h1" id="promises-title" data-split>{testimonials.length ? 'In our clients’ words.' : 'Promises, in writing.'}</h2>
+      <p class="promises__intro" data-reveal>
+        {
+          testimonials.length
+            ? 'What clients say after the first ninety days.'
+            : 'Six commitments that go into every engagement letter, whether you hire one assistant or a team of ten.'
+        }
+      </p>
+    </div>
+    <div class="wrap" data-perspective>
+      <Carousel3D slides={slides} label={testimonials.length ? 'Client testimonials' : 'Our commitments'} />
+    </div>
+  </section>
+
+  <!-- Impact figures -->
+  <section class="impact" aria-labelledby="impact-title">
+    <div class="wrap">
+      <h2 class="impact__title" id="impact-title" data-split>The numbers we hold ourselves to.</h2>
+      <dl class="impact__grid" data-reveal-group>
+        <div class="impact__item" data-reveal>
+          <dt>Hours to a shortlist</dt>
+          <dd data-count>{f.matchHours}</dd>
+        </div>
+        <div class="impact__item" data-reveal>
+          <dt>Hours to onboard</dt>
+          <dd data-count>{f.onboardingHours}</dd>
+        </div>
+        <div class="impact__item" data-reveal>
+          <dt>Task accuracy</dt>
+          <dd data-count>{f.accuracy}%</dd>
+        </div>
+        <div class="impact__item" data-reveal>
+          <dt>Vetting stages</dt>
+          <dd data-count>{vetting.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="team wrap section" aria-labelledby="team-title">
+    <dl class="team__facts" data-reveal-group>
+      <div data-reveal><dt>Headquarters</dt><dd>Wilmington, Delaware</dd></div>
+      <div data-reveal><dt>Delivery</dt><dd>India</dd></div>
+      <div data-reveal><dt>Hours</dt><dd>ET, CT, MT and PT</dd></div>
+    </dl>
+    <div class="team__main">
+      <h2 class="h2" id="team-title" data-split>Who you work with.</h2>
+      <p class="team__para" data-reveal>
+        You get a U.S.-based client partner who owns the engagement, a delivery lead who owns quality, a team lead who reviews the work before it
+        reaches you, and the specialists who do it. One chain, every name known.
+      </p>
+      <ul class="team__roles" role="list" data-reveal-group>
+        {
+          teamRoles.map((r) => (
+            <li class="team__role" data-reveal>
+              <h3 class="team__role-title">{r.role}</h3>
+              <p class="team__role-where">{r.practice}</p>
+              <p class="team__role-body">{r.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Blog preview: horizontal scroll showcase -->
+  <section class="journal" aria-labelledby="journal-title" data-hscroll>
+    <div class="journal__inner">
+      <div class="journal__head wrap">
+        <h2 class="h1" id="journal-title" data-split>Field notes.</h2>
+        <a class="arrow-link" href="/blog">All articles <Icon name="arrow-up-right" /></a>
+      </div>
+      <ul class="journal__track" role="list" data-hscroll-track>
+        {
+          posts.map((p) => (
+            <li class="journal__item">
+              <a class="post-card" href={postHref(p)} data-cursor-label="Read">
+                <Media id={`blog-${p.id}`} alt="" sizes="(min-width: 1024px) 34vw, 82vw" widths={[480, 720, 960, 1280]} ratio="16 / 10" />
+                <p class="post-card__meta">
+                  {p.data.category} · {readingMinutes(p.body)} min read · <time datetime={p.data.published.toISOString()}>{formatDate(p.data.published)}</time>
+                </p>
+                <h3 class="post-card__title">{p.data.title}</h3>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="journal__progress" aria-hidden="true"><span></span></div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  /* ---------------------------------------------------------------- hero */
+  .hero {
+    --intro-delay: 0.15s;
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    overflow: clip;
+    isolation: isolate;
+  }
+  :global(html.is-preloading) .hero { --intro-delay: 1.45s; }
+  .hero__mesh { z-index: -2; }
+  .hero__globe {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    right: -6vw;
+    width: min(64vw, 108svh);
+    aspect-ratio: 1;
+    translate: 0 -48%;
+  }
+  .hero__globe :global(.globe-poster), .hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hero__canvas { opacity: 0; transition: opacity 1.2s var(--ease-out); }
+  .hero__globe:global(.is-ready) .hero__canvas { opacity: 1; }
+  .hero__globe:global(.is-ready) :global(.globe-poster) { opacity: 0; transition: opacity 1.2s var(--ease-out); }
+
+  .hero__content {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 100svh;
+    padding-top: calc(var(--header-h) + 12svh);
+    padding-bottom: clamp(1.5rem, 4svh, 2.5rem);
+  }
+  .hero__title {
+    display: grid;
+    align-content: start;
+    font-family: var(--font-display);
+    font-size: clamp(4.25rem, 0.6rem + 15.4vw, 17rem);
+    font-weight: 600;
+    line-height: 0.86;
+    letter-spacing: -0.055em;
+    color: var(--ink-strong);
+  }
+  .hero__line { display: block; overflow: clip; padding-bottom: 0.05em; margin-bottom: -0.05em; }
+  .hero__line > span { display: block; }
+  .hero__line--end { justify-self: end; }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__line > span { animation: hero-rise 1.1s var(--ease-out) var(--intro-delay) both; }
+    .hero__line--end > span { animation-delay: calc(var(--intro-delay) + 110ms); }
+    .hero__foot { animation: hero-fade 0.9s var(--ease-out) calc(var(--intro-delay) + 0.45s) both; }
+    .hero__globe { animation: hero-globe 1.6s var(--ease-out) calc(var(--intro-delay) + 0.1s) both; }
+  }
+  @keyframes hero-rise { from { translate: 0 105%; } }
+  @keyframes hero-fade { from { opacity: 0; translate: 0 18px; } }
+  @keyframes hero-globe { from { opacity: 0; scale: 0.92; } }
+
+  .hero__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-l);
+  }
+  .hero__lede { max-width: 44ch; font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); line-height: 1.45; color: var(--ink-strong); }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+  .hero__legend {
+    position: absolute;
+    right: var(--gutter);
+    top: calc(var(--header-h) + 1.25rem);
+    display: flex;
+    gap: 1.25rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .hero__legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .hero__legend span::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--accent); }
+
+  @media (max-width: 767px) {
+    .hero__globe { width: 118vw; right: -38vw; top: 36%; opacity: 0.85; }
+    .hero__content { padding-top: calc(var(--header-h) + 10svh); }
+    .hero__title { font-size: 19vw; line-height: 0.9; }
+    .hero__line--end { justify-self: start; }
+    .hero__actions { width: 100%; }
+    .hero__actions .btn { flex: 1 1 auto; }
+    .hero__legend { display: none; }
+  }
+
+  /* --------------------------------------------------------------- intro */
+  .intro {
+    position: relative;
+    background: var(--field);
+    color: var(--field-ink);
+    padding-block: var(--section-gap);
+    overflow: clip;
+  }
+  .intro__statement {
+    position: relative;
+    z-index: 1;
+    max-width: 30ch;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 0.9rem + 3.4vw, 4.25rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+  .intro__figures {
+    position: relative;
+    z-index: 1;
+    max-width: 46ch;
+    margin-top: var(--space-2xl);
+    margin-left: auto;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 0.95rem + 1.2vw, 2.125rem);
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+    color: var(--field-muted);
+  }
+  .intro__figures strong { color: var(--field-ink); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+  .intro__link { position: relative; z-index: 1; margin-top: var(--space-l); margin-left: auto; display: flex; width: fit-content; color: var(--field-ink); }
+  .intro__chips { position: absolute; inset: 0; pointer-events: none; }
+  .intro__chip { position: absolute; }
+  .intro__chip--a { width: clamp(7rem, 12vw, 13rem); right: 9%; top: 12%; rotate: 4deg; }
+  .intro__chip--b { width: clamp(5rem, 9vw, 9.5rem); left: 46%; bottom: 10%; rotate: -5deg; }
+  @media (max-width: 767px) {
+    .intro__chip--a { width: 26vw; right: 4%; top: 4%; }
+    .intro__chip--b { display: none; }
+    .intro__figures { margin-left: 0; }
+    .intro__link { margin-left: 0; }
+  }
+
+  /* ------------------------------------------------------------ services */
+  .services {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 90svh;
+  }
+  .services__cell {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: var(--space-2xl);
+    padding: var(--space-3xl) var(--gutter) var(--space-xl);
+    background: var(--bg-raised);
+  }
+  .services__title {
+    display: grid;
+    align-content: start;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 1rem + 3.6vw, 5rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    color: var(--ink-strong);
+    position: sticky;
+    top: calc(var(--header-h) + 2rem);
+    align-self: start;
+  }
+  .services__title--end { justify-self: end; }
+  .services__cell-foot { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-m); }
+  .services__cell-foot p { max-width: 34ch; }
+  .services__rows { display: grid; background: var(--inverse); }
+  .services__row:nth-child(even) .service-card { background: light-dark(#252521, #d3ccbb); }
+  .service-card {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 5fr 4fr;
+    grid-template-rows: auto 1fr;
+    gap: var(--space-s) var(--space-l);
+    height: 100%;
+    min-height: 12rem;
+    padding: clamp(1.5rem, 2.5vw, 2.25rem);
+    background: var(--inverse);
+    color: var(--inverse-ink);
+    text-decoration: none;
+    transform-style: preserve-3d;
+    transition: background-color var(--dur-base) var(--ease-out);
+  }
+  .service-card:hover { background: light-dark(var(--moss-800), var(--moss-200)) !important; }
+  .service-card__glare {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(40% 60% at var(--glare-x, 50%) var(--glare-y, 50%), rgb(255 255 255 / 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity var(--dur-base);
+  }
+  .service-card:hover .service-card__glare { opacity: 1; }
+  .service-card__head { grid-column: 1; }
+  .service-card__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    transform: translateZ(30px);
+  }
+  .service-card__new { padding: 0.15rem 0.5rem; background: var(--moss-300); color: var(--moss-950); font-family: var(--font-text); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0; }
+  .service-card__meta { display: block; margin-top: 0.35rem; font-size: var(--step--1); color: var(--inverse-muted); }
+  .service-card__body { grid-column: 2; grid-row: 1 / span 2; font-size: var(--step-0); color: var(--inverse-ink); transform: translateZ(18px); }
+  .service-card__terms { grid-column: 1; align-self: end; font-size: var(--step--1); color: var(--inverse-muted); }
+  .service-card__arrow { position: absolute; right: 1.25rem; bottom: 1.25rem; width: 1.5rem; height: 1.5rem; transition: translate var(--dur-base) var(--ease-out); }
+  .service-card:hover .service-card__arrow { translate: 0.25rem -0.25rem; }
+  @media (max-width: 1023px) {
+    .services { grid-template-columns: 1fr; }
+    .services__cell { min-height: 70svh; }
+    .services__title { position: static; font-size: 11vw; }
+  }
+  @media (max-width: 767px) {
+    .service-card { grid-template-columns: 1fr; }
+    .service-card__body { grid-column: 1; grid-row: auto; }
+  }
+
+  .planner-wrap { padding-bottom: 0; }
+
+  /* ---------------------------------------------------------------- work */
+  .work { display: grid; gap: var(--space-2xl); }
+  .work__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; }
+  .work__title { grid-column: 1 / span 7; }
+  .work__intro { grid-column: 9 / -1; color: var(--ink); }
+  .work__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); align-items: start; }
+  .work__col { display: grid; gap: var(--space-xl); }
+  .work__col:nth-child(2) { margin-top: var(--space-3xl); }
+  @media (max-width: 1023px) {
+    .work__grid { display: block; columns: 2; column-gap: var(--gutter); }
+    .work__col { display: contents; }
+    .work__item { break-inside: avoid; margin-bottom: var(--space-xl); }
+  }
+  @media (max-width: 599px) {
+    .work__grid { columns: 1; }
+  }
+  .work-card { display: grid; gap: var(--space-s); text-decoration: none; color: inherit; }
+  .work-card :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .work-card:hover :global(.media img) { scale: 1.045; }
+  .work-card__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink-strong); }
+  .work-card__meta { margin-top: 0.35rem; font-size: var(--step--1); color: var(--muted); }
+  @media (max-width: 1023px) {
+    .work__title, .work__intro { grid-column: 1 / -1; }
+  }
+
+  /* ------------------------------------------------------------- process */
+  .process { position: relative; background: var(--bg-raised); }
+  .process__rail { position: absolute; left: var(--gutter); top: var(--section-gap); bottom: var(--section-gap); width: 3px; background: var(--surface-strong); }
+  .process__line { display: block; width: 100%; height: 100%; background: var(--accent); transform-origin: 50% 0; }
+  :global(html:not(.motion-ready)) .process__line { scale: 1 1; }
+  .process__steps { display: grid; gap: var(--space-2xl); padding-left: clamp(1.5rem, 3vw, 3rem); }
+  .process__step { margin-left: calc(var(--step) * clamp(0px, 7vw, 14rem)); max-width: 46rem; opacity: 0.45; transition: opacity var(--dur-slow) var(--ease-out); }
+  .process__step:global(.is-active), .process__step:global(.is-past) { opacity: 1; }
+  :global(html:not(.motion-ready)) .process__step { opacity: 1; }
+  .process__line-text {
+    font-family: var(--font-display);
+    font-size: clamp(2.125rem, 1rem + 3.8vw, 4.75rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--ink-strong);
+    max-width: 24ch;
+  }
+  .process__step:last-child .process__line-text { color: var(--accent-text); }
+  .process__body { margin-top: 0.85rem; max-width: 34ch; color: var(--ink); }
+  @media (max-width: 767px) {
+    .process__step { margin-left: calc(var(--step) * 4vw); }
+  }
+
+  /* ------------------------------------------------------------ promises */
+  .promises { overflow: clip; }
+  .promises__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; margin-bottom: var(--space-xl); }
+  .promises__head h2 { grid-column: 1 / span 7; }
+  .promises__intro { grid-column: 9 / -1; }
+  @media (max-width: 1023px) {
+    .promises__head h2, .promises__intro { grid-column: 1 / -1; }
+  }
+
+  /* -------------------------------------------------------------- impact */
+  .impact { background: var(--inverse); color: var(--inverse-ink); padding-block: var(--section-gap); }
+  .impact__title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; letter-spacing: -0.035em; line-height: 1.05; max-width: 18ch; }
+  .impact__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xl) var(--gutter); margin-top: var(--space-2xl); }
+  .impact__item { display: flex; flex-direction: column-reverse; gap: 0.6rem; }
+  .impact__item dt { font-size: var(--step-0); color: var(--inverse-muted); }
+  .impact__item dd {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 1rem + 7vw, 9rem);
+    font-weight: 600;
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .impact__item:last-child dd { color: var(--moss-300); }
+  @media (max-width: 767px) {
+    .impact__grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ---------------------------------------------------------------- team */
+  .team { display: grid; grid-template-columns: minmax(10rem, 16rem) 1fr; gap: var(--space-2xl) clamp(2rem, 8vw, 10rem); }
+  .team__facts { display: grid; gap: var(--space-m); align-content: start; }
+  .team__facts dt { font-size: var(--step--1); color: var(--muted); }
+  .team__facts dd { font-weight: 600; color: var(--ink-strong); }
+  .team__para { margin-top: var(--space-m); max-width: 52ch; font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem); line-height: 1.45; }
+  .team__roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-xl) var(--gutter); margin-top: var(--space-2xl); }
+  .team__role { padding-top: var(--space-m); box-shadow: inset 0 3px 0 var(--accent); }
+  .team__role-title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
+  .team__role-where { font-size: var(--step--1); color: var(--muted); margin-top: 0.2rem; }
+  .team__role-body { margin-top: 0.6rem; max-width: 40ch; }
+  @media (max-width: 767px) {
+    .team { grid-template-columns: 1fr; }
+    .team__facts { grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--space-l); }
+    .team__roles { grid-template-columns: 1fr; }
+  }
+
+  /* ------------------------------------------------------------- journal */
+  .journal { background: var(--surface); padding-block: var(--space-3xl); overflow: clip; }
+  .journal__inner { display: grid; gap: var(--space-xl); }
+  .journal__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-m); }
+  .journal__track {
+    display: flex;
+    gap: var(--gutter);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .journal__track::-webkit-scrollbar { display: none; }
+  .journal__item { flex: 0 0 min(82vw, 34rem); scroll-snap-align: start; }
+  .post-card { display: grid; gap: var(--space-s); text-decoration: none; color: inherit; }
+  .post-card :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .post-card:hover :global(.media img) { scale: 1.04; }
+  .post-card__meta { font-size: var(--step--1); color: var(--muted); }
+  .post-card__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink-strong); }
+  .journal__progress { margin-inline: var(--gutter); height: 3px; background: var(--surface-strong); }
+  .journal__progress span { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; scale: var(--hscroll-progress, 0) 1; }
+  @media (min-width: 1024px) {
+    :global(html.motion-ready) .journal { min-height: 100svh; display: grid; align-items: center; }
+    :global(html.motion-ready) .journal__track { overflow: visible; scroll-snap-type: none; }
+    .journal__item { flex-basis: clamp(24rem, 36vw, 40rem); }
+  }
+  @media (max-width: 1023px) {
+    .journal__progress { display: none; }
+  }
+</style>

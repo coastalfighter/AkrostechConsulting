@@ -1,0 +1,273 @@
+---
+import { site } from '@/config/site';
+import { services, serviceHref } from '@/data/services';
+import Icon from './Icon.astro';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const nav = [
+  { href: '/services', label: 'Services' },
+  { href: '/work', label: 'Work' },
+  { href: '/about', label: 'About' },
+  { href: '/blog', label: 'Insights' },
+  { href: '/contact', label: 'Contact' },
+];
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+---
+
+<header class="header" data-header>
+  <div class="header__bar wrap">
+    <a class="wordmark" href="/" aria-label={`${site.name}, home`}>
+      <svg class="wordmark__mark" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" fill="currentColor" class="wordmark__ground"></rect>
+        <path d="M16 50 L32 13 L48 50" fill="none" stroke-width="7" class="wordmark__a"></path>
+        <rect x="21" y="36" width="22" height="6" class="wordmark__bar"></rect>
+      </svg>
+      <span class="wordmark__text">Akrostech</span>
+    </a>
+
+    <nav class="header__nav" aria-label="Primary">
+      <ul role="list">
+        {
+          nav.map((item) => (
+            <li>
+              <a class="link header__link" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <button class="theme-toggle" type="button" data-theme-toggle>
+        <span class="theme-toggle__icon theme-toggle__icon--dark"><Icon name="moon" /></span>
+        <span class="theme-toggle__icon theme-toggle__icon--light"><Icon name="sun" /></span>
+        <span class="sr-only theme-toggle__label--dark">Switch to dark theme</span>
+        <span class="sr-only theme-toggle__label--light">Switch to light theme</span>
+      </button>
+      <a class="btn btn--ink header__cta" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
+        <span class="btn__label">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></span>
+      </a>
+      <button class="menu-button" type="button" aria-haspopup="dialog" aria-controls="site-menu" data-menu-open>
+        <span class="menu-button__lines" aria-hidden="true"><span></span><span></span></span>
+        <span class="menu-button__text">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog class="menu" id="site-menu" aria-label="Site menu" data-menu>
+  <div class="menu__inner wrap">
+    <div class="menu__top">
+      <a class="wordmark" href="/" aria-label={`${site.name}, home`}><span class="wordmark__text">Akrostech</span></a>
+      <button class="menu__close" type="button" data-menu-close>
+        <span>Close</span>
+        <Icon name="plus" class="icon menu__close-icon" />
+      </button>
+    </div>
+
+    <nav class="menu__nav" aria-label="Mobile">
+      <ul role="list">
+        <li style="--i:0"><a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a></li>
+        {
+          nav.map((item, i) => (
+            <li style={`--i:${i + 1}`}>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="menu__foot" style="--i:7">
+      <ul role="list" class="menu__services">
+        {
+          services.map((s) => (
+            <li>
+              <a class="link" href={serviceHref(s.slug)}>
+                {s.shortName}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="menu__contact">
+        <a class="link" href={`tel:${site.phoneE164}`}>{site.phone}</a>
+        <a class="link" href={`mailto:${site.email}`}>{site.email}</a>
+        <a class="btn btn--block" href={site.calendly} target="_blank" rel="noopener">
+          <span class="btn__label">Book a 30-minute call <Icon name="arrow-up-right" class="btn__arrow" /></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-header);
+    view-transition-name: site-header;
+    transition: translate var(--dur-base) var(--ease-out);
+  }
+  .header__bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    height: var(--header-h);
+  }
+  .header__bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: inset 0 -1px 0 var(--line);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  :global(.header.is-scrolled) .header__bar::before { opacity: 1; }
+  :global(.header.is-hidden) { translate: 0 -110%; }
+  :global(html.menu-open) .header { translate: 0 0; }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    color: var(--ink-strong);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: -0.03em;
+  }
+  .wordmark__mark { width: 2rem; height: 2rem; color: var(--ink-strong); transition: rotate var(--dur-slow) var(--ease-spring); }
+  .wordmark:hover .wordmark__mark { rotate: -8deg; }
+  .wordmark__a { stroke: var(--bg); }
+  .wordmark__bar { fill: light-dark(var(--moss-300), var(--moss-600)); }
+
+  .header__nav { margin-inline: auto; }
+  .header__nav ul { display: flex; gap: clamp(1rem, 2vw, 2.25rem); }
+  .header__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 500;
+    font-size: 0.975rem;
+    color: var(--ink-strong);
+  }
+
+  .header__actions { display: flex; align-items: center; gap: var(--space-xs); margin-left: auto; }
+  .header__nav + .header__actions { margin-left: 0; }
+  .header__cta { min-height: 2.875rem; padding: 0.7rem 1.15rem; font-size: 0.95rem; }
+
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--ink-strong);
+    border-radius: var(--radius-round);
+    transition: background-color var(--dur-fast), rotate var(--dur-slow) var(--ease-spring);
+  }
+  .theme-toggle:hover { background: var(--surface); rotate: 20deg; }
+  .theme-toggle__icon { grid-area: 1 / 1; display: grid; }
+  /* Show the option that is NOT currently rendered. Works without JS via media queries. */
+  .theme-toggle__icon--light, .theme-toggle__label--light { display: none; }
+  @media (prefers-color-scheme: dark) {
+    .theme-toggle__icon--light, .theme-toggle__label--light { display: grid; }
+    .theme-toggle__icon--dark, .theme-toggle__label--dark { display: none; }
+  }
+  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__icon--light,
+  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__label--light { display: grid; }
+  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__icon--dark,
+  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__label--dark { display: none; }
+  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__icon--light,
+  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__label--light { display: none; }
+  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__icon--dark,
+  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__label--dark { display: grid; }
+  .theme-toggle__label--dark, .theme-toggle__label--light { position: absolute; }
+
+  .menu-button {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    padding-inline: 0.6rem;
+    font-weight: 600;
+    color: var(--ink-strong);
+  }
+  .menu-button__lines { display: grid; gap: 5px; width: 22px; }
+  .menu-button__lines span { display: block; height: 2px; background: currentColor; transition: translate var(--dur-base) var(--ease-out); }
+  .menu-button:hover .menu-button__lines span:last-child { translate: 6px 0; }
+
+  @media (max-width: 1023px) {
+    .header__nav, .header__cta { display: none; }
+    .menu-button { display: inline-flex; }
+  }
+
+  /* ---------- Full-screen menu ---------- */
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--field);
+    color: var(--field-ink);
+    overflow-y: auto;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 600ms var(--ease-in-out), display 600ms allow-discrete, overlay 600ms allow-discrete;
+  }
+  .menu[open] { clip-path: inset(0 0 0 0); }
+  @starting-style { .menu[open] { clip-path: inset(0 0 100% 0); } }
+  .menu::backdrop { background: transparent; }
+  .menu__inner { display: grid; grid-template-rows: auto 1fr auto; min-height: 100%; padding-block: 0 var(--space-l); }
+  .menu__top { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); }
+  .menu .wordmark { color: var(--field-ink); }
+  .menu__close { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; padding-inline: 0.6rem; font-weight: 600; color: var(--field-ink); }
+  .menu__close-icon { rotate: 45deg; width: 1.5rem; height: 1.5rem; }
+  .menu__nav { align-self: center; padding-block: var(--space-xl); }
+  .menu__nav a {
+    display: block;
+    padding-block: 0.1em;
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 12vw, 6rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--field-ink);
+    text-decoration: none;
+    transition: color var(--dur-fast), translate var(--dur-base) var(--ease-out);
+  }
+  .menu__nav a:hover, .menu__nav a:focus-visible { color: var(--moss-200); translate: 0.15em 0; }
+  .menu__nav a[aria-current='page'] { color: var(--moss-200); }
+  .menu__nav li, .menu__foot {
+    opacity: 0;
+    translate: 0 1.5rem;
+    transition: opacity 500ms var(--ease-out), translate 700ms var(--ease-out);
+    transition-delay: calc(var(--i) * 60ms + 250ms);
+  }
+  .menu[open] .menu__nav li, .menu[open] .menu__foot { opacity: 1; translate: 0 0; }
+  @starting-style { .menu[open] .menu__nav li, .menu[open] .menu__foot { opacity: 0; translate: 0 1.5rem; } }
+  .menu__foot { display: grid; gap: var(--space-l); font-size: var(--step-0); }
+  .menu__services { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; color: var(--field-muted); }
+  .menu__services a { display: inline-flex; min-height: 44px; align-items: center; }
+  .menu__contact { display: grid; gap: 0.25rem; }
+  .menu__contact a.link { display: inline-flex; min-height: 44px; align-items: center; width: fit-content; }
+  .menu__contact .btn { margin-top: var(--space-s); }
+  @media (prefers-reduced-motion: reduce) {
+    .menu, .menu__nav li, .menu__foot { transition: none; }
+  }
+</style>

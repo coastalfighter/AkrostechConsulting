@@ -381,6 +381,7 @@ select.field__control {
   background-size: cover;
   background-position: center;
 }
+.media picture { display: block; width: 100%; height: 100%; }
 .media img {
   width: 100%;
   height: 100%;
@@ -427,3 +428,20 @@ html.motion-ready [data-reveal='fade']:not(.is-revealed) { translate: none; }
 .no-scroll { overflow: hidden; }
 .visually-balanced { text-wrap: balance; }
 .icon { width: 1.25em; height: 1.25em; flex: none; }
+
+/* ---------- Theme switch: circular reveal from the toggle ---------- */
+html[data-theme-switch]::view-transition-old(root) { animation: none; }
+html[data-theme-switch]::view-transition-new(root) {
+  animation: theme-reveal 750ms var(--ease-in-out) both;
+}
+html[data-theme-switch]::view-transition-group(site-header) { animation-duration: 750ms; }
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--vt-x, 100%) var(--vt-y, 0)); }
+  to { clip-path: circle(150vmax at var(--vt-x, 100%) var(--vt-y, 0)); }
+}
+
+/* ---------- Pre-states for JS-driven reveals (removed by the 4s failsafe if motion never loads) ---------- */
+html.motion-ready [data-split]:not(.is-split) { visibility: hidden; }
+html.motion-ready [data-wipe] { clip-path: inset(0 100% 0 0); }
+html.motion-ready [data-wipe='up'] { clip-path: inset(100% 0 0 0); }
+.split-line { padding-bottom: 0.06em; margin-bottom: -0.06em; }

@@ -1,0 +1,244 @@
+---
+/**
+ * The live thing: pick your U.S. time zone and working hours, see the matching India shift and
+ * whether your specialist would be on shift right now. Server-rendered with a 9-to-5 Eastern
+ * default so it reads correctly without JavaScript.
+ */
+import { US_ZONES, planShift } from '@/lib/time';
+
+interface Props {
+  id?: string;
+  compact?: boolean;
+}
+const { id = 'shift-planner', compact = false } = Astro.props;
+
+const initial = planShift({ clientZone: 'America/New_York', startHour: 9, hours: 8, now: new Date() });
+const starts = [6, 7, 8, 9, 10, 11, 12];
+const lengths = [4, 6, 8, 9, 10];
+const label = (h: number) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? 'am' : 'pm'}`;
+---
+
+<section class:list={['planner', { 'planner--compact': compact }]} id={id} aria-labelledby={`${id}-title`} data-planner>
+  <div class="planner__intro">
+    <h2 class="h2 planner__title" id={`${id}-title`}>Pick your hours.<br />See theirs.</h2>
+    <p class="planner__lede">
+      India runs 9½ to 12½ hours ahead of the U.S., so our specialists work the evening and night there while you work your day here.
+      Set your day and see the shift that mirrors it.
+    </p>
+  </div>
+
+  <form class="planner__form" data-planner-form>
+    <fieldset class="planner__zones">
+      <legend class="planner__legend">Your time zone</legend>
+      <div class="planner__segmented">
+        {
+          US_ZONES.map((z, i) => (
+            <label class="planner__seg">
+              <input type="radio" name="zone" value={z.id} checked={i === 0} />
+              <span>
+                <strong>{z.short}</strong> {z.label}
+              </span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+    <div class="planner__selects">
+      <label class="field field--select">
+        <select class="field__control" name="start">
+          {starts.map((h) => <option value={h} selected={h === 9}>{label(h)}</option>)}
+        </select>
+        <span class="field__label">Your day starts</span>
+      </label>
+      <label class="field field--select">
+        <select class="field__control" name="hours">
+          {lengths.map((h) => <option value={h} selected={h === 8}>{h} hours</option>)}
+        </select>
+        <span class="field__label">Shift length</span>
+      </label>
+    </div>
+  </form>
+
+  <div class="planner__result" role="status" aria-live="polite" aria-atomic="true">
+    <dl class="planner__rows">
+      <div class="planner__row">
+        <dt>Your day</dt>
+        <dd><span class="planner__time" data-out="client">{initial.clientStartLabel} – {initial.clientEndLabel}</span> <span class="planner__zone" data-out="clientZone">ET</span></dd>
+      </div>
+      <div class="planner__row planner__row--accent">
+        <dt>Your specialist in India</dt>
+        <dd><span class="planner__time" data-out="india">{initial.indiaStartLabel} – {initial.indiaEndLabel}</span> <span class="planner__zone">IST</span></dd>
+      </div>
+    </dl>
+
+    <div class="planner__band" aria-hidden="true" data-band>
+      {
+        Array.from({ length: 24 }, (_, h) => (
+          <span class="planner__cell" data-hour={h} data-lit={h >= 9 && h < 17 ? 'true' : 'false'}>
+            {h % 6 === 0 && <span class="planner__tick">{label(h).replace(':00', '')}</span>}
+          </span>
+        ))
+      }
+    </div>
+
+    <p class="planner__status" data-out="status" hidden>
+      <span class="planner__pulse" aria-hidden="true"></span>
+      <span data-out="statusText"></span>
+    </p>
+    <p class="planner__gap">India is <strong data-out="gap">{initial.gap}</strong> ahead of you today. Daylight saving moves this by an hour twice a year; your specialist’s shift moves with it.</p>
+  </div>
+</section>
+
+<script>
+  import { US_ZONES, formatDuration, formatClock, planShift, wallClock } from '@/lib/time';
+
+  document.querySelectorAll<HTMLElement>('[data-planner]').forEach((root) => {
+    const form = root.querySelector<HTMLFormElement>('[data-planner-form]')!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+    const cells = root.querySelectorAll<HTMLElement>('[data-band] [data-hour]');
+
+    // Preselect the visitor's own U.S. zone when we can tell.
+    const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const match = US_ZONES.find((z) => z.id === local);
+    if (match) {
+      const input = form.querySelector<HTMLInputElement>(`input[value="${match.id}"]`);
+      if (input) input.checked = true;
+    }
+
+    const render = () => {
+      const data = new FormData(form);
+      const zone = String(data.get('zone') ?? US_ZONES[0].id);
+      const start = Number(data.get('start') ?? 9);
+      const hours = Number(data.get('hours') ?? 8);
+      const now = new Date();
+      const plan = planShift({ clientZone: zone, startHour: start, hours, now });
+      const short = US_ZONES.find((z) => z.id === zone)?.short ?? 'ET';
+
+      out('client').textContent = `${plan.clientStartLabel} – ${plan.clientEndLabel}`;
+      out('clientZone').textContent = short;
+      out('india').textContent = `${plan.indiaStartLabel} – ${plan.indiaEndLabel}`;
+      out('gap').textContent = plan.gap;
+
+      const nowHour = wallClock(zone, now).hour;
+      cells.forEach((cell) => {
+        const h = Number(cell.dataset.hour);
+        const lit = (h - start + 24) % 24 < hours;
+        cell.dataset.lit = String(lit);
+        cell.toggleAttribute('data-now', h === nowHour);
+      });
+
+      const status = out('status');
+      status.hidden = false;
+      status.dataset.state = plan.onShift ? 'on' : 'off';
+      out('statusText').textContent = plan.onShift
+        ? `On shift right now. ${formatDuration(plan.minutesToChange)} left in today’s shift.`
+        : `Off shift. Next shift starts ${plan.nextShiftDay} at ${formatClock(plan.clientStart, zone)} ${short}, in ${formatDuration(plan.minutesToChange)}.`;
+    };
+
+    form.addEventListener('change', render);
+    form.addEventListener('submit', (e) => e.preventDefault());
+    render();
+    const timer = window.setInterval(render, 30_000);
+    window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
+  });
+</script>
+
+<style>
+  .planner {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--space-xl) var(--gutter);
+    padding: clamp(1.5rem, 4vw, 4rem);
+    background: var(--surface);
+  }
+  .planner__intro { grid-column: 1 / span 5; }
+  .planner__title { margin-bottom: var(--space-m); }
+  .planner__lede { max-width: 42ch; }
+  .planner__form { grid-column: 7 / -1; display: grid; gap: var(--space-m); align-content: start; }
+  .planner__zones { border: 0; padding: 0; min-width: 0; }
+  .planner__legend { margin-bottom: 0.6rem; font-size: var(--step--1); font-weight: 600; color: var(--muted); }
+  .planner__segmented { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .planner__seg { position: relative; cursor: pointer; }
+  .planner__seg input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .planner__seg span {
+    display: grid;
+    place-items: center;
+    min-height: 3.5rem;
+    padding: 0.5rem;
+    background: var(--bg-raised);
+    color: var(--muted);
+    font-size: var(--step--1);
+    text-align: center;
+    line-height: 1.2;
+    transition: background-color var(--dur-fast), color var(--dur-fast);
+  }
+  .planner__seg strong { display: block; font-family: var(--font-display); font-size: var(--step-1); color: var(--ink-strong); }
+  .planner__seg:hover span { background: var(--bg); }
+  .planner__seg input:checked + span { background: var(--inverse); color: var(--inverse-muted); }
+  .planner__seg input:checked + span strong { color: var(--inverse-ink); }
+  .planner__seg input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .planner__selects { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+
+  .planner__result { grid-column: 1 / -1; display: grid; gap: var(--space-l); }
+  .planner__rows { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); }
+  .planner__row dt { font-size: var(--step--1); color: var(--muted); margin-bottom: 0.35rem; }
+  .planner__row dd {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 0.9rem + 3.4vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--ink-strong);
+    font-variant-numeric: tabular-nums;
+  }
+  .planner__row--accent dd { color: var(--accent-text); }
+  .planner__time { white-space: nowrap; }
+  @media (max-width: 479px) { .planner__time { white-space: normal; } }
+  .planner__zone { font-size: 0.4em; letter-spacing: -0.01em; vertical-align: 0.9em; color: var(--muted); }
+
+  .planner__band { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 3px; padding-bottom: 1.75rem; }
+  .planner__cell {
+    position: relative;
+    height: clamp(1.5rem, 3vw, 2.5rem);
+    background: var(--bg-raised);
+    transition: background-color 400ms var(--ease-out);
+    transition-delay: calc(var(--d, 0) * 1ms);
+  }
+  .planner__cell[data-lit='true'] { background: var(--accent); }
+  .planner__cell[data-now]::after {
+    content: '';
+    position: absolute;
+    inset: -6px 45% -6px;
+    background: var(--ink-strong);
+  }
+  .planner__tick { position: absolute; top: calc(100% + 0.4rem); left: 0; font-size: 0.8125rem; color: var(--muted); white-space: nowrap; }
+
+  .planner__status { display: flex; align-items: center; gap: 0.75rem; font-weight: 600; color: var(--ink-strong); font-size: var(--step-0); }
+  .planner__pulse { position: relative; width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--muted); flex: none; }
+  .planner__status[data-state='on'] .planner__pulse { background: var(--accent); }
+  .planner__status[data-state='on'] .planner__pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.8s var(--ease-out) infinite;
+  }
+  @keyframes pulse { to { scale: 3; opacity: 0; } }
+  .planner__gap { color: var(--muted); max-width: 70ch; font-size: var(--step--1); }
+  .planner__gap strong { color: var(--ink-strong); }
+
+  @media (max-width: 1023px) {
+    .planner__intro, .planner__form { grid-column: 1 / -1; }
+  }
+  @media (max-width: 767px) {
+    .planner__rows { grid-template-columns: 1fr; }
+    .planner__segmented { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .planner__tick { font-size: 0.75rem; }
+    .planner__cell:nth-child(6n + 4) .planner__tick { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .planner__status[data-state='on'] .planner__pulse::after { animation: none; }
+    .planner__cell { transition: none; }
+  }
+</style>
