@@ -1,0 +1,203 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import Media from '@/components/Media.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Icon from '@/components/Icon.astro';
+import { pages } from '@/data/pages';
+import { CATEGORIES } from '@/content.config';
+import { categorySlug, formatDate, getPosts, postHref, readingMinutes } from '@/lib/blog';
+import { canonical, ids } from '@/lib/seo';
+
+const posts = await getPosts();
+const featured = posts.find((p) => p.data.featured) ?? posts[0]!;
+const rest = posts.filter((p) => p.id !== featured.id);
+const used = CATEGORIES.filter((c) => posts.some((p) => p.data.category === c));
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Insights', path: '/blog' },
+];
+const blogSchema = {
+  '@type': 'Blog',
+  '@id': `${canonical('/blog')}#blog`,
+  name: 'Akrostech Insights',
+  publisher: { '@id': ids.organization },
+  blogPost: posts.map((p) => ({ '@type': 'BlogPosting', headline: p.data.title, url: canonical(postHref(p)), datePublished: p.data.published.toISOString() })),
+};
+---
+
+<BaseLayout {...pages.blog} image="/og/blog.png" breadcrumbs={crumbs} schema={[blogSchema]} webPage={{ '@type': ['WebPage', 'CollectionPage'] }}>
+  <section class="bh wrap" aria-labelledby="page-title">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="bh__title" id="page-title"><span>Insights.</span></h1>
+    <p class="bh__lede">Practical guides on outsourcing, hiring, finance operations, legal support and building websites that load fast and rank.</p>
+  </section>
+
+  <section class="feat wrap" aria-label="Featured article">
+    <a class="feat__link" href={postHref(featured)} data-cursor-label="Read">
+      <div class="feat__art" data-perspective>
+        <Media id={`blog-${featured.id}`} alt="" priority ratio="16 / 9" sizes="(min-width: 1024px) 58vw, 100vw" widths={[640, 960, 1280, 1600, 2000]} />
+      </div>
+      <div class="feat__text">
+        <p class="feat__meta">Featured · {featured.data.category} · {readingMinutes(featured.body)} min read</p>
+        <h2 class="feat__title">{featured.data.title}</h2>
+        <p class="feat__excerpt">{featured.data.excerpt}</p>
+        <span class="arrow-link">Read the article <Icon name="arrow-up-right" /></span>
+      </div>
+    </a>
+  </section>
+
+  <section class="bl wrap section" aria-labelledby="all-title" data-blog>
+    <h2 class="sr-only" id="all-title">All articles</h2>
+    <div class="bl__tools">
+      <div class="bl__cats" role="group" aria-label="Filter by category">
+        <button class="bl__cat" type="button" aria-pressed="true" data-cat="all">All</button>
+        {used.map((c) => <button class="bl__cat" type="button" aria-pressed="false" data-cat={categorySlug(c)}>{c}</button>)}
+      </div>
+      <search class="bl__search">
+        <form role="search" action="/blog" method="get" data-search-form>
+          <label class="field">
+            <input class="field__control" type="search" name="q" placeholder=" " autocomplete="off" enterkeyhint="search" data-search-input />
+            <span class="field__label">Search articles</span>
+          </label>
+          <Icon name="search" class="icon bl__search-icon" />
+        </form>
+      </search>
+    </div>
+    <p class="bl__status" role="status" aria-live="polite" data-blog-status>{posts.length} articles</p>
+
+    <ul class="bl__grid" role="list">
+      {
+        [featured, ...rest].map((p) => (
+          <li
+            class="bl__item"
+            data-cat={categorySlug(p.data.category)}
+            data-text={`${p.data.title} ${p.data.excerpt} ${p.data.tags.join(' ')} ${p.data.category}`.toLowerCase()}
+          >
+            <a class="bcard" href={postHref(p)} data-cursor-label="Read">
+              <Media id={`blog-${p.id}`} alt="" ratio="16 / 10" sizes="(min-width: 1024px) 31vw, (min-width: 600px) 46vw, 92vw" widths={[480, 720, 960]} />
+              <p class="bcard__meta">
+                {p.data.category} · {readingMinutes(p.body)} min read
+              </p>
+              <h3 class="bcard__title">{p.data.title}</h3>
+              <p class="bcard__excerpt">{p.data.excerpt}</p>
+              <p class="bcard__date">
+                <time datetime={p.data.published.toISOString()}>{formatDate(p.data.published)}</time>
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="bl__empty" hidden data-blog-empty>
+      <p class="bl__empty-title">Nothing matches that yet.</p>
+      <p>Try a broader word, or <a class="link link--static" href="/contact">ask us the question directly</a>.</p>
+    </div>
+  </section>
+
+  <CtaBand word="Ask" line="Have a question these articles do not answer? Bring it to a 30-minute call." />
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-blog]').forEach((root) => {
+    const cats = [...root.querySelectorAll<HTMLButtonElement>('[data-cat]').values()].filter((el) => el.tagName === 'BUTTON');
+    const items = [...root.querySelectorAll<HTMLElement>('li[data-cat]')];
+    const input = root.querySelector<HTMLInputElement>('[data-search-input]')!;
+    const form = root.querySelector<HTMLFormElement>('[data-search-form]')!;
+    const status = root.querySelector<HTMLElement>('[data-blog-status]')!;
+    const empty = root.querySelector<HTMLElement>('[data-blog-empty]')!;
+    let cat = 'all';
+
+    const apply = () => {
+      const terms = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      items.forEach((item) => {
+        const text = item.dataset.text ?? '';
+        const on = (cat === 'all' || item.dataset.cat === cat) && terms.every((t) => text.includes(t));
+        item.hidden = !on;
+        if (on) shown++;
+      });
+      status.textContent = `${shown} article${shown === 1 ? '' : 's'}${terms.length ? ` matching “${input.value.trim()}”` : ''}`;
+      empty.hidden = shown > 0;
+      const url = new URL(location.href);
+      if (input.value.trim()) url.searchParams.set('q', input.value.trim());
+      else url.searchParams.delete('q');
+      if (cat !== 'all') url.searchParams.set('category', cat);
+      else url.searchParams.delete('category');
+      history.replaceState(null, '', url);
+    };
+
+    cats.forEach((b) =>
+      b.addEventListener('click', () => {
+        cat = b.dataset.cat ?? 'all';
+        cats.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        apply();
+      }),
+    );
+    let t: number | undefined;
+    input.addEventListener('input', () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(apply, 120);
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      apply();
+    });
+
+    const params = new URL(location.href).searchParams;
+    const q = params.get('q');
+    const c = params.get('category');
+    if (q) input.value = q;
+    if (c && cats.some((b) => b.dataset.cat === c)) {
+      cat = c;
+      cats.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cat === c)));
+    }
+    if (q || c) apply();
+  });
+</script>
+
+<style>
+  .bh { display: grid; gap: var(--space-m); padding-top: calc(var(--header-h) + var(--space-l)); padding-bottom: var(--space-xl); }
+  .bh__title { margin-top: var(--space-l); font-family: var(--font-display); font-size: clamp(3.5rem, 0.5rem + 14vw, 15rem); font-weight: 600; line-height: 0.85; letter-spacing: -0.06em; color: var(--ink-strong); overflow: clip; }
+  .bh__title span { display: block; }
+  @media (prefers-reduced-motion: no-preference) {
+    .bh__title span { animation: bh-rise 1s var(--ease-out) 120ms both; }
+    .bh__lede { animation: bh-fade 800ms var(--ease-out) 400ms both; }
+  }
+  @keyframes bh-rise { from { translate: 0 100%; } }
+  @keyframes bh-fade { from { opacity: 0; translate: 0 16px; } }
+  .bh__lede { max-width: 48ch; font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); line-height: 1.45; }
+
+  .feat__link { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-xl) var(--gutter); align-items: end; text-decoration: none; color: inherit; }
+  .feat__art :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .feat__link:hover .feat__art :global(.media img) { scale: 1.03; }
+  .feat__text { display: grid; gap: var(--space-m); }
+  .feat__meta { font-weight: 600; color: var(--accent-text); }
+  .feat__title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.04; letter-spacing: -0.04em; color: var(--ink-strong); }
+  .feat__excerpt { max-width: 46ch; }
+  @media (max-width: 1023px) { .feat__link { grid-template-columns: 1fr; } }
+
+  .bl__tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-m); }
+  .bl__cats { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bl__cat { min-height: 44px; padding: 0.6rem 1rem; background: var(--bg-raised); font-weight: 600; font-size: var(--step--1); color: var(--ink-strong); transition: background-color var(--dur-fast), color var(--dur-fast); }
+  .bl__cat:hover { background: var(--surface); }
+  .bl__cat[aria-pressed='true'] { background: var(--inverse); color: var(--inverse-ink); }
+  .bl__search { position: relative; width: min(100%, 24rem); }
+  .bl__search-icon { position: absolute; right: 1rem; top: 50%; translate: 0 -50%; color: var(--muted); pointer-events: none; }
+  .bl__search .field__control { padding-right: 3rem; }
+  .bl__search .field__control::-webkit-search-cancel-button { display: none; }
+  :global(html:not(.js)) .bl__tools { display: none; }
+  .bl__status { margin-block: var(--space-m) var(--space-xl); font-size: var(--step--1); color: var(--muted); }
+  .bl__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xl) var(--gutter); }
+  .bcard { display: grid; gap: var(--space-xs); text-decoration: none; color: inherit; }
+  .bcard :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .bcard:hover :global(.media img) { scale: 1.04; }
+  .bcard__meta { margin-top: var(--space-xs); font-size: var(--step--1); font-weight: 600; color: var(--accent-text); }
+  .bcard__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink-strong); }
+  .bcard__excerpt { font-size: var(--step--1); }
+  .bcard__date { font-size: var(--step--1); color: var(--muted); }
+  .bl__empty { padding: var(--space-2xl); background: var(--bg-raised); }
+  .bl__empty-title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; color: var(--ink-strong); }
+  @media (max-width: 1023px) { .bl__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 599px) { .bl__grid { grid-template-columns: 1fr; } }
+</style>

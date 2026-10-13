@@ -1,0 +1,468 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Media from '@/components/Media.astro';
+import Faq from '@/components/Faq.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Carousel3D from '@/components/Carousel3D.astro';
+import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
+import { serviceBySlug, serviceHref, type Service } from '@/data/services';
+import { pricingTiers, techStack, webFaqs, webProcess, webSubServices } from '@/data/webdev';
+import { work } from '@/data/work';
+import { locations } from '@/data/locations';
+import { faqSchema, serviceSchema } from '@/lib/seo';
+
+const s = serviceBySlug('website-development')!;
+const path = serviceHref(s.slug);
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Services', path: '/services' },
+  { name: s.name, path },
+];
+const builds = work.filter((w) => w.service === 'website-development');
+const related = s.related.map((r) => serviceBySlug(r)).filter((r): r is Service => Boolean(r));
+const usd = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+
+const promises = [
+  { figure: '100%', title: 'You own the code', body: 'The repository, hosting and domain are in your name from day one.' },
+  { figure: 'Fixed', title: 'Fixed price after discovery', body: 'One week of discovery ends in a written scope and a price that does not move.' },
+  { figure: '2.5 s', title: 'Core Web Vitals checked', body: 'LCP, INP and CLS measured on key templates before launch, with the report handed over.' },
+  { figure: '301', title: 'Every URL accounted for', body: 'Redesigns ship with a tested redirect for every page that earns traffic or links.' },
+  { figure: 'Weekly', title: 'A staging link every week', body: 'Click through real progress every week instead of waiting for a big reveal.' },
+  { figure: '30 d', title: 'Thirty days of fixes', body: 'Anything that is not right after launch is fixed at no cost for thirty days.' },
+];
+
+const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
+  '@type': 'OfferCatalog',
+  name: 'Website development services',
+  itemListElement: webSubServices.map((w) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: w.title, description: w.summary } })),
+} };
+---
+
+<BaseLayout {...s.meta} path={path} image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(webFaqs)]}>
+  <PageHero title={s.headline} lede="Custom websites, online stores and web applications, designed and built by a senior team in India that works your U.S. hours. Fast, accessible, built to rank, and yours to keep." crumbs={crumbs} tone="field">
+    <Fragment slot="actions">
+      <a class="btn btn--light" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
+        <span class="btn__label">Start a project <Icon name="arrow-up-right" class="btn__arrow" /></span>
+      </a>
+      <a class="btn btn--ghost wd-ghost" href="#pricing"><span class="btn__label">See pricing</span></a>
+    </Fragment>
+    <dl class="wd-facts" data-reveal-group>
+      <div data-reveal><dt>Discovery</dt><dd>{s.startsIn}</dd></div>
+      <div data-reveal><dt>From</dt><dd>{usd(pricingTiers[0]!.from)}</dd></div>
+      <div data-reveal><dt>Typical saving</dt><dd>{s.saving}</dd></div>
+      <div data-reveal><dt>Ownership</dt><dd>100% yours</dd></div>
+    </dl>
+  </PageHero>
+
+  <!-- Intro with art -->
+  <section class="wd-intro wrap section" aria-labelledby="wd-intro-title">
+    <div class="wd-intro__text">
+      <h2 class="h1" id="wd-intro-title" data-split>Found first. Chosen second.</h2>
+      <p class="wd-intro__lede" data-reveal>{s.intro}</p>
+      <p data-reveal>
+        Every build starts from your sales conversation: what buyers ask, what convinces them and what they need to see before they call. Then we
+        engineer for speed, accessibility and search from the first line of code, not as a clean-up before launch.
+      </p>
+    </div>
+    <div class="wd-intro__art" data-perspective>
+      <Media id="service-website-development" alt="Illustration of a fast website layout in a browser window" sizes="(min-width: 1024px) 50vw, 100vw" widths={[640, 960, 1280, 1600]} wipe="left" />
+    </div>
+  </section>
+
+  <!-- Sub-services: accessible tabs -->
+  <section class="wd-tabs section" aria-labelledby="wd-services-title">
+    <div class="wrap">
+      <h2 class="h1 wd-tabs__title" id="wd-services-title" data-split>Ten ways we build.</h2>
+      <div class="wd-tabs__ui" data-tabs>
+        <div class="wd-tabs__list" role="tablist" aria-label="Website development services" aria-orientation="vertical">
+          {
+            webSubServices.map((w, i) => (
+              <button
+                class="wd-tabs__tab"
+                role="tab"
+                type="button"
+                id={`tab-${w.id}`}
+                aria-controls={`panel-${w.id}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+              >
+                <span>{w.title}</span>
+                <Icon name="arrow-right" class="icon wd-tabs__arrow" />
+              </button>
+            ))
+          }
+        </div>
+        <div class="wd-tabs__panels">
+          {
+            webSubServices.map((w, i) => (
+              <div class="wd-tabs__panel" role="tabpanel" id={`panel-${w.id}`} aria-labelledby={`tab-${w.id}`} hidden={i === 0 ? undefined : 'until-found'} tabindex="0">
+                <div class="wd-tabs__inner">
+                  <h3 class="wd-tabs__name">{w.title}</h3>
+                  <p class="wd-tabs__summary">{w.summary}</p>
+                  <p class="wd-tabs__body">{w.body}</p>
+                  <div class="wd-tabs__cols">
+                    <div>
+                      <h4 class="wd-tabs__label">You get</h4>
+                      <ul role="list" class="wd-tabs__deliver">
+                        {w.deliverables.map((d) => (
+                          <li>
+                            <Icon name="check" class="icon wd-tabs__check" />
+                            {d}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 class="wd-tabs__label">Typical stack</h4>
+                      <ul role="list" class="wd-tabs__stack">
+                        {w.stack.map((t) => (
+                          <li>{t}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech stack: horizontal showcase -->
+  <section class="stack" aria-labelledby="stack-title" data-hscroll>
+    <div class="stack__inner">
+      <div class="wrap stack__head">
+        <h2 class="h1" id="stack-title" data-split>The stack, chosen per project.</h2>
+        <p data-reveal>No single platform is right for every business. We pick the one your team can run, then build it properly.</p>
+      </div>
+      <ul class="stack__track" role="list" data-hscroll-track>
+        {
+          techStack.map((g, gi) => (
+            <li class="stack__group" style={`--g:${gi}`}>
+              <h3 class="stack__name">{g.group}</h3>
+              <ul role="list" class="stack__items">
+                {g.items.map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="wd-process wrap section" aria-labelledby="wd-process-title" data-timeline>
+    <div class="wd-process__head">
+      <h2 class="h1" id="wd-process-title" data-split>Six steps, no surprises.</h2>
+      <p data-reveal>A staging link every week, so you see the site take shape and can steer it while it is cheap to change.</p>
+    </div>
+    <div class="wd-process__track">
+      <div class="wd-process__rail" aria-hidden="true"><span data-timeline-line></span></div>
+      <ol class="wd-process__list" role="list">
+        {
+          webProcess.map((p) => (
+            <li class="wd-process__item" data-timeline-step>
+              <p class="wd-process__when">{p.when}</p>
+              <div>
+                <h3 class="wd-process__name">{p.title}</h3>
+                <p class="wd-process__body">{p.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Portfolio (blueprints) -->
+  <section class="wd-work wrap section" aria-labelledby="wd-work-title">
+    <div class="wd-work__head">
+      <h2 class="h1" id="wd-work-title" data-split>Builds, planned in detail.</h2>
+      <a class="arrow-link" href="/work?service=website-development">All web blueprints <Icon name="arrow-up-right" /></a>
+    </div>
+    <ul class="wd-work__grid" role="list">
+      {
+        builds.map((w, i) => (
+          <li class:list={['wd-work__item', { 'wd-work__item--wide': i === 0 }]}>
+            <a class="wd-card" href={`/work/${w.slug}`} data-cursor-label="View">
+              <Media id={`work-${w.slug}-wide`} alt={`Illustration for ${w.title}`} ratio={i === 0 ? '16 / 9' : '4 / 3'} wipe={i % 2 ? 'up' : 'left'} sizes="(min-width: 1024px) 60vw, 92vw" widths={[480, 800, 1200, 1600]} />
+              <p class="wd-card__meta">
+                {w.industry} · {w.duration}
+              </p>
+              <h3 class="wd-card__title">{w.title}</h3>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing section" id="pricing" aria-labelledby="pricing-title">
+    <div class="wrap">
+      <div class="pricing__head">
+        <h2 class="h1" id="pricing-title" data-split>Clear starting prices.</h2>
+        <p data-reveal>Your fixed price is set at the end of discovery, in writing. Hosting, platform fees and third-party licences are billed at cost.</p>
+      </div>
+      <ul class="pricing__grid" role="list" data-reveal-group>
+        {
+          pricingTiers.map((t) => (
+            <li class:list={['tier', { 'tier--featured': t.featured }]} data-reveal data-tilt="4">
+              <h3 class="tier__name">{t.name}</h3>
+              <p class="tier__price">
+                <span class="tier__from">from</span> {usd(t.from)}
+              </p>
+              <p class="tier__time">{t.timeline}</p>
+              <p class="tier__best">{t.bestFor}</p>
+              <ul role="list" class="tier__list">
+                {t.includes.map((inc) => (
+                  <li>
+                    <Icon name="check" class="icon tier__check" />
+                    {inc}
+                  </li>
+                ))}
+              </ul>
+              <a class:list={['btn', 'btn--block', t.featured ? 'btn--light' : 'btn--ink']} href={site.calendly} target="_blank" rel="noopener">
+                <span class="btn__label">
+                  Discuss {t.name} <Icon name="arrow-up-right" class="btn__arrow" />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="pricing__care">
+        <strong>Care plans</strong> for updates, backups, monitoring and monthly change hours are quoted with your build.
+      </p>
+    </div>
+  </section>
+
+  <!-- Build promises carousel -->
+  <section class="wd-promises section" aria-labelledby="wd-promises-title">
+    <div class="wrap wd-promises__head">
+      <h2 class="h1" id="wd-promises-title" data-split>What every build includes.</h2>
+    </div>
+    <div class="wrap" data-perspective>
+      <Carousel3D slides={promises} label="What every website build includes" />
+    </div>
+  </section>
+
+  <Faq faqs={webFaqs} name="web" heading="Website questions" intro="Cost, timelines, platforms and SEO, answered plainly." />
+
+  <section class="wrap section related" aria-labelledby="wd-related-title">
+    <h2 class="h2" id="wd-related-title" data-split>Pair it with a team.</h2>
+    <p class="related__text" data-reveal>
+      Many web clients add a <a class="link link--static" href={serviceHref('virtual-assistance')}>virtual assistant</a> to keep content and listings
+      current after launch. {s.geo} See{' '}
+      {
+        locations.map((l, i) => (
+          <>
+            <a class="link link--static" href={`/locations/${l.slug}`}>
+              web design in {l.city}
+            </a>
+            {i < locations.length - 1 ? ', ' : '.'}
+          </>
+        ))
+      }
+    </p>
+    <ul class="related__list" role="list">
+      {
+        related.map((r) => (
+          <li>
+            <a class="arrow-link" href={serviceHref(r.slug)}>
+              {r.name} <Icon name="arrow-up-right" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <CtaBand word="Build" line="Thirty minutes to talk through your site. You leave knowing which tier fits and what discovery will cover." />
+</BaseLayout>
+
+<script>
+  // Accessible vertical tabs with roving tabindex and Find-in-page support.
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+    const select = (i: number, focus = true) => {
+      tabs.forEach((t, j) => {
+        const on = i === j;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = panels[j];
+        if (!panel) return;
+        if (on) panel.removeAttribute('hidden');
+        else panel.setAttribute('hidden', 'until-found');
+      });
+      if (focus) tabs[i]?.focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i, false));
+      t.addEventListener('keydown', (e) => {
+        const keys: Record<string, number> = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 };
+        if (!(e.key in keys)) return;
+        e.preventDefault();
+        select((keys[e.key]! + tabs.length) % tabs.length);
+      });
+    });
+    root.addEventListener('beforematch', (e) => {
+      const i = panels.indexOf(e.target as HTMLElement);
+      if (i >= 0) select(i, false);
+    });
+  });
+</script>
+
+<style>
+  .wd-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); padding-top: var(--space-l); }
+  .wd-facts dt { font-size: var(--step--1); color: var(--field-muted); }
+  .wd-facts dd { font-weight: 600; }
+  .wd-ghost { --btn-ink: var(--field-ink); }
+  .wd-ghost:hover { --btn-bg: var(--field-ink); --btn-ink: var(--field); }
+  @media (max-width: 767px) { .wd-facts { grid-template-columns: 1fr 1fr; } }
+
+  .wd-intro { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--space-2xl) var(--gutter); align-items: center; }
+  .wd-intro__text { display: grid; gap: var(--space-m); }
+  .wd-intro__lede { font-family: var(--font-display); font-size: var(--step-1); font-weight: 500; line-height: 1.3; letter-spacing: -0.02em; color: var(--ink-strong); max-width: 34ch; }
+  .wd-intro__text p:last-child { max-width: 52ch; }
+  @media (max-width: 1023px) { .wd-intro { grid-template-columns: 1fr; } }
+
+  .wd-tabs { background: var(--inverse); color: var(--inverse-ink); }
+  .wd-tabs__title { color: var(--inverse-ink); margin-bottom: var(--space-2xl); }
+  .wd-tabs__ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--gutter); align-items: start; }
+  .wd-tabs__list { display: grid; }
+  .wd-tabs__tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    min-height: 3.5rem;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--inverse-muted);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.08);
+    transition: color var(--dur-fast), background-color var(--dur-fast), padding var(--dur-base) var(--ease-out);
+  }
+  .wd-tabs__tab:hover { color: var(--inverse-ink); padding-left: 1.4rem; }
+  .wd-tabs__tab[aria-selected='true'] { background: var(--moss-300); color: var(--moss-950); padding-left: 1.4rem; }
+  .wd-tabs__tab:focus-visible { outline-offset: -3px; }
+  .wd-tabs__arrow { opacity: 0; translate: -0.5rem 0; transition: opacity var(--dur-fast), translate var(--dur-base) var(--ease-out); }
+  .wd-tabs__tab[aria-selected='true'] .wd-tabs__arrow, .wd-tabs__tab:hover .wd-tabs__arrow { opacity: 1; translate: 0 0; }
+  .wd-tabs__panels { position: sticky; top: calc(var(--header-h) + 2rem); }
+  .wd-tabs__inner { padding: clamp(1.5rem, 3vw, 2.75rem); background: light-dark(#262622, #cfc8b6); }
+  .wd-tabs__panel:focus-visible { outline-offset: 4px; }
+  .wd-tabs__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1; letter-spacing: -0.04em; }
+  .wd-tabs__summary { margin-top: var(--space-s); font-size: var(--step-1); color: var(--inverse-accent); line-height: 1.3; }
+  .wd-tabs__body { margin-top: var(--space-m); max-width: 56ch; color: var(--inverse-ink); }
+  .wd-tabs__cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); margin-top: var(--space-xl); }
+  .wd-tabs__label { font-family: var(--font-text); font-size: var(--step--1); font-weight: 600; color: var(--inverse-muted); margin-bottom: var(--space-xs); }
+  .wd-tabs__deliver { display: grid; gap: 0.6rem; }
+  .wd-tabs__deliver li { display: flex; gap: 0.5rem; }
+  .wd-tabs__check { color: var(--inverse-accent); margin-top: 0.15em; }
+  .wd-tabs__stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .wd-tabs__stack li { padding: 0.35rem 0.7rem; background: light-dark(rgb(255 255 255 / 0.07), rgb(0 0 0 / 0.07)); font-size: var(--step--1); }
+  @media (max-width: 1023px) {
+    .wd-tabs__ui { grid-template-columns: 1fr; }
+    .wd-tabs__panels { position: static; }
+  }
+  @media (max-width: 599px) { .wd-tabs__cols { grid-template-columns: 1fr; } }
+
+  .stack { background: var(--surface); padding-block: var(--space-3xl); overflow: clip; }
+  .stack__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+  .stack__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; }
+  .stack__head h2 { grid-column: 1 / span 7; }
+  .stack__head p { grid-column: 9 / -1; }
+  .stack__track { min-width: 0; display: flex; gap: var(--gutter); padding-inline: var(--gutter); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .stack__track::-webkit-scrollbar { display: none; }
+  .stack__group {
+    flex: 0 0 min(80vw, 26rem);
+    min-height: 24rem;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: var(--space-l);
+    padding: clamp(1.5rem, 2.5vw, 2.25rem);
+    background: var(--bg-raised);
+    scroll-snap-align: start;
+  }
+  .stack__group:nth-child(odd) { background: var(--inverse); color: var(--inverse-ink); }
+  .stack__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+  .stack__items { display: grid; align-content: end; gap: 0.25rem; font-family: var(--font-display); font-size: var(--step-1); font-weight: 500; letter-spacing: -0.02em; }
+  @media (min-width: 1024px) {
+    :global(html.motion-ready) .stack { min-height: 100svh; display: grid; align-items: center; }
+    :global(html.motion-ready) .stack__track { overflow: visible; scroll-snap-type: none; }
+    .stack__group { flex-basis: clamp(22rem, 30vw, 30rem); }
+  }
+  @media (max-width: 1023px) { .stack__head h2, .stack__head p { grid-column: 1 / -1; } }
+
+  .wd-process { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-2xl) var(--gutter); }
+  .wd-process__head { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; display: grid; gap: var(--space-m); }
+  .wd-process__head p { max-width: 40ch; }
+  .wd-process__track { position: relative; padding-left: clamp(1.5rem, 3vw, 3rem); }
+  .wd-process__rail { position: absolute; left: 0; top: 0.5rem; bottom: 0.5rem; width: 3px; background: var(--surface-strong); }
+  .wd-process__rail span { display: block; width: 100%; height: 100%; background: var(--accent); transform-origin: 50% 0; }
+  .wd-process__list { display: grid; gap: var(--space-xl); }
+  .wd-process__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); opacity: 0.45; transition: opacity 500ms var(--ease-out); }
+  .wd-process__item:global(.is-past), .wd-process__item:global(.is-active) { opacity: 1; }
+  :global(html:not(.motion-ready)) .wd-process__item { opacity: 1; }
+  .wd-process__when { font-weight: 600; color: var(--accent-text); }
+  .wd-process__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1; letter-spacing: -0.04em; color: var(--ink-strong); }
+  .wd-process__body { margin-top: 0.5rem; max-width: 46ch; }
+  @media (max-width: 1023px) {
+    .wd-process { grid-template-columns: 1fr; }
+    .wd-process__head { position: static; }
+    .wd-process__item { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+
+  .wd-work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-m); margin-bottom: var(--space-xl); }
+  .wd-work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-xl) var(--gutter); }
+  .wd-work__item--wide { grid-column: 1 / -1; }
+  .wd-card { display: grid; gap: var(--space-xs); text-decoration: none; color: inherit; }
+  .wd-card :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .wd-card:hover :global(.media img) { scale: 1.04; }
+  .wd-card__meta { margin-top: var(--space-xs); font-size: var(--step--1); color: var(--muted); }
+  .wd-card__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
+  @media (max-width: 767px) { .wd-work__grid { grid-template-columns: 1fr; } }
+
+  .pricing { background: var(--bg-raised); }
+  .pricing__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; margin-bottom: var(--space-2xl); }
+  .pricing__head h2 { grid-column: 1 / span 7; }
+  .pricing__head p { grid-column: 9 / -1; }
+  .pricing__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); align-items: stretch; }
+  .tier { display: flex; flex-direction: column; gap: var(--space-s); padding: clamp(1.5rem, 2.5vw, 2.25rem); background: var(--bg); transform-style: preserve-3d; }
+  .tier--featured { background: var(--field); color: var(--field-ink); box-shadow: var(--shadow-float); }
+  .tier__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
+  .tier__price { font-family: var(--font-display); font-size: var(--step-3); font-weight: 600; line-height: 1; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+  .tier__from { font-size: var(--step-0); font-weight: 500; letter-spacing: 0; opacity: 0.75; }
+  .tier__time { font-weight: 600; color: var(--accent-text); }
+  .tier--featured .tier__time { color: var(--moss-200); }
+  .tier__best { min-height: 3em; }
+  .tier__list { display: grid; gap: 0.55rem; margin-block: var(--space-s) var(--space-l); }
+  .tier__list li { display: flex; gap: 0.55rem; }
+  .tier__check { color: var(--accent-text); margin-top: 0.15em; }
+  .tier--featured .tier__check { color: var(--moss-200); }
+  .tier .btn { margin-top: auto; }
+  .pricing__care { margin-top: var(--space-l); color: var(--muted); }
+  .pricing__care strong { color: var(--ink-strong); }
+  @media (max-width: 1023px) {
+    .pricing__head h2, .pricing__head p { grid-column: 1 / -1; }
+    .pricing__grid { grid-template-columns: 1fr; }
+  }
+
+  .wd-promises { overflow: clip; }
+  .wd-promises__head { margin-bottom: var(--space-xl); }
+
+  .related__text { margin-top: var(--space-m); max-width: 70ch; color: var(--muted); }
+  .related__text a { color: var(--ink-strong); }
+  .related__list { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-l); margin-top: var(--space-l); }
+</style>

@@ -188,7 +188,16 @@ function initTimelines(): void {
     const line = tl.querySelector<HTMLElement>('[data-timeline-line]');
     const steps = tl.querySelectorAll<HTMLElement>('[data-timeline-step]');
     if (line) {
-      gsap.fromTo(line, { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: tl, start: 'top 60%', end: 'bottom 60%', scrub: true } });
+      const horizontal = line.dataset.timelineLine === 'x';
+      gsap.fromTo(
+        line,
+        horizontal ? { scaleX: 0 } : { scaleY: 0 },
+        {
+          ...(horizontal ? { scaleX: 1 } : { scaleY: 1 }),
+          ease: 'none',
+          scrollTrigger: { trigger: tl, start: horizontal ? 'top 75%' : 'top 60%', end: horizontal ? 'bottom 55%' : 'bottom 60%', scrub: true },
+        },
+      );
     }
     steps.forEach((step) => {
       ScrollTrigger.create({

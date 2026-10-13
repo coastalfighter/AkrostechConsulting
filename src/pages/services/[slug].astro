@@ -1,0 +1,301 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Media from '@/components/Media.astro';
+import Faq from '@/components/Faq.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Marquee from '@/components/Marquee.astro';
+import ShiftPlanner from '@/components/ShiftPlanner.astro';
+import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
+import { services, serviceBySlug, serviceHref, staffingServices, type Service } from '@/data/services';
+import { work } from '@/data/work';
+import { locations } from '@/data/locations';
+import { faqSchema, serviceSchema } from '@/lib/seo';
+
+export const getStaticPaths = (() => staffingServices.map((s) => ({ params: { slug: s.slug }, props: { service: s } }))) satisfies GetStaticPaths;
+
+interface Props {
+  service: Service;
+}
+const { service: s } = Astro.props;
+const path = serviceHref(s.slug);
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Services', path: '/services' },
+  { name: s.name, path },
+];
+const blueprints = work.filter((w) => w.service === s.slug);
+const fallback = work.filter((w) => w.service !== s.slug).slice(0, 2 - Math.min(2, blueprints.length));
+const cases = [...blueprints, ...fallback].slice(0, 2);
+const related = s.related.map((r) => serviceBySlug(r)).filter((r): r is Service => Boolean(r));
+---
+
+<BaseLayout {...s.meta} path={path} image={`/og/service-${s.slug}.png`} breadcrumbs={crumbs} schema={[serviceSchema(s), faqSchema(s.faqs)]}>
+  <PageHero title={s.headline} lede={s.summary} crumbs={crumbs} art={`service-${s.slug}-portrait`} size="l">
+    <Fragment slot="actions">
+      <a class="btn" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
+        <span class="btn__label">Book a discovery call <Icon name="arrow-up-right" class="btn__arrow" /></span>
+      </a>
+      <a class="btn btn--ghost" href="#engage"><span class="btn__label">How pricing works</span></a>
+    </Fragment>
+    <dl class="facts" data-reveal-group>
+      <div data-reveal><dt>Service</dt><dd>{s.name}</dd></div>
+      <div data-reveal><dt>Starts</dt><dd>{s.startsIn}</dd></div>
+      <div data-reveal><dt>Typical saving</dt><dd>{s.saving}</dd></div>
+      <div data-reveal><dt>Hours</dt><dd>ET, CT, MT or PT</dd></div>
+    </dl>
+  </PageHero>
+
+  <!-- Intro statement -->
+  <section class="lead" aria-label="Overview">
+    <div class="wrap">
+      <p class="lead__text" data-reveal>{s.intro}</p>
+      <p class="lead__audience" data-reveal>Built for {s.audience.toLowerCase()}.</p>
+    </div>
+  </section>
+
+  <!-- Breakdown -->
+  <section class="breakdown wrap section" aria-labelledby="breakdown-title">
+    <div class="breakdown__head">
+      <h2 class="h1" id="breakdown-title" data-split>What we take on.</h2>
+      <p data-reveal>Every capability is run to a written procedure, reviewed by a team lead and reported weekly.</p>
+    </div>
+    <ul class="breakdown__rows" role="list">
+      {
+        s.capabilities.map((c) => (
+          <li class="breakdown__row" data-reveal>
+            <h3 class="breakdown__title">{c.title}</h3>
+            <p class="breakdown__body">{c.body}</p>
+            <p class="breakdown__items">{c.items.join(', ')}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Tasks -->
+  <section class="tasks section" aria-labelledby="tasks-title">
+    <div class="wrap tasks__grid">
+      <h2 class="h2 tasks__title" id="tasks-title" data-split>Tasks clients hand over first.</h2>
+      <ul class="tasks__list" role="list" data-reveal-group>
+        {
+          s.tasks.map((t) => (
+            <li data-reveal>
+              <Icon name="check" class="icon tasks__check" />
+              <span>{t}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="steps wrap section" aria-labelledby="steps-title" data-timeline>
+    <h2 class="h1 steps__title" id="steps-title" data-split>From call to first task.</h2>
+    <div class="steps__track">
+      <div class="steps__rail" aria-hidden="true"><span data-timeline-line="x"></span></div>
+      <ol class="steps__list" role="list">
+        {
+          s.process.map((p) => (
+            <li class="steps__item" data-timeline-step>
+              <p class="steps__when">{p.when}</p>
+              <h3 class="steps__name">{p.title}</h3>
+              <p class="steps__body">{p.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <Marquee items={s.tools} label={`Tools our ${s.shortName.toLowerCase()} work in`} speed={36} />
+
+  <!-- Case studies (blueprints) -->
+  <section class="cases wrap section" aria-labelledby="cases-title">
+    <div class="cases__head">
+      <h2 class="h1" id="cases-title" data-split>How it runs in practice.</h2>
+      <a class="arrow-link" href="/work">All engagement blueprints <Icon name="arrow-up-right" /></a>
+    </div>
+    <ul class="cases__grid" role="list">
+      {
+        cases.map((w, i) => (
+          <li>
+            <a class="case" href={`/work/${w.slug}`} data-cursor-label="View">
+              <Media id={`work-${w.slug}-wide`} alt={`Illustration for ${w.title}`} ratio="16 / 10" wipe={i ? 'up' : 'left'} sizes="(min-width: 768px) 46vw, 92vw" widths={[480, 800, 1200]} />
+              <p class="case__meta">
+                Blueprint · {w.industry} · {w.format}
+              </p>
+              <h3 class="case__title">{w.title}</h3>
+              <p class="case__summary">{w.summary}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Engagement & pricing -->
+  <section class="engage section" id="engage" aria-labelledby="engage-title">
+    <div class="wrap engage__grid">
+      <div class="engage__head">
+        <h2 class="h1" id="engage-title" data-split>One monthly fee.</h2>
+        <p data-reveal>
+          You pay one predictable fee per person or project, set by role, hours and seniority. It includes the specialist, their team lead, quality
+          checks, equipment and replacement from our bench. No placement fees, no long lock-in.
+        </p>
+        <a class="btn btn--light" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
+          <span class="btn__label">Get your monthly price <Icon name="arrow-up-right" class="btn__arrow" /></span>
+        </a>
+      </div>
+      <ul class="engage__models" role="list" data-reveal-group>
+        {
+          s.engagement.map((m) => (
+            <li data-reveal data-tilt="4">
+              <h3>{m.title}</h3>
+              <p>{m.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <div class="wrap section planner-wrap">
+    <ShiftPlanner id={`planner-${s.slug}`} />
+  </div>
+
+  <Faq faqs={s.faqs} name={s.slug} heading={`${s.shortName}: questions`} intro={`Straight answers about ${s.name.toLowerCase()} with Akrostech.`} />
+
+  <!-- Related + local -->
+  <section class="related wrap section" aria-labelledby="related-title">
+    <h2 class="h2" id="related-title" data-split>Often paired with.</h2>
+    <ul class="related__list" role="list">
+      {
+        related.map((r) => (
+          <li>
+            <a class="related__link" href={serviceHref(r.slug)} data-tilt="4">
+              <span class="related__name">{r.name}</span>
+              <span class="related__summary">{r.summary}</span>
+              <Icon name="arrow-up-right" class="icon related__arrow" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="related__geo">
+      {s.geo} See our service areas:{' '}
+      {
+        locations.map((l, i) => (
+          <>
+            <a class="link link--static" href={`/locations/${l.slug}`}>
+              {s.shortName.toLowerCase()} in {l.city}
+            </a>
+            {i < locations.length - 1 ? ', ' : '.'}
+          </>
+        ))
+      }
+    </p>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); padding-top: var(--space-l); }
+  .facts dt { font-size: var(--step--1); color: var(--muted); }
+  .facts dd { font-weight: 600; color: var(--ink-strong); }
+  @media (max-width: 767px) { .facts { grid-template-columns: 1fr 1fr; } }
+
+  .lead { background: var(--field); color: var(--field-ink); padding-block: var(--space-3xl); }
+  .lead__text { font-family: var(--font-display); font-size: clamp(1.75rem, 0.9rem + 3vw, 3.75rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.04em; max-width: 28ch; }
+  .lead__audience { margin-top: var(--space-l); color: var(--field-muted); font-size: var(--step-1); }
+
+  .breakdown__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; margin-bottom: var(--space-2xl); }
+  .breakdown__head h2 { grid-column: 1 / span 7; }
+  .breakdown__head p { grid-column: 9 / -1; }
+  .breakdown__rows { display: grid; gap: 4px; }
+  .breakdown__row {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr);
+    gap: var(--space-s) var(--gutter);
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    background: var(--bg-raised);
+    transition: background-color var(--dur-base) var(--ease-out);
+  }
+  .breakdown__row:nth-child(even) { background: var(--surface); }
+  .breakdown__row:hover { background: var(--inverse); color: var(--inverse-ink); }
+  .breakdown__row:hover .breakdown__title { color: var(--inverse-ink); }
+  .breakdown__row:hover .breakdown__items { color: var(--inverse-muted); }
+  .breakdown__title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1; letter-spacing: -0.04em; color: var(--ink-strong); transition: color var(--dur-base); }
+  .breakdown__items { font-size: var(--step--1); color: var(--muted); transition: color var(--dur-base); }
+  @media (max-width: 1023px) {
+    .breakdown__head h2, .breakdown__head p { grid-column: 1 / -1; }
+    .breakdown__row { grid-template-columns: 1fr; }
+  }
+
+  .tasks { background: var(--surface); }
+  .tasks__grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--space-xl) var(--gutter); }
+  .tasks__title { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
+  .tasks__list { columns: 2 18rem; column-gap: var(--gutter); }
+  .tasks__list li { display: flex; gap: 0.7rem; break-inside: avoid; padding-block: 0.85rem; font-size: var(--step-0); color: var(--ink-strong); box-shadow: inset 0 -1px 0 var(--line); }
+  .tasks__check { color: var(--accent-text); margin-top: 0.15em; }
+  @media (max-width: 1023px) {
+    .tasks__grid { grid-template-columns: 1fr; }
+    .tasks__title { position: static; }
+  }
+
+  .steps__title { max-width: 14ch; margin-bottom: var(--space-2xl); }
+  .steps__track { position: relative; }
+  .steps__rail { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--surface-strong); }
+  .steps__rail span { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; }
+  .steps__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gutter); padding-top: var(--space-l); }
+  .steps__item { opacity: 0.5; transition: opacity 500ms var(--ease-out); }
+  .steps__item:global(.is-past), .steps__item:global(.is-active) { opacity: 1; }
+  :global(html:not(.motion-ready)) .steps__item { opacity: 1; }
+  .steps__when { font-weight: 600; color: var(--accent-text); }
+  .steps__name { margin-top: 0.5rem; font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
+  .steps__body { margin-top: 0.4rem; }
+  @media (max-width: 1023px) {
+    .steps__list { grid-template-columns: 1fr 1fr; row-gap: var(--space-xl); }
+  }
+  @media (max-width: 599px) {
+    .steps__list { grid-template-columns: 1fr; }
+  }
+
+  .cases__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-m); margin-bottom: var(--space-xl); }
+  .cases__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gutter); }
+  .case { display: grid; gap: var(--space-xs); text-decoration: none; color: inherit; }
+  .case :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .case:hover :global(.media img) { scale: 1.04; }
+  .case__meta { margin-top: var(--space-xs); font-size: var(--step--1); color: var(--muted); }
+  .case__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
+  .case__summary { max-width: 52ch; }
+  @media (max-width: 767px) { .cases__grid { grid-template-columns: 1fr; } }
+
+  .engage { background: var(--field); color: var(--field-ink); }
+  .engage__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--space-2xl) var(--gutter); }
+  .engage__head { display: grid; gap: var(--space-m); align-content: start; }
+  .engage__head .h1 { color: var(--field-ink); }
+  .engage__head p { max-width: 46ch; color: var(--field-muted); }
+  .engage__head .btn { justify-self: start; }
+  .engage__models { display: grid; gap: 6px; }
+  .engage__models li { padding: clamp(1.25rem, 2.5vw, 2rem); background: rgb(0 0 0 / 0.16); }
+  .engage__models h3 { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; margin-bottom: 0.35rem; }
+  .engage__models p { color: var(--field-muted); }
+  @media (max-width: 1023px) { .engage__grid { grid-template-columns: 1fr; } }
+
+  .planner-wrap { padding-bottom: 0; }
+
+  .related__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); margin-top: var(--space-xl); }
+  .related__link { position: relative; display: grid; gap: var(--space-s); min-height: 14rem; padding: clamp(1.25rem, 2.5vw, 2rem); background: var(--bg-raised); text-decoration: none; color: inherit; transition: background-color var(--dur-base); }
+  .related__link:hover { background: var(--inverse); color: var(--inverse-ink); }
+  .related__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
+  .related__summary { font-size: var(--step--1); opacity: 0.85; }
+  .related__arrow { position: absolute; right: 1.25rem; top: 1.25rem; }
+  .related__geo { margin-top: var(--space-xl); max-width: 80ch; color: var(--muted); }
+  .related__geo a { color: var(--ink-strong); }
+  @media (max-width: 1023px) { .related__list { grid-template-columns: 1fr; } .related__link { min-height: auto; } }
+</style>

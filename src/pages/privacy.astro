@@ -1,0 +1,94 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { site, fullAddress } from '@/config/site';
+import { pages } from '@/data/pages';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Privacy policy', path: '/privacy' },
+];
+---
+
+<LegalLayout {...pages.privacy} heading="Privacy policy" updated="2026-10-13" crumbs={crumbs}>
+  <p>
+    This policy explains how {site.legalName} (“Akrostech”, “we”, “us”) collects, uses and protects personal information when you visit
+    {site.url.replace('https://', '')} or contact us. It does not cover the data we process on behalf of clients under a services agreement; that
+    is governed by the agreement and its data-protection terms.
+  </p>
+
+  <h2>Who we are</h2>
+  <p>{site.legalName}, {fullAddress}. Email <a href={`mailto:${site.email}`}>{site.email}</a> or call {site.phone} with any privacy question.</p>
+
+  <h2>What we collect</h2>
+  <h3>Information you give us</h3>
+  <p>
+    When you send an enquiry, we collect your name, work email, and, if you choose to give them, your company, phone number, the service you are
+    interested in, your team size and your message. When you book a call through Calendly, Calendly collects the details you enter under its own
+    privacy policy and shares them with us.
+  </p>
+  <h3>Information collected automatically</h3>
+  <p>
+    Our hosting provider records standard server logs (IP address, browser type, pages requested and timestamps) to keep the site secure and
+    working. We do not use advertising cookies or sell personal information. The site stores two preferences in your browser: your light or dark
+    theme choice and whether you have seen the opening animation in this session. These never leave your device.
+  </p>
+  <h3>Embedded content</h3>
+  <p>
+    Our contact and location pages embed Google Maps, which may set cookies and collect data under Google’s privacy policy when the map loads.
+  </p>
+
+  <h2>How we use it</h2>
+  <ul>
+    <li>To reply to your enquiry and arrange a discovery call.</li>
+    <li>To prepare a proposal and, if you become a client, to deliver our services.</li>
+    <li>To keep the website secure, prevent spam and fix problems.</li>
+    <li>To meet legal, accounting and tax obligations.</li>
+  </ul>
+  <p>
+    We rely on your consent (which you give when you submit the form and can withdraw at any time), our legitimate interest in responding to
+    business enquiries and running our website, and, for clients, the performance of our contract.
+  </p>
+
+  <h2>Who we share it with</h2>
+  <p>We share personal information only with service providers who help us run our business, under contracts that require them to protect it:</p>
+  <ul>
+    <li>our website host (Vercel) and email delivery provider (Resend);</li>
+    <li>our scheduling provider (Calendly), if you book a call;</li>
+    <li>our professional advisers, where needed;</li>
+    <li>authorities, where the law requires it.</li>
+  </ul>
+  <p>Some providers process data outside your state or country. Where required, we use appropriate safeguards for those transfers.</p>
+
+  <h2>How long we keep it</h2>
+  <p>
+    Enquiries that do not lead to an engagement are deleted within 24 months of our last contact. Client records are kept for the life of the
+    engagement and as long afterwards as tax and legal obligations require. Server logs are kept for up to 90 days.
+  </p>
+
+  <h2>How we protect it</h2>
+  <p>
+    The site is served only over HTTPS. Access to enquiry data is limited to the staff who need it, with named accounts and multi-factor
+    authentication. Our team members sign confidentiality agreements.
+  </p>
+
+  <h2>Your rights and choices</h2>
+  <p>
+    Depending on where you live, including under the California Consumer Privacy Act and similar state laws, you may have the right to know what
+    personal information we hold about you, to correct or delete it, to obtain a copy, and to opt out of its sale or sharing for targeted
+    advertising. We do not sell or share personal information for advertising. To exercise any right, email <a href={`mailto:${site.email}`}
+      >{site.email}</a
+    >. We will verify your request and respond within the time the law requires, and we will not treat you differently for exercising your
+    rights.
+  </p>
+
+  <h2>Children</h2>
+  <p>Our website and services are for businesses. We do not knowingly collect information from children under 16.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If we change this policy, we will update the date at the top of this page. Significant changes will be highlighted on the site.</p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions or requests: <a href={`mailto:${site.email}`}>{site.email}</a>, {site.phone}, or by post to {site.legalName}, {fullAddress}.
+  </p>
+</LegalLayout>

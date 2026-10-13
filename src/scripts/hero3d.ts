@@ -111,7 +111,7 @@ export function initHero3d(host: HTMLElement): void {
   const globe = new Group();
   scene.add(globe);
   // Face the North Atlantic, tipped toward the viewer so Delaware and India share the visible face.
-  globe.rotation.set(0.62, -1.62, 0.08);
+  globe.rotation.set(0.95, -1.46, 0);
 
   const colors = themeColors();
   const { positions, sizes, seeds } = fibonacciSphere(small ? 1400 : 2600);

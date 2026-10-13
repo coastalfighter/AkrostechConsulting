@@ -1,0 +1,151 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Media from '@/components/Media.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { pages } from '@/data/pages';
+import { services } from '@/data/services';
+import { work } from '@/data/work';
+import { canonical } from '@/lib/seo';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Work', path: '/work' },
+];
+const filters = [{ slug: 'all', label: 'All work' }, ...services.map((s) => ({ slug: s.slug, label: s.shortName }))];
+const itemList = {
+  '@type': 'ItemList',
+  name: 'Engagement blueprints',
+  itemListElement: work.map((w, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(`/work/${w.slug}`), name: w.title })),
+};
+---
+
+<BaseLayout {...pages.work} image="/og/work.png" breadcrumbs={crumbs} schema={[itemList]} webPage={{ '@type': ['WebPage', 'CollectionPage'] }}>
+  <PageHero
+    title={['Work, planned', 'in the open.']}
+    lede="Engagement blueprints show exactly how we staff, start and measure each kind of engagement: who is on the team, what happens in the first weeks, what you receive and what we track. Filter by practice."
+    crumbs={crumbs}
+  />
+
+  <section class="wk wrap" aria-label="Engagement blueprints" data-filter-root>
+    <div class="wk__bar">
+      <div class="wk__filters" role="group" aria-label="Filter by practice" data-filters>
+        {
+          filters.map((f, i) => (
+            <button class="wk__filter" type="button" aria-pressed={i === 0 ? 'true' : 'false'} data-filter={f.slug}>
+              {f.label}
+              <span class="wk__count tnum">{f.slug === 'all' ? work.length : work.filter((w) => w.service === f.slug).length}</span>
+            </button>
+          ))
+        }
+      </div>
+      <p class="wk__status" role="status" aria-live="polite" data-filter-status>Showing all {work.length} blueprints</p>
+    </div>
+
+    <ul class="wk__grid" role="list">
+      {
+        work.map((w, i) => (
+          <li class="wk__item" data-service={w.service}>
+            <a class="wk-card" href={`/work/${w.slug}`} data-cursor-label="View">
+              <Media
+                id={`work-${w.slug}`}
+                alt={`Illustration for ${w.title}`}
+                wipe={i % 2 ? 'up' : 'left'}
+                sizes="(min-width: 1024px) 31vw, (min-width: 600px) 46vw, 92vw"
+                widths={[480, 720, 960, 1280]}
+              />
+              <p class="wk-card__meta">
+                {services.find((s) => s.slug === w.service)?.shortName} · {w.industry} · {w.format}
+              </p>
+              <h2 class="wk-card__title">{w.title}</h2>
+              <p class="wk-card__summary">{w.summary}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="wk__empty" hidden data-filter-empty>No blueprints for this practice yet. Ask us how we would run it.</p>
+    <p class="wk__note">
+      Blueprints are worked plans built from how we run each kind of engagement. Client names and results are published only with written
+      permission.
+    </p>
+  </section>
+
+  <CtaBand word="Plan" line="Tell us about the work you want to hand off. We will sketch the blueprint for your engagement on the call." />
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-filter-root]').forEach((root) => {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const items = [...root.querySelectorAll<HTMLElement>('[data-service]')];
+    const status = root.querySelector<HTMLElement>('[data-filter-status]')!;
+    const empty = root.querySelector<HTMLElement>('[data-filter-empty]')!;
+
+    const apply = (slug: string, push: boolean) => {
+      let shown = 0;
+      const run = () => {
+        items.forEach((item) => {
+          const on = slug === 'all' || item.dataset.service === slug;
+          item.hidden = !on;
+          if (on) shown++;
+        });
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === slug)));
+        const label = buttons.find((b) => b.dataset.filter === slug)?.firstChild?.textContent?.trim() ?? '';
+        status.textContent = slug === 'all' ? `Showing all ${shown} blueprints` : `Showing ${shown} ${label.toLowerCase()} blueprint${shown === 1 ? '' : 's'}`;
+        empty.hidden = shown > 0;
+      };
+      const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+      if (doc.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) doc.startViewTransition(run);
+      else run();
+      if (push) {
+        const url = new URL(location.href);
+        if (slug === 'all') url.searchParams.delete('service');
+        else url.searchParams.set('service', slug);
+        history.replaceState(null, '', url);
+      }
+    };
+
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.filter ?? 'all', true)));
+    const initial = new URL(location.href).searchParams.get('service');
+    if (initial && buttons.some((b) => b.dataset.filter === initial)) apply(initial, false);
+  });
+</script>
+
+<style>
+  .wk { padding-bottom: var(--section-gap); }
+  .wk__bar { position: sticky; top: calc(var(--header-h) + 0.5rem); z-index: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-s); padding-block: var(--space-s); margin-bottom: var(--space-xl); background: var(--bg); }
+  .wk__filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wk__filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    background: var(--bg-raised);
+    font-weight: 600;
+    font-size: var(--step--1);
+    color: var(--ink-strong);
+    transition: background-color var(--dur-fast), color var(--dur-fast);
+  }
+  .wk__filter:hover { background: var(--surface); }
+  .wk__filter[aria-pressed='true'] { background: var(--inverse); color: var(--inverse-ink); }
+  .wk__count { opacity: 0.6; font-weight: 500; }
+  .wk__status { font-size: var(--step--1); color: var(--muted); }
+  :global(html:not(.js)) .wk__bar { display: none; }
+
+  .wk__grid { columns: 3 18rem; column-gap: var(--gutter); }
+  .wk__item { break-inside: avoid; margin-bottom: var(--space-2xl); view-transition-class: card; }
+  .wk__item:nth-child(1) { view-transition-name: wk-1; } .wk__item:nth-child(2) { view-transition-name: wk-2; }
+  .wk__item:nth-child(3) { view-transition-name: wk-3; } .wk__item:nth-child(4) { view-transition-name: wk-4; }
+  .wk__item:nth-child(5) { view-transition-name: wk-5; } .wk__item:nth-child(6) { view-transition-name: wk-6; }
+  .wk__item:nth-child(7) { view-transition-name: wk-7; } .wk__item:nth-child(8) { view-transition-name: wk-8; }
+  :global(::view-transition-group(.card)) { animation-duration: 500ms; animation-timing-function: var(--ease-out); }
+  .wk-card { display: grid; gap: var(--space-xs); text-decoration: none; color: inherit; }
+  .wk-card :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
+  .wk-card:hover :global(.media img) { scale: 1.045; }
+  .wk-card__meta { margin-top: var(--space-xs); font-size: var(--step--1); color: var(--muted); }
+  .wk-card__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink-strong); }
+  .wk-card__summary { max-width: 48ch; }
+  .wk__empty { padding: var(--space-xl); background: var(--bg-raised); }
+  .wk__note { margin-top: var(--space-l); max-width: 70ch; font-size: var(--step--1); color: var(--muted); }
+</style>

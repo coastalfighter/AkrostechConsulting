@@ -1,0 +1,125 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Icon from '@/components/Icon.astro';
+import { pages } from '@/data/pages';
+import { services, serviceHref } from '@/data/services';
+
+const links = [
+  { href: '/', label: 'Home', body: 'Start again from the top.' },
+  { href: '/services', label: 'Services', body: 'Five practices on your U.S. hours.' },
+  { href: '/work', label: 'Work', body: 'How we staff and run engagements.' },
+  { href: '/blog', label: 'Insights', body: 'Guides on outsourcing and the web.' },
+  { href: '/contact', label: 'Contact', body: 'Talk to a client partner.' },
+];
+---
+
+<BaseLayout {...pages.notFound} noindex preloader={false}>
+  <section class="nf" aria-labelledby="nf-title">
+    <div class="mesh nf__mesh" aria-hidden="true"></div>
+    <div class="nf__inner wrap">
+      <p class="nf__clock" aria-hidden="true">
+        <span class="nf__digit" style="--i:0">4</span><span class="nf__colon">:</span><span class="nf__digit" style="--i:1">0</span><span
+          class="nf__digit"
+          style="--i:2">4</span
+        ><span class="nf__ampm">am</span>
+      </p>
+      <div class="nf__band" aria-hidden="true">
+        {Array.from({ length: 24 }, (_, i) => <span class:list={['nf__cell', { 'is-lit': i >= 9 && i < 17, 'is-lost': i === 4 }]} style={`--i:${i}`} />)}
+      </div>
+      <h1 class="nf__title" id="nf-title">Nobody’s on shift for this page.</h1>
+      <p class="nf__lede">
+        Error 404: the page you asked for has moved or never existed. Everything else is open for business. Try a search, or pick up from one of these.
+      </p>
+
+      <search class="nf__search">
+        <form action="/blog" method="get" role="search">
+          <label class="field">
+            <input class="field__control" type="search" name="q" placeholder=" " enterkeyhint="search" />
+            <span class="field__label">Search our articles</span>
+          </label>
+          <button class="btn btn--ink" type="submit"><span class="btn__label"><Icon name="search" /> Search</span></button>
+        </form>
+      </search>
+
+      <ul class="nf__links" role="list">
+        {
+          links.map((l) => (
+            <li>
+              <a class="nf__link" href={l.href} data-magnetic="0.15">
+                <span class="nf__link-label">{l.label}</span>
+                <span class="nf__link-body">{l.body}</span>
+                <Icon name="arrow-up-right" class="icon nf__link-arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="nf__services">
+        Looking for a service?{' '}
+        {
+          services.map((s, i) => (
+            <>
+              <a class="link link--static" href={serviceHref(s.slug)}>
+                {s.shortName}
+              </a>
+              {i < services.length - 1 ? ', ' : '.'}
+            </>
+          ))
+        }
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; padding-top: calc(var(--header-h) + var(--space-xl)); padding-bottom: var(--section-gap); }
+  .nf__mesh { z-index: -1; }
+  .nf__inner { display: grid; gap: var(--space-l); }
+  .nf__clock {
+    display: flex;
+    align-items: baseline;
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 1rem + 24vw, 26rem);
+    font-weight: 600;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    color: var(--ink-strong);
+    font-variant-numeric: tabular-nums;
+  }
+  .nf__ampm { font-size: 0.18em; letter-spacing: -0.02em; margin-left: 0.25em; color: var(--muted); }
+  .nf__colon { color: var(--accent-text); }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf__digit { display: inline-block; animation: nf-drop 900ms var(--ease-spring) calc(var(--i) * 90ms + 100ms) both; }
+    .nf__colon { animation: nf-blink 1.2s steps(1) infinite; }
+    .nf__cell { animation: nf-cell 400ms var(--ease-out) calc(var(--i) * 25ms + 400ms) both; }
+    .nf__cell.is-lost { animation: nf-cell 400ms var(--ease-out) 500ms both, nf-flicker 2.4s steps(1) 1.2s infinite; }
+    .nf__title, .nf__lede, .nf__search, .nf__links { animation: nf-fade 800ms var(--ease-out) 600ms both; }
+  }
+  @keyframes nf-drop { from { translate: 0 -0.4em; opacity: 0; rotate: -6deg; } }
+  @keyframes nf-blink { 50% { opacity: 0.15; } }
+  @keyframes nf-cell { from { opacity: 0; scale: 1 0.2; } }
+  @keyframes nf-flicker { 0%, 100% { opacity: 1; } 10% { opacity: 0.1; } 14% { opacity: 1; } 60% { opacity: 0.2; } 62% { opacity: 1; } }
+  @keyframes nf-fade { from { opacity: 0; translate: 0 16px; } }
+
+  .nf__band { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 4px; max-width: 60rem; }
+  .nf__cell { height: clamp(0.75rem, 1.6vw, 1.25rem); background: var(--surface-strong); }
+  .nf__cell.is-lit { background: var(--accent); }
+  .nf__cell.is-lost { background: var(--danger); }
+
+  .nf__title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.04; letter-spacing: -0.04em; color: var(--ink-strong); max-width: 20ch; margin-top: var(--space-l); }
+  .nf__lede { max-width: 52ch; font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.25rem); }
+  .nf__search form { display: flex; gap: 6px; max-width: 34rem; }
+  .nf__search .field { flex: 1; }
+  .nf__search .btn { flex: none; }
+
+  .nf__links { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: var(--space-l); }
+  .nf__link { position: relative; display: grid; gap: 0.35rem; min-height: 9rem; padding: var(--space-m); background: var(--glass); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: inset 0 0 0 1px var(--glass-edge); text-decoration: none; color: var(--ink-strong); transition: background-color var(--dur-base), color var(--dur-base); }
+  .nf__link:hover { background: var(--inverse); color: var(--inverse-ink); }
+  .nf__link-label { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
+  .nf__link-body { font-size: var(--step--1); opacity: 0.8; align-self: end; }
+  .nf__link-arrow { position: absolute; right: 1rem; top: 1rem; }
+  .nf__services { color: var(--muted); }
+  .nf__services a { color: var(--ink-strong); }
+  @media (max-width: 1023px) { .nf__links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 479px) { .nf__links { grid-template-columns: 1fr; } .nf__link { min-height: auto; } .nf__search form { flex-direction: column; } }
+</style>

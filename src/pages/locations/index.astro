@@ -1,0 +1,73 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
+import { pages } from '@/data/pages';
+import { locations } from '@/data/locations';
+import { canonical } from '@/lib/seo';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Service areas', path: '/locations' },
+];
+const itemList = {
+  '@type': 'ItemList',
+  name: 'Akrostech service areas',
+  itemListElement: locations.map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(`/locations/${l.slug}`), name: `${l.city}, ${l.region}` })),
+};
+---
+
+<BaseLayout {...pages.locations} image="/og/locations.png" breadcrumbs={crumbs} schema={[itemList]}>
+  <PageHero
+    title={['Local partner,', 'national reach.']}
+    lede={`Our headquarters is in Wilmington, Delaware, a short trip from Philadelphia and New York. We support businesses across the United States, with specialists on Eastern, Central, Mountain and Pacific hours.`}
+    crumbs={crumbs}
+  />
+  <section class="areas wrap section" aria-label="Service areas">
+    <ul role="list" class="areas__list">
+      {
+        locations.map((l) => (
+          <li>
+            <a class="areas__link" href={`/locations/${l.slug}`} data-cursor-label="Open">
+              <span class="areas__kind">{l.isHeadquarters ? 'Headquarters' : 'Service area'}</span>
+              <span class="areas__city">
+                {l.city}, {l.region}
+              </span>
+              <span class="areas__intro">{l.distance}</span>
+              <Icon name="arrow-up-right" class="icon areas__arrow" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="areas__nat">
+      Outside these cities? Most of our clients are elsewhere in the U.S. and Canada. Every engagement runs on your time zone, wherever you are.
+      <a class="link link--static" href="/contact">Talk to {site.shortName}</a>.
+    </p>
+  </section>
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .areas__list { display: grid; }
+  .areas__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr) minmax(0, 22rem);
+    align-items: baseline;
+    gap: var(--space-s) var(--gutter);
+    padding-block: var(--space-l);
+    text-decoration: none;
+    color: var(--ink-strong);
+    box-shadow: inset 0 -1px 0 var(--line);
+  }
+  .areas__kind { font-size: var(--step--1); font-weight: 600; color: var(--muted); }
+  .areas__city { font-family: var(--font-display); font-size: clamp(2.5rem, 1rem + 6vw, 7.5rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.05em; transition: color var(--dur-base), translate var(--dur-slow) var(--ease-out); }
+  .areas__link:hover .areas__city { color: var(--accent-text); translate: 0.06em 0; }
+  .areas__intro { color: var(--ink); font-size: var(--step--1); }
+  .areas__arrow { position: absolute; right: 0; top: var(--space-l); }
+  .areas__nat { margin-top: var(--space-xl); max-width: 64ch; }
+  @media (max-width: 1023px) { .areas__link { grid-template-columns: 1fr; } }
+</style>

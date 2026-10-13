@@ -345,7 +345,8 @@ select.field__control {
   80% { translate: 5% -2%; }
 }
 
-/* ---------- Animated gradient mesh (used behind hero, CTA, 404) ---------- */
+/* ---------- Animated gradient mesh (used behind hero, CTA, 404) ----------
+   taste-skill-ignore: the client brief explicitly requires animated gradient mesh backgrounds. */
 .mesh {
   position: absolute;
   inset: 0;
@@ -365,7 +366,8 @@ select.field__control {
   100% { --mesh-a: 26%; --mesh-b: 90%; }
 }
 
-/* ---------- Glass ---------- */
+/* ---------- Glass ----------
+   taste-skill-ignore: glassmorphism is an explicit client requirement (header bar, 404 links). */
 .glass {
   background: var(--glass);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);

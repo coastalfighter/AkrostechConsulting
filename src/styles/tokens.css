@@ -61,7 +61,7 @@
   --surface-strong: light-dark(var(--sand-400), #2c3024);
   --ink: light-dark(var(--char-800), #ece7da);
   --ink-strong: light-dark(var(--char-950), #faf7ef);
-  --muted: light-dark(#59574e, #b3ad9a);
+  --muted: light-dark(#504e46, #b3ad9a);
   --accent: light-dark(var(--moss-600), var(--moss-300));
   --accent-hover: light-dark(var(--moss-700), var(--moss-200));
   --accent-ink: light-dark(#ffffff, var(--moss-950));
@@ -72,6 +72,7 @@
   --inverse: light-dark(var(--char-900), var(--sand-200));
   --inverse-ink: light-dark(var(--sand-200), var(--char-900));
   --inverse-muted: light-dark(var(--sand-500), var(--char-500));
+  --inverse-accent: light-dark(var(--moss-300), var(--moss-700));
   --danger: light-dark(var(--clay-700), var(--clay-300));
   --line: light-dark(rgb(42 42 38 / 0.14), rgb(236 231 218 / 0.14));
   --focus: light-dark(var(--moss-800), var(--moss-200));

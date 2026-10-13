@@ -1,0 +1,63 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { site, fullAddress } from '@/config/site';
+import { pages } from '@/data/pages';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Terms and conditions', path: '/terms' },
+];
+---
+
+<LegalLayout {...pages.terms} heading="Terms and conditions" updated="2026-10-13" crumbs={crumbs}>
+  <p>
+    These terms govern your use of the {site.legalName} website. By using the site you agree to them. They do not govern client engagements,
+    which are covered by a separate services agreement.
+  </p>
+
+  <h2>Use of the website</h2>
+  <p>You may use this website to learn about our services and to contact us. You agree not to:</p>
+  <ul>
+    <li>use the site in any way that breaks the law or infringes anyone’s rights;</li>
+    <li>attempt to gain unauthorised access to the site, its servers or connected systems;</li>
+    <li>send spam, malware or automated submissions through our forms;</li>
+    <li>scrape or copy the site’s content at scale without our written permission.</li>
+  </ul>
+
+  <h2>Content and intellectual property</h2>
+  <p>
+    The text, design, graphics, illustrations and code on this site belong to {site.legalName} or its licensors and are protected by copyright and
+    trademark law. You may share links to our pages and quote short extracts with attribution. Any other use needs our written permission.
+  </p>
+
+  <h2>Information on the site</h2>
+  <p>
+    We work to keep the information on this site accurate and current, but it is general information, not professional, legal, tax or financial
+    advice. Prices shown are starting points; a binding price is agreed in writing after discovery. Engagement blueprints describe how we typically
+    run engagements and are not guarantees of specific results.
+  </p>
+
+  <h2>Third-party links and services</h2>
+  <p>
+    The site links to and embeds third-party services such as Calendly, Google Maps and LinkedIn. We are not responsible for their content or
+    privacy practices; your use of them is governed by their own terms.
+  </p>
+
+  <h2>Limitation of liability</h2>
+  <p>
+    The website is provided “as is”. To the fullest extent the law allows, {site.legalName} is not liable for any indirect or consequential loss
+    arising from your use of the site, or for interruptions or errors. Nothing in these terms limits liability that cannot be limited by law.
+  </p>
+
+  <h2>Privacy</h2>
+  <p>How we handle personal information is explained in our <a href="/privacy">privacy policy</a>.</p>
+
+  <h2>Governing law</h2>
+  <p>These terms are governed by the laws of the State of Delaware, and the courts of Delaware have jurisdiction over any dispute about them.</p>
+
+  <h2>Changes</h2>
+  <p>We may update these terms from time to time. The date at the top of this page shows when they last changed.</p>
+
+  <h2>Contact</h2>
+  <p>{site.legalName}, {fullAddress}. <a href={`mailto:${site.email}`}>{site.email}</a>, {site.phone}.</p>
+</LegalLayout>

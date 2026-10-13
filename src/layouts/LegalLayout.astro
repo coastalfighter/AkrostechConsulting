@@ -1,0 +1,37 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import type { Crumb } from '@/lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  heading: string;
+  updated: string;
+  crumbs: Crumb[];
+}
+const { heading, updated, crumbs, ...meta } = Astro.props;
+---
+
+<BaseLayout {...meta} image="/og/legal.png" breadcrumbs={crumbs} preloader={false}>
+  <article class="legal wrap">
+    <header class="legal__head">
+      <Breadcrumbs items={crumbs} />
+      <h1 class="legal__title">{heading}</h1>
+      <p class="legal__updated">Last updated <time datetime={updated}>{new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(updated))}</time></p>
+    </header>
+    <div class="prose legal__body">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal { padding-top: calc(var(--header-h) + var(--space-l)); padding-bottom: var(--section-gap); }
+  .legal__head { display: grid; gap: var(--space-m); margin-bottom: var(--space-2xl); }
+  .legal__title { margin-top: var(--space-l); font-family: var(--font-display); font-size: clamp(2.5rem, 1rem + 5vw, 6rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.05em; color: var(--ink-strong); }
+  .legal__updated { color: var(--muted); }
+  .legal__body { margin-inline: auto 0; max-width: 46rem; margin-left: clamp(0rem, 20vw, 22rem); }
+  @media (max-width: 1023px) { .legal__body { margin-left: 0; } }
+</style>

@@ -1,0 +1,230 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import Media from '@/components/Media.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Icon from '@/components/Icon.astro';
+import { serviceBySlug, serviceHref } from '@/data/services';
+import { work, type WorkItem } from '@/data/work';
+import { canonical, ids } from '@/lib/seo';
+import { site } from '@/config/site';
+
+export const getStaticPaths = (() =>
+  work.map((w, i) => ({
+    params: { slug: w.slug },
+    props: { item: w, prev: work[(i - 1 + work.length) % work.length]!, next: work[(i + 1) % work.length]! },
+  }))) satisfies GetStaticPaths;
+
+interface Props {
+  item: WorkItem;
+  prev: WorkItem;
+  next: WorkItem;
+}
+const { item: w, prev, next } = Astro.props;
+const service = serviceBySlug(w.service)!;
+const path = `/work/${w.slug}`;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Work', path: '/work' },
+  { name: w.title, path },
+];
+const isCase = w.kind === 'case-study';
+const creativeWork = {
+  '@type': isCase ? 'Article' : 'CreativeWork',
+  '@id': `${canonical(path)}#work`,
+  headline: w.title,
+  name: w.title,
+  description: w.meta.description,
+  about: { '@type': 'Service', name: service.name, url: canonical(serviceHref(service.slug)) },
+  author: { '@id': ids.organization },
+  publisher: { '@id': ids.organization },
+  image: canonical(`/og/work-${w.slug}.png`),
+  genre: isCase ? 'Case study' : 'Engagement blueprint',
+};
+---
+
+<BaseLayout {...w.meta} path={path} image={`/og/work-${w.slug}.png`} breadcrumbs={crumbs} schema={[creativeWork]}>
+  <article class="cs">
+    <header class="cs__hero wrap">
+      <Breadcrumbs items={crumbs} />
+      <p class="cs__kind">
+        <a class="link" href={serviceHref(service.slug)}>{service.name}</a> · {isCase ? 'Case study' : 'Engagement blueprint'}
+      </p>
+      <h1 class="cs__title">{w.title}</h1>
+      <p class="cs__summary">{w.summary}</p>
+    </header>
+
+    <div class="cs__art wrap">
+      <Media id={`work-${w.slug}-wide`} alt={`Illustration for ${w.title}`} priority ratio="21 / 9" sizes="100vw" widths={[800, 1200, 1600, 2000, 2400]} />
+    </div>
+
+    <section class="cs__facts wrap" aria-label="At a glance">
+      <dl>
+        <div><dt>Practice</dt><dd>{service.name}</dd></div>
+        <div><dt>Industry</dt><dd>{w.industry}</dd></div>
+        <div><dt>Format</dt><dd>{w.format}</dd></div>
+        <div><dt>Team</dt><dd>{w.team}</dd></div>
+        <div><dt>Duration</dt><dd>{w.duration}</dd></div>
+      </dl>
+      {
+        !isCase && (
+          <p class="cs__disclaimer">
+            This is a worked plan showing how we would staff and run this kind of engagement. It is not a report of a specific client’s results.
+          </p>
+        )
+      }
+    </section>
+
+    {
+      isCase && w.outcomes && (
+        <section class="cs__outcomes" aria-label="Outcomes">
+          <dl class="wrap">
+            {w.outcomes.map((o) => (
+              <div>
+                <dd data-count>{o.figure}</dd>
+                <dt>{o.label}</dt>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )
+    }
+
+    <section class="cs__section wrap" aria-labelledby="situation-title">
+      <h2 class="cs__h2" id="situation-title">The situation</h2>
+      <p class="cs__lead" data-reveal>{w.situation}</p>
+    </section>
+
+    <section class="cs__approach" aria-labelledby="approach-title" data-timeline>
+      <div class="wrap cs__approach-grid">
+        <h2 class="cs__h2 cs__approach-title" id="approach-title">The approach</h2>
+        <div class="cs__steps-track">
+          <div class="cs__rail" aria-hidden="true"><span data-timeline-line></span></div>
+          <ol class="cs__steps" role="list">
+            {
+              w.approach.map((a) => (
+                <li class="cs__step" data-timeline-step>
+                  <h3 class="cs__step-title">{a.title}</h3>
+                  <p>{a.body}</p>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="cs__section cs__lists wrap" aria-label="Deliverables and measures">
+      <div data-reveal>
+        <h2 class="cs__h2">What you receive</h2>
+        <ul role="list" class="cs__list">
+          {w.deliverables.map((d) => <li><Icon name="check" class="icon cs__check" />{d}</li>)}
+        </ul>
+      </div>
+      <div data-reveal>
+        <h2 class="cs__h2">What we measure</h2>
+        <ul role="list" class="cs__list">
+          {w.measures.map((m) => <li><Icon name="clock" class="icon cs__check" />{m}</li>)}
+        </ul>
+      </div>
+      <div data-reveal>
+        <h2 class="cs__h2">Tools</h2>
+        <ul role="list" class="cs__tools">
+          {w.tools.map((t) => <li>{t}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    {
+      isCase && w.quote && (
+        <section class="cs__quote wrap section" aria-label="Client quote">
+          <blockquote>
+            <p>{w.quote.text}</p>
+            <footer>
+              {w.quote.name}, {w.quote.role}
+            </footer>
+          </blockquote>
+        </section>
+      )
+    }
+
+    <nav class="cs__nav wrap" aria-label="More blueprints">
+      <a class="cs__nav-link" href={`/work/${prev.slug}`} rel="prev">
+        <span class="cs__nav-dir"><Icon name="arrow-left" /> Previous</span>
+        <span class="cs__nav-title">{prev.title}</span>
+      </a>
+      <a class="cs__nav-link cs__nav-link--next" href={`/work/${next.slug}`} rel="next">
+        <span class="cs__nav-dir">Next <Icon name="arrow-right" /></span>
+        <span class="cs__nav-title">{next.title}</span>
+      </a>
+    </nav>
+  </article>
+
+  <CtaBand word="Start" line={`Want an engagement like this? A ${service.shortName.toLowerCase()} specialist can start within days of a discovery call.`} href={site.calendly} />
+</BaseLayout>
+
+<style>
+  .cs__hero { display: grid; gap: var(--space-m); padding-top: calc(var(--header-h) + var(--space-l)); padding-bottom: var(--space-xl); }
+  .cs__kind { font-weight: 600; color: var(--accent-text); margin-top: var(--space-l); }
+  .cs__kind a { color: inherit; }
+  .cs__title { font-family: var(--font-display); font-size: clamp(2.5rem, 1rem + 5vw, 6.5rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.05em; color: var(--ink-strong); max-width: 18ch; }
+  .cs__summary { max-width: 52ch; font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); line-height: 1.45; }
+  @media (prefers-reduced-motion: no-preference) {
+    .cs__title { animation: cs-rise 900ms var(--ease-out) 100ms both; }
+    .cs__summary { animation: cs-rise 900ms var(--ease-out) 220ms both; }
+  }
+  @keyframes cs-rise { from { opacity: 0; translate: 0 24px; } }
+
+  .cs__facts { padding-block: var(--space-xl); }
+  .cs__facts dl { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); }
+  .cs__facts dt { font-size: var(--step--1); color: var(--muted); }
+  .cs__facts dd { font-weight: 600; color: var(--ink-strong); }
+  .cs__disclaimer { margin-top: var(--space-l); padding: var(--space-s) var(--space-m); background: var(--bg-raised); font-size: var(--step--1); max-width: 80ch; }
+  @media (max-width: 1023px) { .cs__facts dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  .cs__outcomes { background: var(--inverse); color: var(--inverse-ink); padding-block: var(--space-2xl); }
+  .cs__outcomes dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--gutter); }
+  .cs__outcomes dd { font-family: var(--font-display); font-size: var(--step-3); font-weight: 600; letter-spacing: -0.05em; }
+  .cs__outcomes dt { color: var(--inverse-muted); }
+
+  .cs__section { padding-block: var(--space-3xl); }
+  .cs__h2 { font-family: var(--font-text); font-size: var(--step-0); font-weight: 600; color: var(--muted); margin-bottom: var(--space-m); }
+  .cs__lead { font-family: var(--font-display); font-size: clamp(1.5rem, 0.9rem + 2.4vw, 3rem); font-weight: 500; line-height: 1.12; letter-spacing: -0.03em; color: var(--ink-strong); max-width: 32ch; }
+
+  .cs__approach { background: var(--surface); padding-block: var(--space-3xl); }
+  .cs__approach-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gutter); }
+  .cs__approach-title { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
+  .cs__steps-track { position: relative; padding-left: clamp(1.5rem, 3vw, 3rem); }
+  .cs__rail { position: absolute; left: 0; top: 0.4rem; bottom: 0.4rem; width: 3px; background: var(--surface-strong); }
+  .cs__rail span { display: block; width: 100%; height: 100%; background: var(--accent); transform-origin: 50% 0; }
+  .cs__steps { display: grid; gap: var(--space-xl); }
+  .cs__step { opacity: 0.45; transition: opacity 500ms var(--ease-out); }
+  .cs__step:global(.is-past), .cs__step:global(.is-active) { opacity: 1; }
+  :global(html:not(.motion-ready)) .cs__step { opacity: 1; }
+  .cs__step-title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.02; letter-spacing: -0.04em; color: var(--ink-strong); margin-bottom: 0.5rem; }
+  .cs__step p { max-width: 52ch; }
+  @media (max-width: 1023px) {
+    .cs__approach-grid { grid-template-columns: 1fr; }
+    .cs__approach-title { position: static; }
+  }
+
+  .cs__lists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xl) var(--gutter); }
+  .cs__list { display: grid; gap: 0.7rem; }
+  .cs__list li { display: flex; gap: 0.6rem; color: var(--ink-strong); }
+  .cs__check { color: var(--accent-text); margin-top: 0.15em; }
+  .cs__tools { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cs__tools li { padding: 0.45rem 0.8rem; background: var(--bg-raised); font-size: var(--step--1); font-weight: 500; }
+  @media (max-width: 1023px) { .cs__lists { grid-template-columns: 1fr; } }
+
+  .cs__quote blockquote p { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.15; letter-spacing: -0.03em; max-width: 30ch; color: var(--ink-strong); }
+  .cs__quote footer { margin-top: var(--space-m); color: var(--muted); }
+
+  .cs__nav { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-block: var(--space-2xl) var(--section-gap); }
+  .cs__nav-link { display: grid; gap: var(--space-xs); padding: clamp(1.25rem, 2.5vw, 2rem); background: var(--bg-raised); text-decoration: none; color: inherit; transition: background-color var(--dur-base); }
+  .cs__nav-link:hover { background: var(--inverse); color: var(--inverse-ink); }
+  .cs__nav-link--next { text-align: right; justify-items: end; }
+  .cs__nav-dir { display: inline-flex; align-items: center; gap: 0.5rem; font-size: var(--step--1); font-weight: 600; }
+  .cs__nav-title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
+  @media (max-width: 599px) { .cs__nav { grid-template-columns: 1fr; } .cs__nav-link--next { text-align: left; justify-items: start; } }
+</style>

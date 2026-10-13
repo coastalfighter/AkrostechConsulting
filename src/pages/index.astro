@@ -33,7 +33,7 @@ for (const w of work) {
 const f = site.figures;
 
 const slides = testimonials.length
-  ? testimonials.map((t) => ({ figure: '★'.repeat(t.rating), title: t.body, body: `${t.author}, ${t.role}`, meta: t.company }))
+  ? testimonials.map((t) => ({ figure: `${t.rating} / 5`, title: t.body, body: `${t.author}, ${t.role}`, meta: t.company }))
   : commitments;
 
 const marquee = [
@@ -124,7 +124,6 @@ const process = [
       <h2 class="services__title" id="services-title">
         <span>Five practices.</span>
         <span class="services__title--end">One standard.</span>
-        <span>Your hours.</span>
       </h2>
       <div class="services__cell-foot">
         <p data-reveal>
@@ -344,8 +343,8 @@ const process = [
     position: absolute;
     z-index: -1;
     top: 50%;
-    right: -6vw;
-    width: min(64vw, 108svh);
+    right: 0;
+    width: min(60vw, 104svh);
     aspect-ratio: 1;
     translate: 0 -48%;
   }
@@ -408,7 +407,7 @@ const process = [
   @media (max-width: 767px) {
     .hero__globe { width: 118vw; right: -38vw; top: 36%; opacity: 0.85; }
     .hero__content { padding-top: calc(var(--header-h) + 10svh); }
-    .hero__title { font-size: 19vw; line-height: 0.9; }
+    .hero__title { font-size: 16vw; line-height: 0.9; }
     .hero__line--end { justify-self: start; }
     .hero__actions { width: 100%; }
     .hero__actions .btn { flex: 1 1 auto; }
@@ -452,7 +451,7 @@ const process = [
   .intro__chip--a { width: clamp(7rem, 12vw, 13rem); right: 9%; top: 12%; rotate: 4deg; }
   .intro__chip--b { width: clamp(5rem, 9vw, 9.5rem); left: 46%; bottom: 10%; rotate: -5deg; }
   @media (max-width: 767px) {
-    .intro__chip--a { width: 26vw; right: 4%; top: 4%; }
+    .intro__chip--a { display: none; }
     .intro__chip--b { display: none; }
     .intro__figures { margin-left: 0; }
     .intro__link { margin-left: 0; }
@@ -536,7 +535,7 @@ const process = [
   .service-card:hover .service-card__arrow { translate: 0.25rem -0.25rem; }
   @media (max-width: 1023px) {
     .services { grid-template-columns: 1fr; }
-    .services__cell { min-height: 70svh; }
+    .services__cell { min-height: auto; padding-block: var(--space-2xl) var(--space-xl); gap: var(--space-xl); }
     .services__title { position: static; font-size: 11vw; }
   }
   @media (max-width: 767px) {
@@ -618,7 +617,7 @@ const process = [
     letter-spacing: -0.06em;
     font-variant-numeric: tabular-nums lining-nums;
   }
-  .impact__item:last-child dd { color: var(--moss-300); }
+  .impact__item:last-child dd { color: var(--inverse-accent); }
   @media (max-width: 767px) {
     .impact__grid { grid-template-columns: 1fr 1fr; }
   }
@@ -642,9 +641,10 @@ const process = [
 
   /* ------------------------------------------------------------- journal */
   .journal { background: var(--surface); padding-block: var(--space-3xl); overflow: clip; }
-  .journal__inner { display: grid; gap: var(--space-xl); }
+  .journal__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
   .journal__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-m); }
   .journal__track {
+    min-width: 0;
     display: flex;
     gap: var(--gutter);
     padding-inline: var(--gutter);
