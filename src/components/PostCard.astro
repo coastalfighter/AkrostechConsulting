@@ -1,0 +1,45 @@
+---
+/** Article module: photo, category and reading time, title. The whole module is the link. */
+import Photo from './Photo.astro';
+import { photoFor } from '@/data/photos';
+import { postHref, readingMinutes, formatDate, type Post } from '@/lib/blog';
+
+interface Props {
+  post: Post;
+  headingLevel?: 'h2' | 'h3';
+  sizes?: string;
+  large?: boolean;
+}
+const { post, headingLevel: H = 'h3', sizes = '(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw', large = false } = Astro.props;
+---
+
+<article class:list={['post', { 'post--large': large }]}>
+  <Photo name={photoFor(post.data.art, post.data.artVariant)} alt="" ratio={large ? '16 / 10' : '3 / 2'} sizes={sizes} />
+  <div class="post__body">
+    <p class="post__meta small">
+      <span class="post__cat">{post.data.category}</span>
+      <span>{readingMinutes(post.body)} min read</span>
+      <time datetime={post.data.published.toISOString()}>{formatDate(post.data.published)}</time>
+    </p>
+    <H class="post__title"><a class="stretch" href={postHref(post)}>{post.data.title}</a></H>
+    {large && <p class="post__excerpt">{post.data.excerpt}</p>}
+  </div>
+</article>
+
+<style>
+  .post { position: relative; display: grid; align-content: start; gap: var(--s-4); }
+  .post :global(.photo img) { transition: scale 600ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .post:hover :global(.photo img) { scale: 1.03; }
+    .post:hover .post__title a { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+  }
+  .post__body { display: grid; gap: var(--s-3); }
+  .post__meta { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); color: var(--ink-2); }
+  .post__cat { color: var(--accent-text); font-weight: 650; }
+  .post__title { font-size: 1.3125rem; font-stretch: 112%; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+  .post--large .post__title { font-size: clamp(1.5rem, 1rem + 1.6vw, 2.5rem); font-stretch: 125%; line-height: 1.05; }
+  .post__title a { text-decoration: none; }
+  .post__title a:focus-visible { outline: none; }
+  .post:has(a:focus-visible) { outline: 2px solid var(--focus); outline-offset: 6px; }
+  .post__excerpt { color: var(--ink-2); max-width: 52ch; }
+</style>

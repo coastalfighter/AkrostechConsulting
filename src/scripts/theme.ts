@@ -1,63 +1,48 @@
 /**
- * Two-state colour-scheme toggle (system ↔ override), following the platform guidance:
- * the stored value is only written when it differs from the system preference, and the
- * <meta name="color-scheme"> drives the cascade through `light-dark()`.
+ * Theme switch. The brand world is dark (black ground, lime mark); the light theme is the
+ * "printed manual" variant. The inline head script applies a stored choice before first paint;
+ * this module wires the toggle and keeps tabs in sync.
  */
-const KEY = 'color-scheme';
-type Scheme = 'light' | 'dark';
+export type Theme = 'dark' | 'light';
+const KEY = 'ak-theme';
 
-const meta = (): HTMLMetaElement | null => document.querySelector('meta[name="color-scheme"]');
-const systemScheme = (): Scheme => (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+export const currentTheme = (): Theme => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
 
-function stored(): Scheme | null {
+function label(button: HTMLButtonElement, theme: Theme): void {
+  button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+}
+
+function apply(theme: Theme): void {
+  const root = document.documentElement;
+  if (theme === 'light') root.dataset.theme = 'light';
+  else delete root.dataset.theme;
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f4f5ef' : '#0b0c0a');
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((b) => label(b, theme));
+  document.dispatchEvent(new CustomEvent<Theme>('themechange', { detail: theme }));
+}
+
+function store(theme: Theme): void {
   try {
-    const v = localStorage.getItem(KEY);
-    return v === 'light' || v === 'dark' ? v : null;
+    if (theme === 'dark') localStorage.removeItem(KEY);
+    else localStorage.setItem(KEY, theme);
   } catch {
-    return null;
+    /* storage blocked: the switch still applies to this page */
   }
-}
-
-export function renderedScheme(): Scheme {
-  return stored() ?? systemScheme();
-}
-
-function apply(value: Scheme | null): void {
-  const m = meta();
-  if (m) m.content = value ?? 'light dark';
-  document.dispatchEvent(new CustomEvent('themechange', { detail: renderedScheme() }));
-}
-
-function setScheme(target: Scheme): void {
-  try {
-    if (target === systemScheme()) localStorage.removeItem(KEY);
-    else localStorage.setItem(KEY, target);
-  } catch {
-    /* storage blocked: still apply for this page */
-  }
-  apply(target === systemScheme() ? null : target);
 }
 
 export function initTheme(): void {
-  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+  buttons.forEach((button) => {
+    label(button, currentTheme());
     button.addEventListener('click', () => {
-      const target: Scheme = renderedScheme() === 'dark' ? 'light' : 'dark';
-      const swap = () => setScheme(target);
+      const next: Theme = currentTheme() === 'dark' ? 'light' : 'dark';
+      store(next);
       const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
-      if (doc.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        const r = button.getBoundingClientRect();
-        const root = document.documentElement;
-        root.style.setProperty('--vt-x', `${r.left + r.width / 2}px`);
-        root.style.setProperty('--vt-y', `${r.top + r.height / 2}px`);
-        root.dataset.themeSwitch = 'true';
-        const vt = doc.startViewTransition(swap) as { finished?: Promise<void> };
-        void vt.finished?.finally(() => delete document.documentElement.dataset.themeSwitch);
-      } else swap();
+      if (doc.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) doc.startViewTransition(() => apply(next));
+      else apply(next);
     });
   });
-
   window.addEventListener('storage', (e) => {
-    if (e.key === KEY) apply(stored());
+    if (e.key === KEY) apply(e.newValue === 'light' ? 'light' : 'dark');
   });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => apply(stored()));
 }

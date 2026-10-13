@@ -1,7 +1,28 @@
 /**
- * Header state: glass background once scrolled, hides on scroll down, returns on scroll up.
- * Also drives the progress bar where CSS scroll timelines are unsupported.
+ * Header state (solid ground once scrolled, hides on scroll down, returns on scroll up),
+ * the reading-progress bar where CSS scroll timelines are unsupported, and the two-city clock.
  */
+const clockFormat = (timeZone: string) => new Intl.DateTimeFormat('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+function initClock(): void {
+  const us = document.querySelector<HTMLElement>('[data-clock-us]');
+  const india = document.querySelector<HTMLElement>('[data-clock-in]');
+  if (!us || !india) return;
+  const fUs = clockFormat('America/New_York');
+  const fIn = clockFormat('Asia/Kolkata');
+  const tick = () => {
+    const now = new Date();
+    us.textContent = fUs.format(now);
+    india.textContent = fIn.format(now);
+  };
+  tick();
+  // Align to the next minute boundary, then tick every minute.
+  window.setTimeout(() => {
+    tick();
+    window.setInterval(tick, 60_000);
+  }, 60_000 - (Date.now() % 60_000));
+}
+
 export function initHeader(): void {
   const header = document.querySelector<HTMLElement>('[data-header]');
   const bar = document.querySelector<HTMLElement>('[data-progress]');
@@ -13,10 +34,10 @@ export function initHeader(): void {
     ticking = false;
     const y = window.scrollY;
     if (header) {
-      header.classList.toggle('is-scrolled', y > 24);
+      header.classList.toggle('is-scrolled', y > 8);
       const goingDown = y > lastY + 4;
       const goingUp = y < lastY - 4;
-      if (goingDown && y > 320 && !header.contains(document.activeElement)) header.classList.add('is-hidden');
+      if (goingDown && y > 400 && !header.contains(document.activeElement)) header.classList.add('is-hidden');
       else if (goingUp || y < 120) header.classList.remove('is-hidden');
     }
     if (bar && !cssProgress) {
@@ -38,4 +59,5 @@ export function initHeader(): void {
   );
   header?.addEventListener('focusin', () => header.classList.remove('is-hidden'));
   update();
+  initClock();
 }

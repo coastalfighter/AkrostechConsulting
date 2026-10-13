@@ -1,0 +1,144 @@
+---
+/**
+ * Side-by-side comparison with a draggable divider: the visitor pulls the seam to give either
+ * side more room. Rows stay aligned (one grid); the divider is a keyboard slider too.
+ */
+import Icon from './Icon.astro';
+
+interface Row {
+  label: string;
+  a: string;
+  b: string;
+}
+interface Props {
+  id: string;
+  aTitle: string;
+  bTitle: string;
+  rows: Row[];
+}
+const { id, aTitle, bTitle, rows } = Astro.props;
+---
+
+<div class="compare" style="--split:50%" data-compare id={id}>
+  <div class="compare__grid" role="table" aria-label={`${aTitle} compared with ${bTitle}`}>
+    <div role="row" class="compare__row compare__row--head">
+      <span role="columnheader" class="compare__cell compare__cell--a compare__title">{aTitle}</span>
+      <span role="columnheader" class="compare__cell compare__cell--b compare__title">{bTitle}</span>
+    </div>
+    {
+      rows.map((r) => (
+        <div role="row" class="compare__row">
+          <div role="cell" class="compare__cell compare__cell--a">
+            <span class="label compare__label">{r.label}</span>
+            <span class="compare__value">{r.a}</span>
+          </div>
+          <div role="cell" class="compare__cell compare__cell--b">
+            <span class="label compare__label">{r.label}</span>
+            <span class="compare__value">{r.b}</span>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <div
+    class="compare__seam"
+    role="slider"
+    tabindex="0"
+    aria-label="Divider between the two columns"
+    aria-valuemin="25"
+    aria-valuemax="75"
+    aria-valuenow="50"
+    aria-valuetext="Even split"
+    aria-controls={id}
+    data-compare-seam
+  >
+    <span class="compare__grip"><Icon name="arrow-left" /><Icon name="arrow-right" /></span>
+  </div>
+</div>
+
+<script>
+  function initCompare(root: HTMLElement): void {
+    const seam = root.querySelector<HTMLElement>('[data-compare-seam]');
+    if (!seam) return;
+    let split = 50;
+    const set = (v: number) => {
+      split = Math.min(75, Math.max(25, v));
+      root.style.setProperty('--split', `${split}%`);
+      seam.setAttribute('aria-valuenow', String(Math.round(split)));
+      seam.setAttribute('aria-valuetext', split < 45 ? 'More room for the right column' : split > 55 ? 'More room for the left column' : 'Even split');
+    };
+    let active: number | null = null;
+    seam.addEventListener('pointerdown', (e) => {
+      if (active !== null) return;
+      active = e.pointerId;
+      seam.setPointerCapture(e.pointerId);
+      root.classList.add('is-dragging');
+    });
+    seam.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== active) return;
+      const r = root.getBoundingClientRect();
+      set(((e.clientX - r.left) / r.width) * 100);
+    });
+    const end = (e: PointerEvent) => {
+      if (e.pointerId !== active) return;
+      active = null;
+      root.classList.remove('is-dragging');
+    };
+    seam.addEventListener('pointerup', end);
+    seam.addEventListener('pointercancel', end);
+    seam.addEventListener('keydown', (e) => {
+      const map: Record<string, number> = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5, PageDown: -15, PageUp: 15 };
+      if (e.key === 'Home') set(25);
+      else if (e.key === 'End') set(75);
+      else if (map[e.key] !== undefined) set(split + map[e.key]!);
+      else return;
+      e.preventDefault();
+    });
+  }
+  document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
+</script>
+
+<style>
+  .compare { position: relative; border: 1px solid var(--rule); container-type: inline-size; }
+  .compare__grid { display: grid; grid-template-columns: var(--split) 1fr; }
+  .compare__row { display: contents; }
+  .compare__cell { display: grid; gap: var(--s-2); align-content: start; padding: var(--s-5) var(--module-pad); border-top: 1px solid var(--rule); min-width: 0; }
+  .compare__cell--a { background: var(--plate); }
+  .compare__cell--b { background: var(--field); color: var(--field-ink); --rule: var(--field-rule); }
+  .compare__cell--b .compare__label { color: var(--field-ink-2); }
+  .compare__row--head .compare__cell { border-top: 0; padding-block: var(--s-6) var(--s-5); }
+  .compare__title { font-size: clamp(1.25rem, 0.9rem + 1.4vw, 2rem); font-weight: 750; font-stretch: 125%; line-height: 1; text-transform: uppercase; letter-spacing: -0.01em; }
+  .compare__label { color: var(--ink-2); }
+  .compare__value { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem); font-weight: 550; line-height: 1.35; }
+  .compare__cell--b .compare__value { font-weight: 650; }
+  .compare__seam {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: var(--split);
+    width: 44px;
+    margin-left: -22px;
+    cursor: ew-resize;
+    touch-action: none;
+    display: grid;
+    place-items: center;
+    outline: none;
+  }
+  .compare__seam::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: var(--carbon-950); }
+  .compare__grip {
+    position: relative;
+    display: flex;
+    gap: 2px;
+    padding: 0.55rem 0.5rem;
+    background: var(--carbon-950);
+    color: var(--lime-400);
+    transition: transform var(--t-press) var(--ease-out);
+  }
+  .compare__grip :global(.icon) { width: 1rem; height: 1rem; }
+  .compare.is-dragging .compare__grip { transform: scale(1.08); }
+  .compare__seam:focus-visible .compare__grip { outline: 2px solid var(--lime-400); outline-offset: 2px; }
+  @container (max-width: 36rem) {
+    .compare__cell { padding-inline: var(--s-4); }
+    .compare__title { font-size: 1rem; }
+    .compare__value { font-size: 0.9375rem; }
+  }
+</style>

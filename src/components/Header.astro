@@ -1,28 +1,33 @@
 ---
+/**
+ * Site header: logo, primary navigation, a live two-city clock (Wilmington / India),
+ * theme switch and the primary action. Below 64rem the navigation moves into a native
+ * <dialog> menu (focus trap and Esc for free).
+ */
 import { site } from '@/config/site';
 import { services, serviceHref } from '@/data/services';
 import Icon from './Icon.astro';
+import Logo from './Logo.astro';
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const nav = [
   { href: '/services', label: 'Services' },
+  { href: '/services/website-development', label: 'Websites' },
   { href: '/work', label: 'Work' },
   { href: '/about', label: 'About' },
   { href: '/blog', label: 'Insights' },
   { href: '/contact', label: 'Contact' },
 ];
-const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+const isCurrent = (href: string) => {
+  if (href === '/services') return path === '/services' || (path.startsWith('/services/') && path !== '/services/website-development');
+  return path === href || path.startsWith(`${href}/`);
+};
 ---
 
 <header class="header" data-header>
   <div class="header__bar wrap">
-    <a class="wordmark" href="/" aria-label={`${site.name}, home`}>
-      <svg class="wordmark__mark" viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" fill="currentColor" class="wordmark__ground"></rect>
-        <path d="M16 50 L32 13 L48 50" fill="none" stroke-width="7" class="wordmark__a"></path>
-        <rect x="21" y="36" width="22" height="6" class="wordmark__bar"></rect>
-      </svg>
-      <span class="wordmark__text">Akrostech</span>
+    <a class="header__logo" href="/" aria-label={`${site.name}, home`}>
+      <Logo />
     </a>
 
     <nav class="header__nav" aria-label="Primary">
@@ -30,7 +35,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
         {
           nav.map((item) => (
             <li>
-              <a class="link header__link" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              <a class="header__link" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
                 {item.label}
               </a>
             </li>
@@ -40,18 +45,20 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
     </nav>
 
     <div class="header__actions">
-      <button class="theme-toggle" type="button" data-theme-toggle>
-        <span class="theme-toggle__icon theme-toggle__icon--dark"><Icon name="moon" /></span>
-        <span class="theme-toggle__icon theme-toggle__icon--light"><Icon name="sun" /></span>
-        <span class="sr-only theme-toggle__label--dark">Switch to dark theme</span>
-        <span class="sr-only theme-toggle__label--light">Switch to light theme</span>
+      <p class="header__clock tabular" aria-hidden="true" data-clock>
+        <span><b>DE</b> <span data-clock-us>--:--</span></span>
+        <span><b>IN</b> <span data-clock-in>--:--</span></span>
+      </p>
+      <button class="header__icon" type="button" data-theme-toggle aria-label="Switch to light theme">
+        <Icon name="sun" class="icon header__sun" />
+        <Icon name="moon" class="icon header__moon" />
       </button>
-      <a class="btn btn--ink header__cta" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
-        <span class="btn__label">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></span>
+      <a class="btn btn--primary btn--small header__cta" href={site.calendly} target="_blank" rel="noopener">
+        Book a call <Icon name="arrow-up-right" class="btn__arrow" />
       </a>
-      <button class="menu-button" type="button" aria-haspopup="dialog" aria-controls="site-menu" data-menu-open>
-        <span class="menu-button__lines" aria-hidden="true"><span></span><span></span></span>
-        <span class="menu-button__text">Menu</span>
+      <button class="header__menu" type="button" aria-haspopup="dialog" aria-controls="site-menu" data-menu-open>
+        <span class="header__menu-lines" aria-hidden="true"><span></span><span></span></span>
+        <span>Menu</span>
       </button>
     </div>
   </div>
@@ -60,14 +67,13 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
 <dialog class="menu" id="site-menu" aria-label="Site menu" data-menu>
   <div class="menu__inner wrap">
     <div class="menu__top">
-      <a class="wordmark" href="/" aria-label={`${site.name}, home`}><span class="wordmark__text">Akrostech</span></a>
-      <button class="menu__close" type="button" data-menu-close>
+      <a class="header__logo" href="/" aria-label={`${site.name}, home`}><Logo /></a>
+      <button class="header__menu" type="button" data-menu-close>
         <span>Close</span>
-        <Icon name="plus" class="icon menu__close-icon" />
+        <Icon name="plus" class="icon menu__x" />
       </button>
     </div>
-
-    <nav class="menu__nav" aria-label="Mobile">
+    <nav class="menu__nav" aria-label="Menu">
       <ul role="list">
         <li style="--i:0"><a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a></li>
         {
@@ -81,15 +87,12 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
         }
       </ul>
     </nav>
-
-    <div class="menu__foot" style="--i:7">
+    <div class="menu__foot">
       <ul role="list" class="menu__services">
         {
           services.map((s) => (
             <li>
-              <a class="link" href={serviceHref(s.slug)}>
-                {s.shortName}
-              </a>
+              <a class="link link--quiet" href={serviceHref(s.slug)}>{s.name}</a>
             </li>
           ))
         }
@@ -97,10 +100,10 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
       <div class="menu__contact">
         <a class="link" href={`tel:${site.phoneE164}`}>{site.phone}</a>
         <a class="link" href={`mailto:${site.email}`}>{site.email}</a>
-        <a class="btn btn--block" href={site.calendly} target="_blank" rel="noopener">
-          <span class="btn__label">Book a 30-minute call <Icon name="arrow-up-right" class="btn__arrow" /></span>
-        </a>
       </div>
+      <a class="btn btn--primary btn--block" href={site.calendly} target="_blank" rel="noopener">
+        Book a 30-minute call <Icon name="arrow-up-right" class="btn__arrow" />
+      </a>
     </div>
   </div>
 </dialog>
@@ -110,112 +113,93 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
     position: fixed;
     inset: 0 0 auto;
     z-index: var(--z-header);
-    view-transition-name: site-header;
-    transition: translate var(--dur-base) var(--ease-out);
-  }
-  .header__bar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: var(--space-m);
     height: var(--header-h);
+    border-bottom: 1px solid transparent;
+    transition: transform 300ms var(--ease-out), background-color var(--t-ui) ease, border-color var(--t-ui) ease;
   }
-  .header__bar::before {
+  .header.is-scrolled { background: var(--ground); border-bottom-color: var(--rule); }
+  .header.is-hidden { transform: translateY(-100%); }
+  .header__bar { height: 100%; display: flex; align-items: center; gap: var(--s-6); }
+  .header__logo { display: inline-flex; min-height: 44px; align-items: center; text-decoration: none; font-size: 0.95rem; flex: none; }
+
+  .header__nav { display: none; margin-inline: auto; }
+  .header__nav ul { display: flex; gap: clamp(0.75rem, 1.6vw, 2rem); }
+  .header__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 550;
+    text-decoration: none;
+    color: var(--ink-2);
+    transition: color var(--t-ui) ease;
+  }
+  .header__link::after {
     content: '';
     position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--glass);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
-    backdrop-filter: blur(18px) saturate(1.4);
-    box-shadow: inset 0 -1px 0 var(--line);
-    opacity: 0;
-    transition: opacity var(--dur-base) var(--ease-out);
+    left: 0; right: 0; bottom: 8px;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--t-ui) var(--ease-out);
   }
-  :global(.header.is-scrolled) .header__bar::before { opacity: 1; }
-  :global(.header.is-hidden) { translate: 0 -110%; }
-  :global(html.menu-open) .header { translate: 0 0; }
-
-  .wordmark {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    min-height: 44px;
-    color: var(--ink-strong);
-    text-decoration: none;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 1.25rem;
-    letter-spacing: -0.03em;
-  }
-  .wordmark__mark { width: 2rem; height: 2rem; color: var(--ink-strong); transition: rotate var(--dur-slow) var(--ease-spring); }
-  .wordmark:hover .wordmark__mark { rotate: -8deg; }
-  .wordmark__a { stroke: var(--bg); }
-  .wordmark__bar { fill: light-dark(var(--moss-300), var(--moss-600)); }
-
-  /* Over a moss-field hero, the bar uses light ink until it gains its glass background. */
-  :global(html[data-hero-tone='field']) .header:not(:global(.is-scrolled)) { --ink-strong: var(--field-ink); --bg: var(--field); }
-  .header__nav { margin-inline: auto; }
-  .header__nav ul { display: flex; gap: clamp(1rem, 2vw, 2.25rem); }
-  .header__link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    font-weight: 500;
-    font-size: 0.975rem;
-    color: var(--ink-strong);
+  .header__link[aria-current='page'] { color: var(--ink); }
+  .header__link[aria-current='page']::after { transform: scaleX(1); }
+  @media (hover: hover) and (pointer: fine) {
+    .header__link:hover { color: var(--ink); }
   }
 
-  .header__actions { display: flex; align-items: center; gap: var(--space-xs); margin-left: auto; }
-  .header__nav + .header__actions { margin-left: 0; }
-  .header__cta { min-height: 2.875rem; padding: 0.7rem 1.15rem; font-size: 0.95rem; }
-
-  .theme-toggle {
+  .header__actions { display: flex; align-items: center; gap: var(--s-3); margin-left: auto; }
+  .header__clock { display: none; gap: var(--s-4); font-size: 0.8125rem; color: var(--ink-2); font-stretch: 112%; }
+  .header__clock b { font-weight: 650; color: var(--ink); letter-spacing: 0.06em; margin-right: 0.15em; }
+  .header__icon {
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
-    color: var(--ink-strong);
-    border-radius: var(--radius-round);
-    transition: background-color var(--dur-fast), rotate var(--dur-slow) var(--ease-spring);
+    width: 44px; height: 44px;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    transition: transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease;
   }
-  .theme-toggle:hover { background: var(--surface); rotate: 20deg; }
-  .theme-toggle__icon { grid-area: 1 / 1; display: grid; }
-  /* Show the option that is NOT currently rendered. Works without JS via media queries. */
-  .theme-toggle__icon--light, .theme-toggle__label--light { display: none; }
-  @media (prefers-color-scheme: dark) {
-    .theme-toggle__icon--light, .theme-toggle__label--light { display: grid; }
-    .theme-toggle__icon--dark, .theme-toggle__label--dark { display: none; }
+  .header__icon:active { transform: scale(0.94); }
+  .header__icon .icon { grid-area: 1 / 1; width: 1.15rem; height: 1.15rem; }
+  .header__moon { display: none; }
+  :global(:root[data-theme='light']) .header__sun { display: none; }
+  :global(:root[data-theme='light']) .header__moon { display: block; }
+  @media (hover: hover) and (pointer: fine) {
+    .header__icon:hover { border-color: var(--ink); }
   }
-  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__icon--light,
-  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__label--light { display: grid; }
-  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__icon--dark,
-  :global(:root:has(meta[name='color-scheme'][content='dark'])) .theme-toggle__label--dark { display: none; }
-  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__icon--light,
-  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__label--light { display: none; }
-  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__icon--dark,
-  :global(:root:has(meta[name='color-scheme'][content='light'])) .theme-toggle__label--dark { display: grid; }
-  .theme-toggle__label--dark, .theme-toggle__label--light { position: absolute; }
-
-  .menu-button {
-    display: none;
+  .header__cta { display: none; }
+  .header__menu {
+    display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: var(--s-3);
     min-height: 44px;
-    padding-inline: 0.6rem;
-    font-weight: 600;
-    color: var(--ink-strong);
+    padding-inline: var(--s-4);
+    border: 1px solid var(--rule-strong);
+    font-weight: 650;
+    font-size: 0.9375rem;
+    font-stretch: 112%;
+    transition: transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease;
   }
-  .menu-button__lines { display: grid; gap: 5px; width: 22px; }
-  .menu-button__lines span { display: block; height: 2px; background: currentColor; transition: translate var(--dur-base) var(--ease-out); }
-  .menu-button:hover .menu-button__lines span:last-child { translate: 6px 0; }
+  .header__menu:active { transform: scale(0.97); }
+  .header__menu-lines { display: grid; gap: 5px; width: 18px; }
+  .header__menu-lines span { height: 2px; background: currentColor; }
+  .header__menu-lines span:last-child { width: 60%; }
 
-  @media (max-width: 1023px) {
-    .header__nav, .header__cta { display: none; }
-    .menu-button { display: inline-flex; }
+  @media (min-width: 40rem) {
+    .header__cta { display: inline-flex; }
+  }
+  @media (min-width: 64rem) {
+    .header__nav { display: block; }
+    .header__menu { display: none; }
+  }
+  @media (min-width: 90rem) {
+    .header__clock { display: flex; }
   }
 
-  /* ---------- Full-screen menu ---------- */
+  /* ---- Menu dialog ---- */
   .menu {
     position: fixed;
     inset: 0;
@@ -223,53 +207,39 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
     max-width: none;
     height: 100dvh;
     max-height: none;
-    margin: 0;
     padding: 0;
     border: 0;
-    background: var(--field);
-    color: var(--field-ink);
+    background: var(--ground);
+    color: var(--ink);
     overflow-y: auto;
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path 600ms var(--ease-in-out), display 600ms allow-discrete, overlay 600ms allow-discrete;
   }
-  .menu[open] { clip-path: inset(0 0 0 0); }
-  @starting-style { .menu[open] { clip-path: inset(0 0 100% 0); } }
-  .menu::backdrop { background: transparent; }
-  .menu__inner { display: grid; grid-template-rows: auto 1fr auto; min-height: 100%; padding-block: 0 var(--space-l); }
-  .menu__top { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); }
-  .menu .wordmark { color: var(--field-ink); }
-  .menu__close { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; padding-inline: 0.6rem; font-weight: 600; color: var(--field-ink); }
-  .menu__close-icon { rotate: 45deg; width: 1.5rem; height: 1.5rem; }
-  .menu__nav { align-self: center; padding-block: var(--space-xl); }
+  .menu::backdrop { background: var(--scrim); }
+  .menu[open] { animation: menu-in 340ms var(--ease-drawer); }
+  @keyframes menu-in { from { transform: translateY(-2%); opacity: 0; } }
+  .menu__inner { min-height: 100%; display: flex; flex-direction: column; gap: var(--s-6); padding-bottom: var(--s-7); }
+  .menu__top { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--rule); }
+  .menu__x { rotate: 45deg; }
+  .menu__nav ul { display: grid; }
+  .menu__nav li { border-bottom: 1px solid var(--rule); }
   .menu__nav a {
-    display: block;
-    padding-block: 0.1em;
-    font-family: var(--font-display);
-    font-size: clamp(2.75rem, 12vw, 6rem);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -0.045em;
-    color: var(--field-ink);
+    display: flex;
+    align-items: center;
+    min-height: 3.75rem;
+    font-size: clamp(1.75rem, 7vw, 2.75rem);
+    font-weight: 700;
+    font-stretch: 125%;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
     text-decoration: none;
-    transition: color var(--dur-fast), translate var(--dur-base) var(--ease-out);
   }
-  .menu__nav a:hover, .menu__nav a:focus-visible { color: var(--moss-200); translate: 0.15em 0; }
-  .menu__nav a[aria-current='page'] { color: var(--moss-200); }
-  .menu__nav li, .menu__foot {
-    opacity: 0;
-    translate: 0 1.5rem;
-    transition: opacity 500ms var(--ease-out), translate 700ms var(--ease-out);
-    transition-delay: calc(var(--i) * 60ms + 250ms);
+  .menu__nav a[aria-current='page'] { color: var(--accent-text); }
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] .menu__nav li { animation: menu-item 420ms var(--ease-out) both; animation-delay: calc(var(--i) * 40ms + 60ms); }
   }
-  .menu[open] .menu__nav li, .menu[open] .menu__foot { opacity: 1; translate: 0 0; }
-  @starting-style { .menu[open] .menu__nav li, .menu[open] .menu__foot { opacity: 0; translate: 0 1.5rem; } }
-  .menu__foot { display: grid; gap: var(--space-l); font-size: var(--step-0); }
-  .menu__services { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; color: var(--field-muted); }
+  @keyframes menu-item { from { opacity: 0; transform: translateY(12px); } }
+  .menu__foot { display: grid; gap: var(--s-6); margin-top: auto; }
+  .menu__services { display: grid; gap: var(--s-2); color: var(--ink-2); }
   .menu__services a { display: inline-flex; min-height: 44px; align-items: center; }
-  .menu__contact { display: grid; gap: 0.25rem; }
-  .menu__contact a.link { display: inline-flex; min-height: 44px; align-items: center; width: fit-content; }
-  .menu__contact .btn { margin-top: var(--space-s); }
-  @media (prefers-reduced-motion: reduce) {
-    .menu, .menu__nav li, .menu__foot { transition: none; }
-  }
+  .menu__contact { display: grid; gap: var(--s-2); font-weight: 600; }
+  .menu__contact a { justify-self: start; }
 </style>

@@ -1,21 +1,19 @@
 ---
 /**
- * Branded preloader. Runs once per browser session, on the first page a visitor opens.
- * Entirely CSS-driven so it finishes and gets out of the way even if JavaScript fails;
- * skipped for reduced-motion users by the inline head script.
+ * Branded preloader, once per browser session on the first page a visitor opens.
+ * The M-wave mark draws itself, the tagline rises, then the plate lifts away.
+ * CSS only, so it always finishes even if JavaScript fails; skipped under reduced motion.
  */
-const cells = Array.from({ length: 24 }, (_, i) => i);
-const lit = (i: number) => i >= 9 && i < 17;
+import Logo from './Logo.astro';
 ---
 
-<div class="preloader" aria-hidden="true" data-preloader>
+<div class="preloader" aria-hidden="true">
   <div class="preloader__inner">
-    <p class="preloader__word"><span>Akrostech</span></p>
-    <div class="preloader__band">
-      {cells.map((i) => <span class:list={['preloader__cell', { 'is-lit': lit(i) }]} style={`--i:${i}`} />)}
-    </div>
-    <p class="preloader__line"><span>Your team in India. Working your U.S. hours.</span></p>
+    <Logo wordmark={false} draw class="preloader__mark" />
+    <p class="preloader__line"><span>Offshore talent.</span></p>
+    <p class="preloader__line preloader__line--lime"><span>Onshore quality.</span></p>
   </div>
+  <span class="preloader__rule"></span>
 </div>
 
 <style>
@@ -24,50 +22,39 @@ const lit = (i: number) => i >= 9 && i < 17;
     position: fixed;
     inset: 0;
     z-index: var(--z-preloader);
-    place-items: center;
-    background: var(--moss-950);
-    color: var(--sand-100);
+    background: var(--carbon-950);
+    color: var(--carbon-50);
     pointer-events: none;
   }
   :global(html.is-preloading) .preloader {
-    display: grid;
-    animation: preloader-exit 650ms var(--ease-in-out) 650ms forwards;
+    display: block;
+    animation: lift 700ms var(--ease-in-out) 1250ms forwards;
   }
-  /* Absolutely placed at fixed coordinates so font loading can never move it (no layout shift). */
-  .preloader__inner { position: absolute; left: max(6vw, calc(50vw - 28rem)); top: 32svh; width: min(88vw, 56rem); }
-  .preloader__word {
-    overflow: hidden;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: clamp(3rem, 14vw, 10rem);
+  /* Fixed coordinates so font loading can never shift it. */
+  .preloader__inner { position: absolute; left: var(--margin); bottom: 18svh; display: grid; gap: 0.1em; }
+  .preloader :global(.preloader__mark) { font-size: clamp(2.25rem, 6vw, 4rem); margin-bottom: 0.35em; }
+  .preloader :global(.preloader__mark .logo__mark) { color: var(--lime-400); }
+  .preloader__line {
+    overflow: clip;
+    font-size: clamp(2.25rem, 1rem + 5vw, 6rem);
+    font-weight: 750;
+    font-stretch: 125%;
     line-height: 0.95;
-    letter-spacing: -0.05em;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
   }
-  .preloader__word span { display: block; animation: rise 650ms var(--ease-out) both; }
-  .preloader__band {
-    display: grid;
-    grid-template-columns: repeat(24, 1fr);
-    gap: 4px;
-    margin-block: clamp(1.25rem, 3vw, 2rem);
+  .preloader__line span { display: block; animation: rise 700ms var(--ease-out) 450ms both; }
+  .preloader__line--lime { color: var(--lime-400); }
+  .preloader__line--lime span { animation-delay: 540ms; }
+  .preloader__rule {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 6px;
+    background: var(--lime-400);
+    transform-origin: 0 50%;
+    animation: grow 1200ms var(--ease-in-out) both;
   }
-  .preloader__cell {
-    height: clamp(10px, 1.6vw, 18px);
-    background: var(--moss-800);
-    animation: cell 300ms var(--ease-out) both;
-    animation-delay: calc(var(--i) * 18ms + 60ms);
-  }
-  .preloader__cell.is-lit { animation-name: cell-lit; }
-  .preloader__line { overflow: hidden; color: var(--moss-200); font-size: var(--step-0); }
-  .preloader__line span { display: block; animation: rise 600ms var(--ease-out) 150ms both; }
-
   @keyframes rise { from { translate: 0 105%; } }
-  @keyframes cell { from { opacity: 0; scale: 1 0.2; } }
-  @keyframes cell-lit {
-    0% { opacity: 0; scale: 1 0.2; background: var(--moss-800); }
-    60% { opacity: 1; scale: 1 1; background: var(--moss-800); }
-    100% { background: var(--moss-300); }
-  }
-  @keyframes preloader-exit {
-    to { clip-path: inset(0 0 100% 0); visibility: hidden; }
-  }
+  @keyframes grow { from { scale: 0 1; } }
+  @keyframes lift { to { clip-path: inset(0 0 100% 0); visibility: hidden; } }
 </style>

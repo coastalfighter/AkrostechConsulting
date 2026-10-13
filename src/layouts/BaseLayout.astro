@@ -28,8 +28,6 @@ interface Props extends PageMeta {
   preloader?: boolean;
   /** Extra props merged into this page's WebPage node. */
   webPage?: JsonLd;
-  /** Light or dark ink for the header over the first screen. */
-  heroTone?: 'default' | 'field';
 }
 
 const {
@@ -37,7 +35,6 @@ const {
   breadcrumbs,
   preloader = true,
   webPage = {},
-  heroTone = 'default',
   ...meta
 } = Astro.props;
 
@@ -54,36 +51,35 @@ const jsonLd = graph(
 ---
 
 <!doctype html>
-<html lang="en-US" data-preloader={preloader ? 'true' : 'false'} data-hero-tone={heroTone}>
+<html lang="en-US" data-preloader={preloader ? 'true' : 'false'}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0c0a" />
     <script is:inline>
       (() => {
         const d = document.documentElement;
         try {
-          const stored = localStorage.getItem('color-scheme');
-          if (stored === 'light' || stored === 'dark') document.querySelector('meta[name="color-scheme"]').content = stored;
+          if (localStorage.getItem('ak-theme') === 'light') {
+            d.dataset.theme = 'light';
+            document.querySelector('meta[name="theme-color"]').content = '#f4f5ef';
+          }
         } catch {}
         d.classList.add('js');
-        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reduce) return;
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         d.classList.add('motion-ready');
         // Failsafe: never leave content hidden if the motion bundle fails to load.
-        setTimeout(() => { if (!window.__akMotion) d.classList.remove('motion-ready'); }, 5000);
+        setTimeout(() => { if (!window.__akMotion) d.classList.remove('motion-ready'); }, 6000);
         let first = false;
         try { first = !sessionStorage.getItem('ak-visited'); sessionStorage.setItem('ak-visited', '1'); } catch {}
         if (first && d.dataset.preloader === 'true') {
           d.classList.add('is-preloading');
-          setTimeout(() => d.classList.remove('is-preloading'), 1400);
+          setTimeout(() => d.classList.remove('is-preloading'), 2000);
         }
       })();
     </script>
-    <meta name="theme-color" content="#ddd6c6" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151611" media="(prefers-color-scheme: dark)" />
-    <link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/archivo-latin-wdth.woff2" as="font" type="font/woff2" crossorigin />
     <Seo meta={meta} schema={jsonLd} />
     <slot name="head" />
   </head>
@@ -92,17 +88,10 @@ const jsonLd = graph(
     <Preloader />
     <div class="progress" aria-hidden="true"><span class="progress__bar" data-progress></span></div>
     <Header />
-    <div class="page" data-page>
-      <main id="main" tabindex="-1">
-        <slot />
-      </main>
-    </div>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
     <Footer />
-    <div class="noise" aria-hidden="true"></div>
-    <div class="cursor" aria-hidden="true" data-cursor>
-      <span class="cursor__dot"></span>
-      <span class="cursor__ring"><span class="cursor__label" data-cursor-label></span></span>
-    </div>
     <div class="sr-only" aria-live="polite" data-announcer></div>
     <script>
       import '@/scripts/main';
@@ -111,76 +100,14 @@ const jsonLd = graph(
 </html>
 
 <style is:global>
-  .page {
-    position: relative;
-    z-index: 1;
-    background: var(--bg);
-    transition: background-color var(--dur-slow) var(--ease-in-out);
-  }
+  main { display: block; }
   main:focus { outline: none; }
-
-  .progress {
-    position: fixed;
-    inset: 0 0 auto;
-    z-index: var(--z-progress);
-    height: 3px;
-    pointer-events: none;
-  }
-  .progress__bar {
-    display: block;
-    height: 100%;
-    background: var(--accent);
-    transform-origin: 0 50%;
-    scale: 0 1;
-  }
+  .progress { position: fixed; inset: 0 0 auto; z-index: var(--z-progress); height: 2px; pointer-events: none; }
+  .progress__bar { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; scale: 0 1; }
   @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
       .progress__bar { animation: progress linear both; animation-timeline: scroll(root block); }
     }
   }
   @keyframes progress { to { scale: 1 1; } }
-
-  .cursor { display: none; }
-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    html.has-cursor .cursor {
-      display: block;
-      position: fixed;
-      inset: 0;
-      z-index: var(--z-cursor);
-      pointer-events: none;
-      mix-blend-mode: difference;
-    }
-    html.has-cursor, html.has-cursor a, html.has-cursor button { cursor: none; }
-    html.has-cursor input, html.has-cursor textarea, html.has-cursor select { cursor: auto; }
-  }
-  .cursor__dot, .cursor__ring {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: 50%;
-    will-change: transform;
-  }
-  .cursor__dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #f0ece3; }
-  .cursor__ring {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    margin: -22px 0 0 -22px;
-    border: 1.5px solid #f0ece3;
-    transition: width 300ms var(--ease-out), height 300ms var(--ease-out), margin 300ms var(--ease-out), background-color 300ms, border-color 300ms, opacity 300ms;
-  }
-  .cursor__label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: #1d1d1a;
-    opacity: 0;
-    transition: opacity 200ms;
-    white-space: nowrap;
-  }
-  html.cursor-hover .cursor__ring { width: 72px; height: 72px; margin: -36px 0 0 -36px; background: rgb(240 236 227 / 0.12); }
-  html.cursor-label .cursor__ring { width: 96px; height: 96px; margin: -48px 0 0 -48px; background: #f0ece3; border-color: transparent; }
-  html.cursor-label .cursor__label { opacity: 1; }
-  html.cursor-down .cursor__ring { scale: 0.85; }
-  html.cursor-hidden .cursor { opacity: 0; }
 </style>

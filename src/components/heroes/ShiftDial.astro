@@ -1,0 +1,215 @@
+---
+/**
+ * Home hero instrument: the live shift dial. Two 24-hour rings, the visitor's U.S. day outside
+ * and India inside. Dragging the two lime handles sets the working day; the India ring turns
+ * to the chosen time zone; the readout says whether a specialist would be on shift now.
+ * Server-rendered for 9 am to 5 pm Eastern so it reads correctly without JavaScript.
+ */
+import { US_ZONES, planShift, gapMinutes } from '@/lib/time';
+import { DAY, R, arcDash, polar, pad2 } from '@/lib/dial';
+
+const now = new Date();
+const zone = US_ZONES[0];
+const start = 9 * 60;
+const length = 8 * 60;
+const plan = planShift({ clientZone: zone.id, startHour: 9, hours: 8, now });
+const gap = gapMinutes(zone.id, now);
+const dash = arcDash(start, length);
+const startPt = polar(start, R.outer);
+const endPt = polar(start + length, R.outer);
+const ticks = Array.from({ length: 96 }, (_, i) => i * 15);
+const outerLabels = Array.from({ length: 8 }, (_, i) => i * 180);
+const innerLabels = Array.from({ length: 8 }, (_, i) => i * 3);
+const rot = -(gap / DAY) * 360;
+const gapLabel = `+${Math.floor(gap / 60)}:${pad2(gap % 60)}`;
+---
+
+<div class="dial" data-hero="dial" style={`--rot:${rot}deg`} data-start={start} data-length={length} data-zone={zone.id}>
+  <div class="dial__zones" role="group" aria-label="Your time zone">
+    {
+      US_ZONES.map((z, i) => (
+        <button type="button" class="chip dial__zone" aria-pressed={i === 0 ? 'true' : 'false'} data-zone-id={z.id} data-short={z.short}>
+          <b>{z.short}</b> {z.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="dial__face">
+    <svg class="dial__svg" viewBox="-300 -300 600 600" role="img" aria-labelledby="dial-title dial-desc">
+      <title id="dial-title">24-hour shift dial</title>
+      <desc id="dial-desc" data-dial-desc>
+        Outer ring: your U.S. working day, {plan.clientStartLabel} to {plan.clientEndLabel} {zone.short}. Inner ring: the same hours in India,
+        {plan.indiaStartLabel} to {plan.indiaEndLabel} IST.
+      </desc>
+
+      <!-- Ticks: every 15 minutes, longer each hour, longest every 3 hours -->
+      <g class="dial__ticks">
+        {
+          ticks.map((m) => {
+            const major = m % 180 === 0;
+            const hour = m % 60 === 0;
+            const a = polar(m, R.tickIn + (major ? -6 : hour ? 4 : 10));
+            const b = polar(m, R.tickOut);
+            return <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} class:list={{ 'is-hour': hour, 'is-major': major }} />;
+          })
+        }
+      </g>
+
+      <!-- Rings -->
+      <circle class="dial__track dial__track--outer" r={R.outer} />
+      <circle class="dial__track dial__track--inner" r={R.inner} />
+      <circle class="dial__arc dial__arc--outer" r={R.outer} pathLength={DAY} stroke-dasharray={dash.dasharray} stroke-dashoffset={dash.dashoffset} data-arc />
+      <circle class="dial__arc dial__arc--inner" r={R.inner} pathLength={DAY} stroke-dasharray={dash.dasharray} stroke-dashoffset={dash.dashoffset} data-arc />
+
+      <!-- Outer labels: the visitor's clock -->
+      <g class="dial__labels">
+        {
+          outerLabels.map((m) => {
+            const p = polar(m, R.outerLabel);
+            return (
+              <text x={p.x} y={p.y}>
+                {pad2(m / 60)}
+              </text>
+            );
+          })
+        }
+      </g>
+
+      <!-- Inner labels: India's clock, turned by the time-zone gap -->
+      <g class="dial__india">
+        {
+          innerLabels.map((h) => {
+            const p = polar(h * 60, R.innerLabel);
+            return (
+              <text x={p.x} y={p.y}>
+                {pad2(h)}
+              </text>
+            );
+          })
+        }
+      </g>
+
+      <!-- Now hand -->
+      <g class="dial__now" data-now>
+        <line x1="0" y1="-40" x2="0" y2={-R.tickOut} />
+        <circle cx="0" cy={-R.tickOut} r="5" />
+      </g>
+
+      <!-- Centre readout -->
+      <g class="dial__centre">
+        <text class="dial__gap" y="-4" data-gap>{gapLabel}</text>
+        <text class="dial__gap-label" y="26">India ahead of <tspan data-zone-short>{zone.short}</tspan></text>
+      </g>
+
+      <!-- Handles -->
+      <g
+        class="dial__handle"
+        transform={`translate(${startPt.x} ${startPt.y})`}
+        role="slider"
+        tabindex="0"
+        aria-label="Start of your working day"
+        aria-valuemin="0"
+        aria-valuemax="1410"
+        aria-valuenow={start}
+        aria-valuetext={plan.clientStartLabel}
+        data-handle="start"
+      >
+        <circle r="26" class="dial__hit" />
+        <circle r="17" class="dial__knob" />
+        <path d="M-6 0h12M0 -6v12" class="dial__grip" />
+      </g>
+      <g
+        class="dial__handle"
+        transform={`translate(${endPt.x} ${endPt.y})`}
+        role="slider"
+        tabindex="0"
+        aria-label="Length of your working day, in hours"
+        aria-valuemin="1"
+        aria-valuemax="12"
+        aria-valuenow={length / 60}
+        aria-valuetext={`8 hours, ending ${plan.clientEndLabel}`}
+        data-handle="end"
+      >
+        <circle r="26" class="dial__hit" />
+        <circle r="17" class="dial__knob" />
+        <path d="M-6 0h12" class="dial__grip" />
+      </g>
+    </svg>
+    <p class="dial__legend" aria-hidden="true">
+      <span><i class="dial__key dial__key--outer"></i>Your hours, outer ring</span>
+      <span><i class="dial__key dial__key--inner"></i>India, inner ring</span>
+    </p>
+  </div>
+
+  <dl class="dial__readout ruled" aria-live="polite">
+    <div class="module">
+      <dt class="label">Your day</dt>
+      <dd><span data-out="client">{plan.clientStartLabel} – {plan.clientEndLabel}</span> <span data-zone-short>{zone.short}</span></dd>
+    </div>
+    <div class="module">
+      <dt class="label">Their shift in India</dt>
+      <dd><span data-out="india">{plan.indiaStartLabel} – {plan.indiaEndLabel}</span> IST</dd>
+    </div>
+    <div class="module">
+      <dt class="label">Right now</dt>
+      <dd><span class="live is-off" data-out="status">Checking the clock…</span></dd>
+    </div>
+  </dl>
+  <p class="dial__hint small muted">Drag the lime handles, or focus one and use the arrow keys, to set your working day.</p>
+</div>
+
+<style>
+  @property --rot { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+  @property --now { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+  .dial { display: grid; gap: var(--s-5); --rot-time: 900ms; transition: --rot var(--rot-time) var(--ease-in-out), --now var(--rot-time) var(--ease-in-out); }
+  .dial__zones { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .dial__zone b { font-weight: 750; font-stretch: 112%; }
+  .dial__face { position: relative; }
+  .dial__svg { width: 100%; max-width: 34rem; margin-inline: auto; overflow: visible; touch-action: none; user-select: none; }
+  .dial__ticks line { stroke: var(--rule-strong); stroke-width: 1.5; }
+  .dial__ticks line.is-hour { stroke: var(--ink-3); stroke-width: 2; }
+  .dial__ticks line.is-major { stroke: var(--ink); stroke-width: 3; }
+  .dial__track, .dial__arc { fill: none; }
+  .dial__track--outer { stroke: var(--plate-3); stroke-width: 40; }
+  .dial__track--inner { stroke: var(--plate-2); stroke-width: 26; }
+  .dial__arc { transform: rotate(-90deg); }
+  .dial__arc--outer { stroke: var(--lime-400); stroke-width: 40; }
+  .dial__arc--inner { stroke: var(--lime-400); stroke-width: 26; opacity: 0.55; }
+  :global(:root[data-theme='light']) .dial__arc--outer, :global(:root[data-theme='light']) .dial__arc--inner { stroke: var(--lime-500); }
+  .dial__labels text, .dial__india text {
+    font-size: 17px;
+    font-weight: 650;
+    font-stretch: 112%;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .dial__india { rotate: var(--rot); transform-box: view-box; transform-origin: 0 0; }
+  .dial__india text { fill: var(--accent-text); font-size: 15px; rotate: calc(var(--rot) * -1); transform-box: fill-box; transform-origin: center; }
+  .dial__now { rotate: var(--now); transform-box: view-box; transform-origin: 0 0; }
+  .dial__now line { stroke: var(--ink); stroke-width: 2; }
+  .dial__now circle { fill: var(--ink); }
+  .dial__gap { font-size: 64px; font-weight: 750; font-stretch: 125%; text-anchor: middle; fill: var(--ink); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .dial__gap-label { font-size: 15px; font-weight: 600; text-anchor: middle; fill: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; }
+  .dial__handle { cursor: grab; outline: none; }
+  .dial__handle:active { cursor: grabbing; }
+  .dial__hit { fill: transparent; }
+  .dial__knob { fill: var(--carbon-950); stroke: var(--lime-400); stroke-width: 5; transition: r var(--t-press) var(--ease-out); }
+  .dial__grip { stroke: var(--lime-400); stroke-width: 3; }
+  .dial__handle:focus-visible .dial__knob { stroke: var(--carbon-50); stroke-width: 6; }
+  .dial__handle:focus-visible .dial__hit { stroke: var(--focus); stroke-width: 3; }
+  .dial__handle.is-dragging .dial__knob { r: 21; }
+  @media (hover: hover) and (pointer: fine) { .dial__handle:hover .dial__knob { r: 20; } }
+  .dial__legend { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-2) var(--s-5); margin-top: var(--s-3); font-size: 0.8125rem; color: var(--ink-2); }
+  .dial__key { display: inline-block; width: 1.5rem; height: 0.5rem; margin-right: 0.5rem; background: var(--lime-400); vertical-align: middle; }
+  .dial__key--inner { opacity: 0.55; height: 0.35rem; }
+  .dial__readout { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .dial__readout { grid-template-columns: repeat(3, 1fr); } }
+  .dial__readout .module { padding: var(--s-4) var(--s-5); display: grid; gap: var(--s-2); }
+  .dial__readout dt { color: var(--ink-2); }
+  .dial__readout dd { font-size: 1.0625rem; font-weight: 650; font-stretch: 112%; font-variant-numeric: tabular-nums; }
+  .dial__hint { text-align: center; }
+  :global(html:not(.js)) .dial__hint, :global(html:not(.js)) .dial__zones, :global(html:not(.js)) .dial__now { display: none; }
+</style>

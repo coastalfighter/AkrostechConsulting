@@ -1,0 +1,58 @@
+---
+/**
+ * The Akrostech identity: the lime M-wave mark (traced from the akrosstech.com logo) and the
+ * "Akrostech / CONSULTING" wordmark set in Archivo. The mark's stroke can be drawn on
+ * (preloader, 404) through the `draw` prop.
+ */
+interface Props {
+  /** Show the wordmark next to the mark. */
+  wordmark?: boolean;
+  class?: string;
+  /** Animate the stroke drawing on (CSS only). */
+  draw?: boolean;
+  /** Accessible label; omit when the logo sits inside a labelled link. */
+  label?: string;
+}
+const { wordmark = true, class: className, draw = false, label } = Astro.props;
+---
+
+<span class:list={['logo', className, { 'logo--draw': draw }]} role={label ? 'img' : undefined} aria-label={label}>
+  <svg class="logo__mark" viewBox="150 400 1270 800" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="currentColor" stroke-width="102" stroke-linecap="round" stroke-linejoin="round">
+      <path
+        class="logo__wave"
+        pathLength="1"
+        d="M213 1110 L 438 538 A 104 104 0 0 1 641 591 L 489 990 A 106 106 0 0 0 694 1050 L 873 586 Q 940 432 1004 468 A 104 104 0 0 1 1104 611 L 1001 876"
+      ></path>
+      <path class="logo__dash" pathLength="1" d="M1220 876 L 1349 550"></path>
+    </g>
+  </svg>
+  {
+    wordmark && (
+      <span class="logo__type" aria-hidden={label ? 'true' : undefined}>
+        <span class="logo__name">Akrostech</span>
+        <span class="logo__sub">Consulting</span>
+      </span>
+    )
+  }
+</span>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.6em; color: var(--ink); line-height: 1; }
+  .logo__mark { width: 2.35em; height: auto; aspect-ratio: 1270 / 800; color: var(--lime-400); flex: none; }
+  :global(:root[data-theme='light']) .logo__mark { color: var(--carbon-950); }
+  :global(.lime) .logo__mark { color: var(--carbon-950); }
+  .logo__type { display: grid; gap: 0.28em; }
+  .logo__name { font-size: 1.18em; font-weight: 750; font-stretch: 112%; letter-spacing: -0.02em; }
+  .logo__sub { font-size: 0.56em; font-weight: 600; font-stretch: 125%; letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-2); }
+
+  .logo--draw .logo__wave, .logo--draw .logo__dash { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .logo--draw .logo__wave { animation: draw 900ms var(--ease-in-out) 80ms forwards; }
+    .logo--draw .logo__dash { animation: draw 260ms var(--ease-out) 900ms forwards; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo--draw .logo__wave, .logo--draw .logo__dash { stroke-dashoffset: 0; }
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+</style>

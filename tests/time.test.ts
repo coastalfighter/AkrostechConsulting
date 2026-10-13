@@ -91,3 +91,26 @@ describe('formatting helpers', () => {
     expect(hours[9]).toBe(19);
   });
 });
+
+import { arcDash, clockLabel, polar, wrap } from '@/lib/dial';
+
+describe('shift dial geometry', () => {
+  it('puts midnight at the top and noon at the bottom', () => {
+    expect(polar(0, 100)).toEqual({ x: 0, y: -100 });
+    expect(polar(720, 100)).toEqual({ x: 0, y: 100 });
+    expect(polar(360, 100)).toEqual({ x: 100, y: 0 });
+  });
+  it('wraps minutes into one day', () => {
+    expect(wrap(-30)).toBe(1410);
+    expect(wrap(1500)).toBe(60);
+  });
+  it('builds dash values for an arc', () => {
+    expect(arcDash(540, 480)).toEqual({ dasharray: '480 960', dashoffset: '-540' });
+    expect(arcDash(1380, 2000).dasharray).toBe('1440 0');
+  });
+  it('formats clock labels', () => {
+    expect(clockLabel(0)).toBe('12:00 am');
+    expect(clockLabel(570)).toBe('9:30 am');
+    expect(clockLabel(1020)).toBe('5:00 pm');
+  });
+});

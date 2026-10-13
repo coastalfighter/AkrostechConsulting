@@ -1,154 +1,111 @@
 ---
+/**
+ * Footer: the manual's back cover. Four ruled columns (visit, services, company, contact),
+ * the tagline set large, and the legal line.
+ */
 import { site, fullAddress, mapsDirectionsUrl } from '@/config/site';
 import { services, serviceHref } from '@/data/services';
 import { locations } from '@/data/locations';
 import Icon from './Icon.astro';
+import Logo from './Logo.astro';
 
 const year = new Date().getFullYear();
 ---
 
-<footer class="footer" data-footer>
-  <div class="footer__inner wrap">
-    <div class="footer__cols">
-      <div class="footer__col">
-        <h2 class="footer__head">Visit</h2>
-        <address class="footer__address">
+<footer class="footer ink-plate">
+  <div class="wrap">
+    <div class="footer__top grid">
+      <a class="footer__logo c-4" href="/" aria-label={`${site.name}, home`}><Logo /></a>
+      <p class="footer__tag c-8">
+        <span>Offshore talent.</span>
+        <span class="accent">Onshore quality.</span>
+      </p>
+    </div>
+
+    <div class="footer__cols ruled">
+      <div class="module">
+        <h2 class="label footer__head">Visit</h2>
+        <address class="footer__text">
           {site.legalName}<br />
           {site.address.street}<br />
           {site.address.locality}, {site.address.region} {site.address.postalCode}
         </address>
-        <a class="link footer__line" href={mapsDirectionsUrl} target="_blank" rel="noopener">
-          Get directions <Icon name="arrow-up-right" class="icon footer__icon" />
-        </a>
+        <a class="more" href={mapsDirectionsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-up-right" /></a>
         <p class="footer__note">Delivery teams in {site.deliveryCountry}, working U.S. hours.</p>
       </div>
-
-      <div class="footer__col">
-        <h2 class="footer__head">Services</h2>
-        <ul role="list">
-          {
-            services.map((s) => (
-              <li>
-                <a class="link footer__line" href={serviceHref(s.slug)}>
-                  {s.name}
-                </a>
-              </li>
-            ))
-          }
+      <div class="module">
+        <h2 class="label footer__head">Services</h2>
+        <ul role="list" class="footer__list">
+          {services.map((s) => <li><a class="link link--quiet" href={serviceHref(s.slug)}>{s.name}</a></li>)}
         </ul>
       </div>
-
-      <div class="footer__col">
-        <h2 class="footer__head">Company</h2>
-        <ul role="list">
-          <li><a class="link footer__line" href="/about">About</a></li>
-          <li><a class="link footer__line" href="/work">Work</a></li>
-          <li><a class="link footer__line" href="/blog">Insights</a></li>
-          <li><a class="link footer__line" href="/contact">Contact</a></li>
-          {
-            locations.map((l) => (
-              <li>
-                <a class="link footer__line" href={`/locations/${l.slug}`}>
-                  {l.city}, {l.region}
-                </a>
-              </li>
-            ))
-          }
+      <div class="module">
+        <h2 class="label footer__head">Company</h2>
+        <ul role="list" class="footer__list">
+          <li><a class="link link--quiet" href="/about">About</a></li>
+          <li><a class="link link--quiet" href="/work">Work</a></li>
+          <li><a class="link link--quiet" href="/blog">Insights</a></li>
+          <li><a class="link link--quiet" href="/locations">Service areas</a></li>
+          {locations.map((l) => <li><a class="link link--quiet" href={`/locations/${l.slug}`}>{l.city}, {l.region}</a></li>)}
         </ul>
       </div>
-
-      <div class="footer__col">
-        <h2 class="footer__head">Talk to us</h2>
-        <ul role="list">
-          <li><a class="link footer__line" href={`tel:${site.phoneE164}`}>{site.phone}</a></li>
-          <li><a class="link footer__line" href={`mailto:${site.email}`}>{site.email}</a></li>
-          <li><a class="link footer__line" href={site.socials.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>
+      <div class="module">
+        <h2 class="label footer__head">Talk to us</h2>
+        <ul role="list" class="footer__list">
+          <li><a class="link link--quiet" href={`tel:${site.phoneE164}`}>{site.phone}</a></li>
+          <li><a class="link link--quiet" href={`mailto:${site.email}`}>{site.email}</a></li>
+          <li><a class="link link--quiet" href={site.socials.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>
         </ul>
         <p class="footer__note">{site.hoursLabel}</p>
+        <a class="btn btn--primary btn--small footer__cta" href={site.calendly} target="_blank" rel="noopener">
+          Book a call <Icon name="arrow-up-right" class="btn__arrow" />
+        </a>
       </div>
-    </div>
-
-    <div class="footer__mark" aria-hidden="true">
-      <svg viewBox="0 0 1000 200" preserveAspectRatio="xMinYMax meet">
-        <text x="0" y="178" textLength="1000" lengthAdjust="spacingAndGlyphs">Akrostech</text>
-      </svg>
     </div>
 
     <div class="footer__legal">
-      <p>© {year} {site.legalName}. All rights reserved. {fullAddress}.</p>
+      <p>© {year} {site.legalName}. {fullAddress}.</p>
       <ul role="list">
-        <li><a class="link" href="/privacy">Privacy</a></li>
-        <li><a class="link" href="/terms">Terms</a></li>
-        <li><a class="link" href="/sitemap-index.xml">Sitemap</a></li>
+        <li><a class="link link--quiet" href="/privacy">Privacy</a></li>
+        <li><a class="link link--quiet" href="/terms">Terms</a></li>
+        <li><a class="link link--quiet" href="/sitemap-index.xml">Sitemap</a></li>
       </ul>
     </div>
   </div>
 </footer>
 
 <style>
-  .footer {
-    position: relative;
-    z-index: 0;
-    background: var(--inverse);
-    color: var(--inverse-ink);
-  }
-  @media (min-width: 1024px) and (min-height: 760px) {
-    .footer { position: sticky; bottom: 0; }
-  }
-  .footer__inner {
+  .footer { padding-top: var(--s-9); padding-bottom: var(--s-6); border-top: 1px solid var(--rule); }
+  .footer__top { row-gap: var(--s-6); align-items: start; margin-bottom: var(--s-8); }
+  .footer__logo { justify-self: start; text-decoration: none; font-size: 1.1rem; }
+  .footer__tag {
     display: grid;
-    grid-template-rows: auto 1fr auto auto;
-    min-height: min(100svh, 62rem);
-    padding-block: var(--space-2xl) var(--space-m);
+    font-size: clamp(2.25rem, 1rem + 4.4vw, 5.5rem);
+    font-weight: 750;
+    font-stretch: 125%;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
   }
-  .footer__cols {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-xl) var(--gutter);
-  }
-  .footer__head {
-    font-family: var(--font-text);
-    font-size: var(--step-0);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--inverse-ink);
-    margin-bottom: var(--space-s);
-  }
-  .footer__col { font-size: var(--step-0); color: var(--inverse-muted); }
-  .footer__col ul { display: grid; gap: 0.1rem; }
-  .footer__address { font-style: normal; color: var(--inverse-ink); line-height: 1.6; margin-bottom: 0.5rem; }
-  .footer__line { display: inline-flex; align-items: center; gap: 0.4em; min-height: 44px; color: inherit; }
-  .footer__line:hover { color: var(--inverse-ink); }
-  .footer__icon { width: 0.9em; height: 0.9em; }
-  .footer__note { margin-top: var(--space-s); font-size: var(--step--1); max-width: 26ch; }
-
-  .footer__mark { align-self: end; margin-top: var(--space-2xl); color: var(--inverse-ink); }
-  .footer__mark svg { width: 100%; height: auto; overflow: visible; }
-  .footer__mark text {
-    fill: currentColor;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 228px;
-    letter-spacing: -0.05em;
-  }
-
+  .footer__cols { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .footer__cols { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .footer__cols { grid-template-columns: repeat(4, 1fr); } }
+  .footer__cols > .module { display: flex; flex-direction: column; gap: var(--s-4); align-items: flex-start; }
+  .footer__head { color: var(--ink-2); }
+  .footer__text { line-height: 1.6; }
+  .footer__list { display: grid; gap: var(--s-1); }
+  .footer__list a { display: inline-flex; min-height: 36px; align-items: center; }
+  .footer__note { font-size: var(--t-small); color: var(--ink-2); }
+  .footer__cta { margin-top: auto; }
   .footer__legal {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    gap: var(--space-xs) var(--space-l);
-    padding-top: var(--space-m);
-    font-size: var(--step--1);
-    color: var(--inverse-muted);
+    gap: var(--s-3) var(--s-6);
+    padding-top: var(--s-6);
+    font-size: 0.875rem;
+    color: var(--ink-2);
   }
-  .footer__legal ul { display: flex; gap: var(--space-m); }
-  .footer__legal a { display: inline-flex; align-items: center; min-height: 44px; }
-
-  @media (max-width: 767px) {
-    .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .footer__inner { min-height: auto; }
-  }
-  @media (max-width: 420px) {
-    .footer__cols { grid-template-columns: 1fr; }
-  }
+  .footer__legal ul { display: flex; gap: var(--s-5); }
+  .footer__legal a { display: inline-flex; min-height: 44px; align-items: center; }
 </style>

@@ -1,166 +1,159 @@
 /* ==========================================================================
-   Akrostech design tokens
-   Primitive scales → semantic roles (light-dark) → component tokens.
-   Palette: "Sand and moss". Sand is the paper of a ledger; moss is the one
-   accent, reserved for actions and live state. Ink is a warm charcoal.
+   Akrostech standards manual: design tokens
+   Brand: near-black ground, lime #C9FF4A (the M-wave mark), white ink.
+   Primitive scales → semantic roles (dark is the brand default; light is the
+   "printed manual" variant) → component tokens.
    ========================================================================== */
 
-
 :root {
-  /* ---- Primitive: sand (warm neutral) ---- */
-  --sand-50: #f8f6f1;
-  --sand-100: #f0ece3;
-  --sand-200: #e7e1d4;
-  --sand-300: #ddd6c6;
-  --sand-400: #cbc1ab;
-  --sand-500: #aea38a;
-  --sand-600: #8d836b;
-  --sand-700: #6c6553;
-  --sand-800: #4d483c;
-  --sand-900: #333028;
-  --sand-950: #1c1a15;
+  /* ---- Primitive: lime (brand) ---- */
+  --lime-50: #f8ffe6;
+  --lime-100: #effec9;
+  --lime-200: #e1fd99;
+  --lime-300: #d4fe6e;
+  --lime-400: #c9ff4a; /* brand */
+  --lime-500: #b2ec2b;
+  --lime-600: #8fc416;
+  --lime-700: #6a9410;
+  --lime-800: #4b6a0d;
+  --lime-900: #344a0b;
+  --lime-950: #1b2806;
 
-  /* ---- Primitive: moss (accent) ---- */
-  --moss-50: #f1f4ea;
-  --moss-100: #e0e8d2;
-  --moss-200: #c3d3a9;
-  --moss-300: #a2ba7c;
-  --moss-400: #819f55;
-  --moss-500: #66833f;
-  --moss-600: #4f6238;
-  --moss-700: #3f5a2a;
-  --moss-800: #2f4220;
-  --moss-900: #212e17;
-  --moss-950: #131b0d;
+  /* ---- Primitive: carbon (neutral, faintly green-warm) ---- */
+  --carbon-0: #ffffff;
+  --carbon-50: #f4f5ef;
+  --carbon-100: #e8eae2;
+  --carbon-200: #d3d6cb;
+  --carbon-300: #b5b9ab;
+  --carbon-400: #929787;
+  --carbon-500: #727767;
+  --carbon-600: #555a4c;
+  --carbon-700: #3a3e34;
+  --carbon-800: #24271f;
+  --carbon-850: #1b1e17;
+  --carbon-900: #13150f;
+  --carbon-950: #0b0c0a;
 
-  /* ---- Primitive: char (ink) ---- */
-  --char-50: #f3f3f1;
-  --char-100: #e4e4e0;
-  --char-200: #c8c8c1;
-  --char-300: #a5a59c;
-  --char-400: #7f7f76;
-  --char-500: #5f5f57;
-  --char-600: #4a4a43;
-  --char-700: #393933;
-  --char-800: #2a2a26;
-  --char-900: #1d1d1a;
-  --char-950: #121210;
+  /* ---- Primitive: signal (errors, live dots) ---- */
+  --signal-red: #ff5c45;
+  --signal-red-deep: #b5321f;
 
-  /* ---- Primitive: clay (errors only) ---- */
-  --clay-300: #e8a28f;
-  --clay-500: #b5452c;
-  --clay-700: #8a2f1b;
+  /* ---- Semantic roles: dark (brand default) ---- */
+  color-scheme: dark;
+  --ground: var(--carbon-950);
+  --plate: var(--carbon-900);
+  --plate-2: var(--carbon-850);
+  --plate-3: var(--carbon-800);
+  --ink: var(--carbon-50);
+  --ink-2: var(--carbon-300);
+  --ink-3: var(--carbon-400);
+  --rule: rgb(244 245 239 / 0.14);
+  --rule-strong: rgb(244 245 239 / 0.32);
+  --accent: var(--lime-400);
+  --accent-hover: var(--lime-300);
+  --accent-ink: var(--carbon-950);
+  --accent-text: var(--lime-400);
+  --field: var(--lime-400);
+  --field-ink: var(--carbon-950);
+  --field-ink-2: #2c3a12;
+  --field-rule: rgb(11 12 10 / 0.18);
+  --danger: var(--signal-red);
+  --focus: var(--lime-400);
+  --selection-bg: var(--lime-400);
+  --selection-ink: var(--carbon-950);
+  --scrim: rgb(11 12 10 / 0.72);
+  --photo-tint: rgb(11 12 10 / 0.18);
 
-  /* ---- Semantic colour roles ---- */
-  color-scheme: light dark;
-  --bg: light-dark(var(--sand-300), #151611);
-  --bg-raised: light-dark(var(--sand-200), #1d1f18);
-  --surface: light-dark(#d2cab8, #23261d);
-  --surface-strong: light-dark(var(--sand-400), #2c3024);
-  --ink: light-dark(var(--char-800), #ece7da);
-  --ink-strong: light-dark(var(--char-950), #faf7ef);
-  --muted: light-dark(#504e46, #b3ad9a);
-  --accent: light-dark(var(--moss-600), var(--moss-300));
-  --accent-hover: light-dark(var(--moss-700), var(--moss-200));
-  --accent-ink: light-dark(#ffffff, var(--moss-950));
-  --accent-text: light-dark(var(--moss-700), var(--moss-300));
-  --field: light-dark(var(--moss-700), #26341a);
-  --field-ink: light-dark(#ffffff, #eef3e3);
-  --field-muted: light-dark(var(--moss-100), var(--moss-200));
-  --inverse: light-dark(var(--char-900), var(--sand-200));
-  --inverse-ink: light-dark(var(--sand-200), var(--char-900));
-  --inverse-muted: light-dark(var(--sand-500), var(--char-500));
-  --inverse-accent: light-dark(var(--moss-300), var(--moss-700));
-  --danger: light-dark(var(--clay-700), var(--clay-300));
-  --line: light-dark(rgb(42 42 38 / 0.14), rgb(236 231 218 / 0.14));
-  --focus: light-dark(var(--moss-800), var(--moss-200));
-  --selection-bg: light-dark(var(--moss-700), var(--moss-300));
-  --selection-ink: light-dark(#ffffff, var(--moss-950));
-  --scrim: light-dark(rgb(221 214 198 / 0.72), rgb(21 22 17 / 0.72));
-  --glass: light-dark(rgb(232 226 213 / 0.62), rgb(29 31 24 / 0.6));
-  --glass-edge: light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08));
-  --mesh-1: light-dark(rgb(129 159 85 / 0.32), rgb(129 159 85 / 0.22));
-  --mesh-2: light-dark(rgb(203 193 171 / 0.9), rgb(63 90 42 / 0.4));
-  --mesh-3: light-dark(rgb(240 236 227 / 0.9), rgb(44 48 36 / 0.7));
+  /* ---- Typography: one grotesk, two widths ---- */
+  --font: 'Archivo', 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --wide: 125%;
+  --semi-wide: 112%;
+  --normal: 100%;
 
-  /* ---- Typography ---- */
-  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', system-ui, sans-serif;
-  --font-text: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --t-display: clamp(2.75rem, 1.25rem + 5vw, 6rem);
+  --t-h1: clamp(2.5rem, 1.1rem + 4.2vw, 5.25rem);
+  --t-h2: clamp(1.875rem, 1.1rem + 2.6vw, 3.5rem);
+  --t-h3: clamp(1.25rem, 1.02rem + 0.75vw, 1.75rem);
+  --t-lead: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);
+  --t-body: 1.0625rem;
+  --t-small: 0.9375rem;
+  --t-label: 0.8125rem;
+  --t-figure: clamp(3rem, 1.5rem + 5vw, 6rem);
 
-  /* Fluid type scale (320px → 1920px). Five working steps plus display. */
-  --step--1: clamp(0.8125rem, 0.79rem + 0.11vw, 0.9375rem); /* 13 → 15 */
-  --step-0: clamp(1rem, 0.96rem + 0.19vw, 1.1875rem); /* 16 → 19 */
-  --step-1: clamp(1.25rem, 1.13rem + 0.56vw, 1.75rem); /* 20 → 28 */
-  --step-2: clamp(1.75rem, 1.42rem + 1.63vw, 3.375rem); /* 28 → 54 */
-  --step-3: clamp(2.5rem, 1.83rem + 3.33vw, 5.5rem); /* 40 → 88 */
-  --step-display: clamp(3.5rem, 0.8rem + 12.4vw, 13rem); /* 56 → 208 */
-  --step-poster: clamp(3rem, 1rem + 9.6vw, 9.5rem);
+  --lh-display: 0.94;
+  --lh-heading: 1.02;
+  --lh-snug: 1.25;
+  --lh-text: 1.6;
+  --track-display: -0.025em;
+  --track-heading: -0.02em;
+  --track-label: 0.08em;
+  --measure: 66ch;
 
-  --leading-display: 0.88;
-  --leading-heading: 1.02;
-  --leading-snug: 1.25;
-  --leading-text: 1.55;
-  --tracking-display: -0.045em;
-  --tracking-heading: -0.03em;
-  --tracking-text: -0.006em;
-  --measure: 62ch;
-
-  /* ---- Space (4px base, fluid at the large end) ---- */
-  --space-3xs: 0.25rem;
-  --space-2xs: 0.5rem;
-  --space-xs: 0.75rem;
-  --space-s: 1rem;
-  --space-m: 1.5rem;
-  --space-l: 2rem;
-  --space-xl: clamp(2.5rem, 2rem + 2.5vw, 4rem);
-  --space-2xl: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
-  --space-3xl: clamp(5rem, 3rem + 10vw, 11rem);
-  --section-gap: clamp(6rem, 3.5rem + 10vw, 13.5rem);
-  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
-  --page-max: 1920px;
+  /* ---- Grid & space (8px base) ---- */
+  --margin: clamp(1.25rem, 0.6rem + 3vw, 4rem);
+  --gutter: clamp(1rem, 0.6rem + 1.4vw, 2rem);
+  --page-max: 1680px;
   --header-h: 4.5rem;
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: clamp(3rem, 2rem + 3vw, 4.5rem);
+  --s-9: clamp(4rem, 2.5rem + 5vw, 7rem);
+  --s-10: clamp(5.5rem, 3rem + 8vw, 10rem);
+  --module-pad: clamp(1.25rem, 0.8rem + 1.6vw, 2.5rem);
 
-  /* ---- Shape ---- */
-  --radius-0: 0;
-  --radius-s: 2px;
-  --radius-round: 999px;
+  /* ---- Shape & depth ---- */
+  --radius: 0;
+  --radius-pill: 999px;
+  --rule-w: 1px;
+  --shadow-float: 0 24px 64px -24px rgb(0 0 0 / 0.6), 0 2px 8px rgb(0 0 0 / 0.3);
+  --shadow-lift: 0 18px 40px -20px rgb(0 0 0 / 0.55);
 
-  /* ---- Elevation: only for things that float (menus, dialogs, the cursor ring) ---- */
-  --shadow-1: 0 1px 2px rgb(28 26 21 / 0.08), 0 2px 6px rgb(28 26 21 / 0.06);
-  --shadow-2: 0 4px 10px rgb(28 26 21 / 0.08), 0 12px 28px rgb(28 26 21 / 0.1);
-  --shadow-3: 0 10px 24px rgb(28 26 21 / 0.12), 0 32px 64px rgb(28 26 21 / 0.16);
-  --shadow-float: 0 24px 80px -16px rgb(19 27 13 / 0.35);
-
-  /* ---- Motion ---- */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
-  --dur-instant: 120ms;
-  --dur-fast: 200ms;
-  --dur-base: 360ms;
-  --dur-slow: 700ms;
-  --dur-slower: 1100ms;
-  --stagger: 70ms;
+  /* ---- Motion (Emil Kowalski curves) ---- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --t-press: 160ms;
+  --t-ui: 220ms;
+  --t-reveal: 900ms;
+  --stagger: 60ms;
 
   /* ---- Layers ---- */
-  --z-base: 1;
   --z-raised: 10;
   --z-header: 100;
   --z-menu: 200;
   --z-progress: 250;
-  --z-noise: 300;
   --z-cursor: 400;
   --z-preloader: 500;
 }
 
-/* The toggle writes the <meta name="color-scheme">; the cascade follows it. */
-:root:has(> head > meta[name='color-scheme'][content='dark']) { color-scheme: dark; }
-:root:has(> head > meta[name='color-scheme'][content='light']) { color-scheme: light; }
+/* "Printed manual" light variant: white paper, black ink, lime as fields only. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --ground: var(--carbon-50);
+  --plate: #ffffff;
+  --plate-2: var(--carbon-100);
+  --plate-3: var(--carbon-200);
+  --ink: var(--carbon-950);
+  --ink-2: var(--carbon-600);
+  --ink-3: var(--carbon-500);
+  --rule: rgb(11 12 10 / 0.14);
+  --rule-strong: rgb(11 12 10 / 0.34);
+  --accent: var(--carbon-950);
+  --accent-hover: var(--carbon-800);
+  --accent-ink: var(--lime-400);
+  --accent-text: var(--lime-800);
+  --danger: var(--signal-red-deep);
+  --focus: var(--carbon-950);
+  --scrim: rgb(244 245 239 / 0.78);
+  --photo-tint: rgb(244 245 239 / 0);
+}
 
 @media (prefers-contrast: more) {
-  :root {
-    --muted: light-dark(var(--char-700), var(--sand-200));
-    --line: light-dark(rgb(42 42 38 / 0.4), rgb(236 231 218 / 0.4));
-  }
+  :root { --ink-2: var(--carbon-200); --rule: rgb(244 245 239 / 0.4); }
+  :root[data-theme='light'] { --ink-2: var(--carbon-800); --rule: rgb(11 12 10 / 0.45); }
 }

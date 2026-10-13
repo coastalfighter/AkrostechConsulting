@@ -1,0 +1,72 @@
+---
+/**
+ * Photograph module. Stock photography (Unsplash License, see src/assets/photos/credits.json)
+ * served through Astro's image pipeline as AVIF + WebP srcsets with explicit dimensions.
+ * The photos show people at work in general; they are never captioned as Akrostech staff.
+ */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import credits from '@/assets/photos/credits.json';
+
+export type PhotoName = keyof typeof credits;
+
+interface Props {
+  name: PhotoName;
+  /** Defaults to the photo's catalogued description. Pass "" for a decorative photo. */
+  alt?: string;
+  sizes?: string;
+  /** Frame ratio, e.g. "4 / 5". The image covers the frame. Omit to use the photo's own ratio. */
+  ratio?: string;
+  /** CSS object-position, e.g. "30% 50%". */
+  focal?: string;
+  priority?: boolean;
+  /** Fill the parent's height instead of using a ratio. */
+  fill?: boolean;
+  mono?: boolean;
+  reveal?: 'clip' | 'fade';
+  caption?: string;
+  class?: string;
+}
+
+const {
+  name,
+  alt,
+  sizes = '(min-width: 64rem) 50vw, 100vw',
+  ratio,
+  focal,
+  priority = false,
+  fill = false,
+  mono = false,
+  reveal,
+  caption,
+  class: className,
+} = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/photos/*.jpg', { eager: true });
+const image = images[`/src/assets/photos/${name}.jpg`]?.default;
+if (!image) throw new Error(`Photo: no photograph named "${name}" in src/assets/photos.`);
+const widths = [480, 768, 1080, 1440, 1920].filter((w) => w <= image.width);
+const style = [
+  fill ? 'height:100%' : `aspect-ratio:${ratio ?? `${image.width} / ${image.height}`}`,
+  focal ? `--focal:${focal}` : '',
+]
+  .filter(Boolean)
+  .join(';');
+const altText = alt ?? credits[name].description;
+---
+
+<figure class:list={['photo', className, { 'photo--mono': mono }]} style={style} data-reveal={reveal === 'fade' ? '' : reveal}>
+  <Picture
+    src={image}
+    alt={altText}
+    formats={['avif', 'webp']}
+    fallbackFormat="jpg"
+    widths={widths}
+    sizes={sizes}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding={priority ? 'sync' : 'async'}
+    fetchpriority={priority ? 'high' : 'auto'}
+    quality={72}
+  />
+  {caption && <figcaption class="photo__caption">{caption}</figcaption>}
+</figure>

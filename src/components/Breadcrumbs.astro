@@ -13,7 +13,7 @@ const { items } = Astro.props;
       items.map((c, i) => (
         <li>
           {i < items.length - 1 ? (
-            <a class="link" href={c.path}>
+            <a class="link link--quiet" href={c.path}>
               {c.name}
             </a>
           ) : (
@@ -26,9 +26,9 @@ const { items } = Astro.props;
 </nav>
 
 <style>
-  .crumbs ol { display: flex; flex-wrap: wrap; gap: 0.25rem 0.6rem; font-size: var(--step--1); color: var(--muted); }
+  .crumbs ol { display: flex; flex-wrap: wrap; gap: 0 0.6rem; font-size: 0.875rem; font-weight: 550; color: var(--ink-2); }
   .crumbs li { display: inline-flex; align-items: center; gap: 0.6rem; }
-  .crumbs li + li::before { content: '/'; color: var(--muted); opacity: 0.6; }
+  .crumbs li + li::before { content: '/'; color: var(--ink-3); }
   .crumbs a { display: inline-flex; min-height: 44px; align-items: center; color: var(--ink); }
-  .crumbs span { display: inline-flex; min-height: 44px; align-items: center; color: var(--muted); }
+  .crumbs span { display: inline-flex; min-height: 44px; align-items: center; }
 </style>

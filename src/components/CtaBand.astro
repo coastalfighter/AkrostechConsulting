@@ -1,70 +1,67 @@
 ---
-/** The closing band: the whole field is one link, a single verb fills the width. */
+/**
+ * Closing chapter: a whole lime field. Headline across the left columns, the two contact
+ * routes on the right, and a photograph module across the seam.
+ */
 import { site } from '@/config/site';
+import Icon from './Icon.astro';
+import Photo from './Photo.astro';
+import type { PhotoName } from './Photo.astro';
 
 interface Props {
-  word?: string;
+  heading?: string;
   line?: string;
-  href?: string;
-  external?: boolean;
+  photo?: PhotoName;
+  photoAlt?: string;
 }
 
 const {
-  word = 'Talk',
-  line = 'Thirty minutes with a client partner. You leave with a shortlist plan and a monthly price.',
-  href = site.calendly,
-  external = true,
+  heading = 'Your team can start in 48 hours.',
+  line = 'Thirty minutes with a client partner. You leave with a role plan, a shortlist date and a monthly price.',
+  photo = 'handshake',
+  photoAlt,
 } = Astro.props;
 ---
 
-<section class="cta" aria-label="Book a discovery call">
-  <a class="cta__link" href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined} data-cursor-label="Book">
-    <div class="mesh cta__mesh" aria-hidden="true"></div>
-    <p class="cta__line">{line}</p>
-    <svg class="cta__arrow" viewBox="0 0 48 48" aria-hidden="true"><path d="M12 36 36 12M16 12h20v20" fill="none" stroke="currentColor" stroke-width="3"></path></svg>
-    <span class="cta__word" aria-hidden="true">{word}</span>
-    <span class="sr-only">{word} to us: book a 30-minute discovery call{external ? ' (opens in a new tab)' : ''}</span>
-  </a>
+<section class="cta lime" aria-labelledby="cta-heading">
+  <div class="wrap cta__grid grid">
+    <div class="cta__copy c-7">
+      <h2 class="cta__heading" id="cta-heading" data-split>{heading}</h2>
+      <p class="cta__line" data-reveal>{line}</p>
+      <div class="actions" data-reveal>
+        <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
+          Book a 30-minute call <Icon name="arrow-up-right" class="btn__arrow" />
+        </a>
+        <a class="btn btn--ghost" href="/contact">Send a brief <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      </div>
+      <dl class="cta__routes">
+        <div><dt class="label">Phone</dt><dd><a class="link" href={`tel:${site.phoneE164}`}>{site.phone}</a></dd></div>
+        <div><dt class="label">Email</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
+      </dl>
+    </div>
+    <div class="cta__photo c-5">
+      <Photo name={photo} alt={photoAlt} ratio="4 / 5" sizes="(min-width: 64rem) 40vw, 100vw" reveal="clip" />
+    </div>
+  </div>
 </section>
 
 <style>
-  .cta { padding: 0; }
-  .cta__link {
-    position: relative;
-    isolation: isolate;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto 1fr auto;
-    min-height: 62svh;
-    padding: clamp(1rem, 2vw, 1.5rem) var(--gutter) 0;
-    overflow: hidden;
-    background: var(--field);
-    color: var(--field-ink);
-    text-decoration: none;
-    transition: background-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+  .cta { padding-block: var(--s-9); overflow: hidden; }
+  .cta__grid { row-gap: var(--s-7); align-items: end; }
+  .cta__copy { display: grid; gap: var(--s-6); align-content: start; }
+  .cta__heading {
+    font-size: clamp(2.5rem, 1rem + 5vw, 6rem);
+    font-stretch: 125%;
+    font-weight: 750;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    max-width: 12ch;
   }
-  .cta__mesh { z-index: -1; opacity: 0.55; mix-blend-mode: soft-light; }
-  .cta__link:hover, .cta__link:focus-visible { background: var(--field-ink); color: var(--field); }
-  .cta__link:focus-visible { outline-offset: -6px; }
-  .cta__line { grid-column: 1; max-width: 34ch; font-size: var(--step-1); line-height: 1.3; letter-spacing: -0.015em; }
-  .cta__arrow { grid-column: 2; width: clamp(2rem, 4vw, 3rem); height: clamp(2rem, 4vw, 3rem); transition: translate var(--dur-slow) var(--ease-out); }
-  .cta__link:hover .cta__arrow { translate: 0.35rem -0.35rem; }
-  .cta__word {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    display: block;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(6rem, 29vw, 34rem);
-    line-height: 0.74;
-    letter-spacing: -0.07em;
-    margin-left: -0.04em;
-    transform-origin: 0 100%;
-    transition: letter-spacing var(--dur-slow) var(--ease-out);
-  }
-  .cta__link:hover .cta__word { letter-spacing: -0.05em; }
-  @media (max-width: 767px) {
-    .cta__link { min-height: 46svh; }
-    .cta__word { font-size: 30vw; }
-  }
+  .cta__line { font-size: var(--t-lead); line-height: 1.45; max-width: 40ch; color: var(--field-ink-2); }
+  .cta__routes { display: flex; flex-wrap: wrap; gap: var(--s-6); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
+  .cta__routes dd { font-size: 1.125rem; font-weight: 650; margin-top: var(--s-1); }
+  .cta__routes a { display: inline-flex; min-height: 44px; align-items: center; }
+  .cta__photo { align-self: stretch; }
+  @media (min-width: 64rem) { .cta__photo { margin-bottom: calc(var(--s-9) * -1 - 1px); } }
 </style>
