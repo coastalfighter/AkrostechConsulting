@@ -8,3 +8,4 @@ dist/
 .DS_Store
 .taste-skill/inspect/
 coverage/
+.claude/worktrees/
