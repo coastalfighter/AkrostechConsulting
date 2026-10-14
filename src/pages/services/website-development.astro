@@ -1,14 +1,16 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
-import Media from '@/components/Media.astro';
+import Hero from '@/components/Hero.astro';
+import PageBuilder from '@/components/heroes/PageBuilder.astro';
+import Photo from '@/components/Photo.astro';
+import type { PhotoName } from '@/components/Photo.astro';
+import WorkCard from '@/components/WorkCard.astro';
 import Faq from '@/components/Faq.astro';
 import CtaBand from '@/components/CtaBand.astro';
-import Carousel3D from '@/components/Carousel3D.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
 import { serviceBySlug, serviceHref, type Service } from '@/data/services';
-import { pricingTiers, techStack, webFaqs, webProcess, webSubServices } from '@/data/webdev';
+import { pricingTiers, techStack, webFaqs, webProcess, webSubServices, type WebSubService } from '@/data/webdev';
 import { work } from '@/data/work';
 import { locations } from '@/data/locations';
 import { faqSchema, serviceSchema } from '@/lib/seo';
@@ -38,430 +40,422 @@ const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
   name: 'Website development services',
   itemListElement: webSubServices.map((w) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: w.title, description: w.summary } })),
 } };
+
+/**
+ * Sub-service mosaic: ten ruled modules and four photographs placed on the 12-column grid.
+ * Performance optimisation is the lime field: it is the promise the hero instrument demonstrates.
+ */
+type Cell = { kind: 'service'; item: WebSubService; span: number; lime?: boolean; lead?: boolean } | { kind: 'photo'; name: PhotoName; span: number; tall?: boolean; focal?: string };
+const sub = (id: string) => webSubServices.find((w) => w.id === id)!;
+const mosaic: Cell[] = [
+  { kind: 'service', item: sub('custom-web-design'), span: 7, lead: true },
+  { kind: 'photo', name: 'code-laptop', span: 5, focal: '50% 60%' },
+  { kind: 'service', item: sub('ecommerce'), span: 4 },
+  { kind: 'service', item: sub('cms-development'), span: 4 },
+  { kind: 'service', item: sub('web-applications'), span: 4 },
+  { kind: 'photo', name: 'developers', span: 4, tall: true, focal: '50% 40%' },
+  { kind: 'service', item: sub('landing-pages'), span: 4 },
+  { kind: 'service', item: sub('redesign-migration'), span: 4 },
+  { kind: 'service', item: sub('pwa'), span: 4 },
+  { kind: 'service', item: sub('maintenance-support'), span: 4 },
+  { kind: 'service', item: sub('performance-optimization'), span: 5, lime: true },
+  { kind: 'service', item: sub('api-integration'), span: 4 },
+  { kind: 'photo', name: 'sticky-notes', span: 3, focal: '40% 50%' },
+];
+
+/** Process on a week ruler: Weeks 1–8, launch week, then ongoing care. */
+const COLS = 10;
+const spanOf = (when: string): [number, number] => {
+  const m = when.match(/Weeks?\s+(\d+)(?:\s*[–-]\s*(\d+))?/);
+  if (m) return [Number(m[1]), Number(m[2] ?? m[1])];
+  if (/launch/i.test(when)) return [9, 9];
+  return [10, 10];
+};
+const ruler = [...Array.from({ length: 8 }, (_, i) => `W${i + 1}`), 'Launch', 'Ongoing'];
 ---
 
-<BaseLayout {...s.meta} path={path} heroTone="field" image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(webFaqs)]}>
-  <PageHero title={s.headline} lede="Custom websites, online stores and web applications, designed and built by a senior team in India that works your U.S. hours. Fast, accessible, built to rank, and yours to keep." crumbs={crumbs} tone="field">
-    <Fragment slot="actions">
-      <a class="btn btn--light" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
-        <span class="btn__label">Start a project <Icon name="arrow-up-right" class="btn__arrow" /></span>
+<BaseLayout {...s.meta} path={path} image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(webFaqs)]}>
+  <Hero labelledby="wd-title" split="5-7" crumbs={crumbs}>
+    <h1 class="h1 hero__title" id="wd-title">{s.headline[0]} <span class="accent">{s.headline[1]}</span></h1>
+    <p class="hero__lead">
+      Custom websites, online stores and web applications, designed and built by a senior team in India that works your U.S. hours. Fast, accessible, built
+      to rank, and yours to keep.
+    </p>
+    <div class="actions">
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
+        Start a project <Icon name="arrow-up-right" class="btn__arrow" />
       </a>
-      <a class="btn btn--ghost wd-ghost" href="#pricing"><span class="btn__label">See pricing</span></a>
-    </Fragment>
-    <dl class="wd-facts" data-reveal-group>
-      <div data-reveal><dt>Discovery</dt><dd>{s.startsIn}</dd></div>
-      <div data-reveal><dt>From</dt><dd>{usd(pricingTiers[0]!.from)}</dd></div>
-      <div data-reveal><dt>Typical saving</dt><dd>{s.saving}</dd></div>
-      <div data-reveal><dt>Ownership</dt><dd>100% yours</dd></div>
-    </dl>
-  </PageHero>
-
-  <!-- Intro with art -->
-  <section class="wd-intro wrap section" aria-labelledby="wd-intro-title">
-    <div class="wd-intro__text">
-      <h2 class="h1" id="wd-intro-title" data-split>Found first. Chosen second.</h2>
-      <p class="wd-intro__lede" data-reveal>{s.intro}</p>
-      <p data-reveal>
-        Every build starts from your sales conversation: what buyers ask, what convinces them and what they need to see before they call. Then we
-        engineer for speed, accessibility and search from the first line of code, not as a clean-up before launch.
-      </p>
+      <a class="btn btn--ghost" href="#pricing">See pricing <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
     </div>
-    <div class="wd-intro__art" data-perspective>
-      <Media id="service-website-development" alt="Illustration of a fast website layout in a browser window" sizes="(min-width: 1024px) 50vw, 100vw" widths={[640, 960, 1280, 1600]} wipe="left" />
+    <PageBuilder slot="instrument" />
+
+    <div slot="strip" class="wd-strip ruled">
+      <div class="module module--flex lime wd-strip__lime">
+        <p class="label">From</p>
+        <p class="figure">{usd(pricingTiers[0]!.from)}</p>
+        <p class="wd-strip__text">A focused five-page site, fixed in writing after discovery.</p>
+      </div>
+      <div class="wd-strip__photo">
+        <Photo name="code-desk" alt="" fill sizes="(min-width: 64rem) 34vw, 100vw" focal="50% 55%" />
+      </div>
+      <dl class="module wd-strip__facts">
+        <div><dt class="label">Discovery</dt><dd>{s.startsIn}</dd></div>
+        <div><dt class="label">Typical saving</dt><dd>{s.saving}</dd></div>
+        <div><dt class="label">Ownership</dt><dd>100% yours: code, hosting, domain</dd></div>
+      </dl>
+    </div>
+  </Hero>
+
+  <!-- Intro: the two jobs of a business website -->
+  <section class="section wd-intro" aria-labelledby="wd-intro-title">
+    <div class="wrap grid wd-intro__grid">
+      <h2 class="wd-intro__title c-6" id="wd-intro-title" data-split>Found first. Chosen second.</h2>
+      <div class="wd-intro__copy c-5 s-8">
+        <p class="wd-intro__lede" data-reveal>{s.intro}</p>
+        <p class="muted" data-reveal>
+          Every build starts from your sales conversation: what buyers ask, what convinces them and what they need to see before they call. Then we engineer for
+          speed, accessibility and search from the first line of code, not as a clean-up before launch.
+        </p>
+        <dl class="spec" data-reveal>
+          <div><dt>Built for</dt><dd>{s.audience}</dd></div>
+          <div><dt>Starts with</dt><dd>{s.startsIn}, ending in a fixed price</dd></div>
+          <div><dt>Where</dt><dd>{s.geo}</dd></div>
+        </dl>
+      </div>
     </div>
   </section>
 
-  <!-- Sub-services: accessible tabs -->
-  <section class="wd-tabs section" aria-labelledby="wd-services-title">
+  <!-- Sub-services: ten ruled modules and four photographs -->
+  <section class="section section--flush-top" aria-labelledby="wd-services-title">
     <div class="wrap">
-      <h2 class="h1 wd-tabs__title" id="wd-services-title" data-split>Ten ways we build.</h2>
-      <div class="wd-tabs__ui" data-tabs>
-        <div class="wd-tabs__list" role="tablist" aria-label="Website development services" aria-orientation="vertical">
-          {
-            webSubServices.map((w, i) => (
-              <button
-                class="wd-tabs__tab"
-                role="tab"
-                type="button"
-                id={`tab-${w.id}`}
-                aria-controls={`panel-${w.id}`}
-                aria-selected={i === 0 ? 'true' : 'false'}
-                tabindex={i === 0 ? 0 : -1}
-              >
-                <span>{w.title}</span>
-                <Icon name="arrow-right" class="icon wd-tabs__arrow" />
-              </button>
-            ))
-          }
-        </div>
-        <div class="wd-tabs__panels">
-          {
-            webSubServices.map((w, i) => (
-              <div class="wd-tabs__panel" role="tabpanel" id={`panel-${w.id}`} aria-labelledby={`tab-${w.id}`} hidden={i === 0 ? undefined : 'until-found'} tabindex="0">
-                <div class="wd-tabs__inner">
-                  <h3 class="wd-tabs__name">{w.title}</h3>
-                  <p class="wd-tabs__summary">{w.summary}</p>
-                  <p class="wd-tabs__body">{w.body}</p>
-                  <div class="wd-tabs__cols">
-                    <div>
-                      <p class="wd-tabs__label">You get</p>
-                      <ul role="list" class="wd-tabs__deliver">
-                        {w.deliverables.map((d) => (
-                          <li>
-                            <Icon name="check" class="icon wd-tabs__check" />
-                            {d}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <p class="wd-tabs__label">Typical stack</p>
-                      <ul role="list" class="wd-tabs__stack">
-                        {w.stack.map((t) => (
-                          <li>{t}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          }
-        </div>
+      <div class="section-head grid">
+        <h2 class="h2" id="wd-services-title" data-split>Ten ways we build.</h2>
+        <p data-reveal>From a single landing page to a client portal. Each one ships with the same standards: accessible, measured, documented and yours.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- Tech stack: horizontal showcase -->
-  <section class="stack" aria-labelledby="stack-title" data-hscroll>
-    <div class="stack__inner">
-      <div class="wrap stack__head">
-        <h2 class="h1" id="stack-title" data-split>The stack, chosen per project.</h2>
-        <p data-reveal>No single platform is right for every business. We pick the one your team can run, then build it properly.</p>
-      </div>
-      <ul class="stack__track" role="list" data-hscroll-track>
+      <ul class="mosaic ruled" role="list">
         {
-          techStack.map((g, gi) => (
-            <li class="stack__group" style={`--g:${gi}`}>
-              <h3 class="stack__name">{g.group}</h3>
-              <ul role="list" class="stack__items">
-                {g.items.map((t) => (
-                  <li>{t}</li>
-                ))}
-              </ul>
-            </li>
-          ))
+          mosaic.map((cell) =>
+            cell.kind === 'photo' ? (
+              <li class:list={['mosaic__photo', { 'mosaic__photo--tall': cell.tall }]} style={`--span:${cell.span}`} aria-hidden="true">
+                <Photo name={cell.name} alt="" fill sizes="(min-width: 64rem) 40vw, 100vw" focal={cell.focal} reveal="clip" />
+              </li>
+            ) : (
+              <li class:list={['module module--flex sub', { lime: cell.lime, 'sub--lead': cell.lead }]} style={`--span:${cell.span}`} id={cell.item.id}>
+                <h3 class="sub__title">{cell.item.title}</h3>
+                <p class="sub__summary">{cell.item.summary}</p>
+                <p class="sub__body">{cell.item.body}</p>
+                <div class="sub__foot">
+                  <p class="label sub__key">You get</p>
+                  <ul class="ticks sub__ticks" role="list">
+                    {cell.item.deliverables.map((d) => (
+                      <li>{d}</li>
+                    ))}
+                  </ul>
+                  <p class="sub__stack">
+                    <span class="label sub__key">Typical stack</span>
+                    {cell.item.stack.join(' · ')}
+                  </p>
+                </div>
+              </li>
+            ),
+          )
         }
       </ul>
     </div>
   </section>
 
-  <!-- Process -->
-  <section class="wd-process wrap section" aria-labelledby="wd-process-title" data-timeline>
-    <div class="wd-process__head">
-      <h2 class="h1" id="wd-process-title" data-split>Six steps, no surprises.</h2>
-      <p data-reveal>A staging link every week, so you see the site take shape and can steer it while it is cheap to change.</p>
-    </div>
-    <div class="wd-process__track">
-      <div class="wd-process__rail" aria-hidden="true"><span data-timeline-line></span></div>
-      <ol class="wd-process__list" role="list">
+  <!-- Tech stack -->
+  <section class="section plate" aria-labelledby="stack-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="stack-title" data-split>The stack, chosen per project.</h2>
+        <p data-reveal>No single platform is right for every business. We pick the one your team can run, then build it properly.</p>
+      </div>
+      <div class="stack ruled ruled--plate" data-reveal-group>
         {
-          webProcess.map((p) => (
-            <li class="wd-process__item" data-timeline-step>
-              <p class="wd-process__when">{p.when}</p>
-              <div>
-                <h3 class="wd-process__name">{p.title}</h3>
-                <p class="wd-process__body">{p.body}</p>
-              </div>
-            </li>
+          techStack.map((g) => (
+            <div class="module stack__group" data-reveal>
+              <h3 class="label stack__name">{g.group}</h3>
+              <ul class="stack__items" role="list">
+                {g.items.map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
+            </div>
           ))
         }
-      </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process on a week ruler -->
+  <section class="section" aria-labelledby="wd-process-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="wd-process-title" data-split>Six steps, no surprises.</h2>
+        <p data-reveal>A staging link every week, so you see the site take shape and can steer it while it is cheap to change.</p>
+      </div>
+      <div class="gantt" style={`--cols:${COLS}`}>
+        <div class="gantt__ruler" aria-hidden="true">
+          <span class="gantt__corner label">Step</span>
+          <span class="gantt__weeks">{ruler.map((r) => <span class="label">{r}</span>)}</span>
+        </div>
+        <ol class="gantt__rows" role="list" data-reveal-group>
+          {
+            webProcess.map((p) => {
+              const [a, b] = spanOf(p.when);
+              return (
+                <li class="gantt__row" data-reveal>
+                  <div class="gantt__step">
+                    <p class="label gantt__when">{p.when}</p>
+                    <h3 class="gantt__name">{p.title}</h3>
+                    <p class="gantt__body">{p.body}</p>
+                  </div>
+                  <div class="gantt__track" aria-hidden="true">
+                    <span class:list={['gantt__bar', { 'is-build': p.title === 'Build', 'is-open': b === COLS }]} style={`grid-column:${a} / ${b + 1}`} data-reveal="rule" />
+                  </div>
+                </li>
+              );
+            })
+          }
+        </ol>
+      </div>
     </div>
   </section>
 
   <!-- Portfolio (blueprints) -->
-  <section class="wd-work wrap section" aria-labelledby="wd-work-title">
-    <div class="wd-work__head">
-      <h2 class="h1" id="wd-work-title" data-split>Builds, planned in detail.</h2>
-      <a class="arrow-link" href="/work?service=website-development">All web blueprints <Icon name="arrow-up-right" /></a>
+  <section class="section section--flush-top" aria-labelledby="wd-work-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="wd-work-title" data-split>Builds, planned in detail.</h2>
+        <p data-reveal>Engagement blueprints for web projects: how we would scope, staff and launch them. Plans, not invented case studies.</p>
+      </div>
+      <div class="cards grid" data-reveal-group>
+        {builds.map((w) => <div class="c-4" data-reveal><WorkCard item={w} /></div>)}
+      </div>
+      <a class="more section-more" href="/work?service=website-development">All web blueprints <Icon name="arrow-right" /></a>
     </div>
-    <ul class="wd-work__grid" role="list">
-      {
-        builds.map((w, i) => (
-          <li class:list={['wd-work__item', { 'wd-work__item--wide': i === 0 }]}>
-            <a class="wd-card" href={`/work/${w.slug}`} data-cursor-label="View">
-              <Media id={`work-${w.slug}-wide`} alt={`Illustration for ${w.title}`} ratio={i === 0 ? '16 / 9' : '4 / 3'} wipe={i % 2 ? 'up' : 'left'} sizes="(min-width: 1024px) 60vw, 92vw" widths={[480, 800, 1200, 1600]} />
-              <p class="wd-card__meta">
-                {w.industry} · {w.duration}
-              </p>
-              <h3 class="wd-card__title">{w.title}</h3>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
   </section>
 
   <!-- Pricing -->
-  <section class="pricing section" id="pricing" aria-labelledby="pricing-title">
+  <section class="section plate" id="pricing" aria-labelledby="pricing-title">
     <div class="wrap">
-      <div class="pricing__head">
-        <h2 class="h1" id="pricing-title" data-split>Clear starting prices.</h2>
+      <div class="section-head grid">
+        <h2 class="h2" id="pricing-title" data-split>Clear starting prices.</h2>
         <p data-reveal>Your fixed price is set at the end of discovery, in writing. Hosting, platform fees and third-party licences are billed at cost.</p>
       </div>
-      <ul class="pricing__grid" role="list" data-reveal-group>
+      <ul class="tiers ruled ruled--plate" role="list" data-reveal-group>
         {
           pricingTiers.map((t) => (
-            <li class:list={['tier', { 'tier--featured': t.featured }]} data-reveal data-tilt="4">
-              <h3 class="tier__name">{t.name}</h3>
+            <li class:list={['module module--flex tier', { lime: t.featured }]} data-reveal>
+              <div class="tier__head">
+                <h3 class="tier__name">{t.name}</h3>
+                {t.featured && <span class="tier__flag">Most chosen scope</span>}
+              </div>
               <p class="tier__price">
-                <span class="tier__from">from</span> {usd(t.from)}
+                <span class="label tier__from">From</span>
+                <span class="figure tier__figure">{usd(t.from)}</span>
               </p>
-              <p class="tier__time">{t.timeline}</p>
-              <p class="tier__best">{t.bestFor}</p>
-              <ul role="list" class="tier__list">
+              <dl class="tier__facts">
+                <div><dt class="label">Timeline</dt><dd>{t.timeline}</dd></div>
+                <div><dt class="label">Best for</dt><dd>{t.bestFor}</dd></div>
+              </dl>
+              <ul class="ticks tier__list" role="list">
                 {t.includes.map((inc) => (
-                  <li>
-                    <Icon name="check" class="icon tier__check" />
-                    {inc}
-                  </li>
+                  <li>{inc}</li>
                 ))}
               </ul>
-              <a class:list={['btn', 'btn--block', t.featured ? 'btn--light' : 'btn--ink']} href={site.calendly} target="_blank" rel="noopener">
-                <span class="btn__label">
-                  Discuss {t.name} <Icon name="arrow-up-right" class="btn__arrow" />
-                </span>
+              <a class:list={['btn btn--block tier__cta', t.featured ? 'btn--primary' : 'btn--ghost']} href={site.calendly} target="_blank" rel="noopener">
+                Discuss {t.name} <Icon name="arrow-up-right" class="btn__arrow" />
               </a>
             </li>
           ))
         }
       </ul>
-      <p class="pricing__care">
+      <p class="tiers__care">
         <strong>Care plans</strong> for updates, backups, monitoring and monthly change hours are quoted with your build.
       </p>
     </div>
   </section>
 
-  <!-- Build promises carousel -->
-  <section class="wd-promises section" aria-labelledby="wd-promises-title">
-    <div class="wrap wd-promises__head">
-      <h2 class="h1" id="wd-promises-title" data-split>What every build includes.</h2>
-    </div>
-    <div class="wrap" data-perspective>
-      <Carousel3D slides={promises} label="What every website build includes" />
+  <!-- What every build includes -->
+  <section class="section" aria-labelledby="wd-promises-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="wd-promises-title" data-split>What every build includes.</h2>
+        <p data-reveal>Six commitments in every website engagement letter, from a landing page to a portal.</p>
+      </div>
+      <ul class="promises ruled" role="list" data-reveal-group>
+        {
+          promises.map((p) => (
+            <li class="module module--flex promise" data-reveal>
+              <p class="promise__figure">{p.figure}</p>
+              <h3 class="promise__title">{p.title}</h3>
+              <p class="promise__body">{p.body}</p>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
   <Faq faqs={webFaqs} name="web" heading="Website questions" intro="Cost, timelines, platforms and SEO, answered plainly." />
 
-  <section class="wrap section related" aria-labelledby="wd-related-title">
-    <h2 class="h2" id="wd-related-title" data-split>Pair it with a team.</h2>
-    <p class="related__text" data-reveal>
-      Many web clients add a <a class="link link--static" href={serviceHref('virtual-assistance')}>virtual assistant</a> to keep content and listings
-      current after launch. {s.geo} See{' '}
-      {
-        locations.map((l, i) => (
-          <>
-            <a class="link link--static" href={`/locations/${l.slug}`}>
-              web design in {l.city}
-            </a>
-            {i < locations.length - 1 ? ', ' : '.'}
-          </>
-        ))
-      }
-    </p>
-    <ul class="related__list" role="list">
-      {
-        related.map((r) => (
-          <li>
-            <a class="arrow-link" href={serviceHref(r.slug)}>
-              {r.name} <Icon name="arrow-up-right" />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+  <section class="section section--flush-top" aria-labelledby="wd-related-title">
+    <div class="wrap grid related">
+      <div class="related__copy c-6">
+        <h2 class="h2" id="wd-related-title" data-split>Pair it with a team.</h2>
+        <p class="related__text" data-reveal>
+          Many web clients add a <a class="link" href={serviceHref('virtual-assistance')}>virtual assistant</a> to keep content and listings current after launch.
+          {s.geo} See{' '}
+          {
+            locations.map((l, i) => (
+              <>
+                <a class="link" href={`/locations/${l.slug}`}>web design in {l.city}</a>{i < locations.length - 1 ? ', ' : '.'}
+              </>
+            ))
+          }
+        </p>
+      </div>
+      <ul class="related__list c-5 s-8" role="list">
+        {
+          related.map((r) => (
+            <li>
+              <a class="related__link" href={serviceHref(r.slug)}>
+                <span class="related__name">{r.name}</span>
+                <span class="related__summary">{r.summary}</span>
+                <Icon name="arrow-up-right" class="icon related__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
 
-  <CtaBand word="Build" line="Thirty minutes to talk through your site. You leave knowing which tier fits and what discovery will cover." />
+  <CtaBand
+    heading="Scope your site in one week."
+    line="Thirty minutes to talk through your site. You leave knowing which tier fits and what discovery will cover."
+    photo="pair-at-laptop"
+  />
 </BaseLayout>
 
-<script>
-  // Accessible vertical tabs with roving tabindex and Find-in-page support.
-  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
-    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
-    const panels = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
-    const select = (i: number, focus = true) => {
-      tabs.forEach((t, j) => {
-        const on = i === j;
-        t.setAttribute('aria-selected', String(on));
-        t.tabIndex = on ? 0 : -1;
-        const panel = panels[j];
-        if (!panel) return;
-        if (on) panel.removeAttribute('hidden');
-        else panel.setAttribute('hidden', 'until-found');
-      });
-      if (focus) tabs[i]?.focus();
-    };
-    tabs.forEach((t, i) => {
-      t.addEventListener('click', () => select(i, false));
-      t.addEventListener('keydown', (e) => {
-        const keys: Record<string, number> = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 };
-        if (!(e.key in keys)) return;
-        e.preventDefault();
-        select((keys[e.key]! + tabs.length) % tabs.length);
-      });
-    });
-    root.addEventListener('beforematch', (e) => {
-      const i = panels.indexOf(e.target as HTMLElement);
-      if (i >= 0) select(i, false);
-    });
-  });
-</script>
-
 <style>
-  .wd-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); padding-top: var(--space-l); }
-  .wd-facts dt { font-size: var(--step--1); color: var(--field-muted); }
-  .wd-facts dd { font-weight: 600; }
-  .wd-ghost { --btn-ink: var(--field-ink); }
-  .wd-ghost:hover { --btn-bg: var(--field-ink); --btn-ink: var(--field); }
-  @media (max-width: 767px) { .wd-facts { grid-template-columns: 1fr 1fr; } }
+  /* ---- Hero strip ---- */
+  .wd-strip { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .wd-strip { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .wd-strip { grid-template-columns: 3fr 4fr 5fr; } }
+  .wd-strip__lime { gap: var(--s-3); min-height: 11rem; }
+  .wd-strip__lime .figure { font-size: clamp(2.75rem, 1.6rem + 2.4vw, 4rem); white-space: nowrap; }
+  .wd-strip__text { margin-top: auto; max-width: 28ch; font-weight: 550; }
+  .wd-strip__photo { min-height: 13rem; }
+  .wd-strip__facts { display: grid; align-content: center; }
+  .wd-strip__facts div { display: grid; grid-template-columns: 9rem 1fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
+  .wd-strip__facts div:last-child { border-bottom: 0; }
+  .wd-strip__facts dt { color: var(--ink-2); padding-top: 0.2rem; }
+  .wd-strip__facts dd { font-weight: 650; font-stretch: 112%; }
+  @media (min-width: 40rem) and (max-width: 63.99rem) { .wd-strip__facts { grid-column: 1 / -1; } }
+  @media (max-width: 30rem) { .wd-strip__facts div { grid-template-columns: 1fr; gap: var(--s-1); } }
 
-  .wd-intro { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--space-2xl) var(--gutter); align-items: center; }
-  .wd-intro__text { display: grid; gap: var(--space-m); }
-  .wd-intro__lede { font-family: var(--font-display); font-size: var(--step-1); font-weight: 500; line-height: 1.3; letter-spacing: -0.02em; color: var(--ink-strong); max-width: 34ch; }
-  .wd-intro__text p:last-child { max-width: 52ch; }
-  @media (max-width: 1023px) { .wd-intro { grid-template-columns: 1fr; } }
+  /* ---- Intro ---- */
+  .wd-intro__grid { row-gap: var(--s-6); align-items: start; }
+  .wd-intro__title { font-size: var(--t-display); font-stretch: 125%; line-height: var(--lh-display); letter-spacing: var(--track-display); text-transform: uppercase; }
+  .wd-intro__copy { display: grid; gap: var(--s-5); }
+  .wd-intro__lede { font-size: var(--t-lead); line-height: 1.45; font-weight: 500; }
 
-  .wd-tabs { background: var(--inverse); color: var(--inverse-ink); }
-  .wd-tabs__title { color: var(--inverse-ink); margin-bottom: var(--space-2xl); }
-  .wd-tabs__ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--gutter); align-items: start; }
-  .wd-tabs__list { display: grid; }
-  .wd-tabs__tab {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-s);
-    min-height: 3.5rem;
-    padding: 0.85rem 1rem;
-    text-align: left;
-    font-family: var(--font-display);
-    font-size: var(--step-1);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--inverse-muted);
-    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.08);
-    transition: color var(--dur-fast), background-color var(--dur-fast), padding var(--dur-base) var(--ease-out);
+  /* ---- Mosaic ---- */
+  .mosaic { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) {
+    .mosaic { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .mosaic > li { grid-column: span var(--span); }
+    .mosaic__photo--tall { grid-row: span 2; }
   }
-  .wd-tabs__tab:hover { color: var(--inverse-ink); padding-left: 1.4rem; }
-  .wd-tabs__tab[aria-selected='true'] { background: var(--moss-300); color: var(--moss-950); padding-left: 1.4rem; }
-  .wd-tabs__tab:focus-visible { outline-offset: -3px; }
-  .wd-tabs__arrow { opacity: 0; translate: -0.5rem 0; transition: opacity var(--dur-fast), translate var(--dur-base) var(--ease-out); }
-  .wd-tabs__tab[aria-selected='true'] .wd-tabs__arrow, .wd-tabs__tab:hover .wd-tabs__arrow { opacity: 1; translate: 0 0; }
-  .wd-tabs__panels { position: sticky; top: calc(var(--header-h) + 2rem); }
-  .wd-tabs__inner { padding: clamp(1.5rem, 3vw, 2.75rem); background: light-dark(#262622, #cfc8b6); }
-  .wd-tabs__panel:focus-visible { outline-offset: 4px; }
-  .wd-tabs__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1; letter-spacing: -0.04em; }
-  .wd-tabs__summary { margin-top: var(--space-s); font-size: var(--step-1); color: var(--inverse-accent); line-height: 1.3; }
-  .wd-tabs__body { margin-top: var(--space-m); max-width: 56ch; color: var(--inverse-ink); }
-  .wd-tabs__cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); margin-top: var(--space-xl); }
-  .wd-tabs__label { font-family: var(--font-text); font-size: var(--step--1); font-weight: 600; color: var(--inverse-muted); margin-bottom: var(--space-xs); }
-  .wd-tabs__deliver { display: grid; gap: 0.6rem; }
-  .wd-tabs__deliver li { display: flex; gap: 0.5rem; }
-  .wd-tabs__check { color: var(--inverse-accent); margin-top: 0.15em; }
-  .wd-tabs__stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-  .wd-tabs__stack li { padding: 0.35rem 0.7rem; background: light-dark(rgb(255 255 255 / 0.07), rgb(0 0 0 / 0.07)); font-size: var(--step--1); }
-  @media (max-width: 1023px) {
-    .wd-tabs__ui { grid-template-columns: 1fr; }
-    .wd-tabs__panels { position: static; }
-  }
-  @media (max-width: 599px) { .wd-tabs__cols { grid-template-columns: 1fr; } }
+  .mosaic__photo { min-height: 16rem; }
+  @media (min-width: 40rem) and (max-width: 63.99rem) { .sub--lead { grid-column: 1 / -1; } }
+  .sub { gap: var(--s-3); }
+  @media (min-width: 64rem) { .sub { min-height: 26rem; } }
+  .sub__title { font-size: 1.3125rem; font-stretch: 112%; line-height: 1.2; letter-spacing: -0.01em; }
+  .sub--lead .sub__title { font-size: var(--t-h3); font-stretch: 125%; }
+  .sub__summary { font-weight: 600; line-height: 1.4; }
+  .sub--lead .sub__summary { font-size: var(--t-lead); }
+  .sub__body { color: var(--ink-2); font-size: var(--t-small); }
+  .sub__foot { margin-top: auto; padding-top: var(--s-5); display: grid; gap: var(--s-3); }
+  .sub__key { color: var(--ink-2); }
+  .sub__ticks { font-size: var(--t-small); gap: var(--s-2); }
+  @media (min-width: 40rem) { .sub--lead .sub__ticks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .sub__stack { display: grid; gap: var(--s-1); padding-top: var(--s-3); border-top: 1px solid var(--rule); font-size: var(--t-small); font-weight: 600; }
 
-  .stack { background: var(--surface); padding-block: var(--space-3xl); overflow: clip; }
-  .stack__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
-  .stack__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; }
-  .stack__head h2 { grid-column: 1 / span 7; }
-  .stack__head p { grid-column: 9 / -1; }
-  .stack__track { min-width: 0; display: flex; gap: var(--gutter); padding-inline: var(--gutter); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-  .stack__track::-webkit-scrollbar { display: none; }
-  .stack__group {
-    flex: 0 0 min(80vw, 26rem);
-    min-height: 24rem;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    gap: var(--space-l);
-    padding: clamp(1.5rem, 2.5vw, 2.25rem);
-    background: var(--bg-raised);
-    scroll-snap-align: start;
-  }
-  .stack__group:nth-child(odd) { background: var(--inverse); color: var(--inverse-ink); }
-  .stack__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
-  .stack__items { display: grid; align-content: end; gap: 0.25rem; font-family: var(--font-display); font-size: var(--step-1); font-weight: 500; letter-spacing: -0.02em; }
-  @media (min-width: 1024px) {
-    :global(html.motion-ready) .stack { min-height: 100svh; display: grid; align-items: center; }
-    :global(html.motion-ready) .stack__track { overflow: visible; scroll-snap-type: none; }
-    .stack__group { flex-basis: clamp(22rem, 30vw, 30rem); }
-  }
-  @media (max-width: 1023px) { .stack__head h2, .stack__head p { grid-column: 1 / -1; } }
+  /* ---- Stack ---- */
+  .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 40rem) { .stack { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) { .stack { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .stack__group { display: grid; gap: var(--s-4); align-content: start; }
+  .stack__name { color: var(--accent-text); }
+  .stack__items li { padding-block: var(--s-2); border-top: 1px solid var(--rule); font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); font-weight: 650; font-stretch: 112%; }
 
-  .wd-process { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-2xl) var(--gutter); }
-  .wd-process__head { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; display: grid; gap: var(--space-m); }
-  .wd-process__head p { max-width: 40ch; }
-  .wd-process__track { position: relative; padding-left: clamp(1.5rem, 3vw, 3rem); }
-  .wd-process__rail { position: absolute; left: 0; top: 0.5rem; bottom: 0.5rem; width: 3px; background: var(--surface-strong); }
-  .wd-process__rail span { display: block; width: 100%; height: 100%; background: var(--accent); transform-origin: 50% 0; }
-  .wd-process__list { display: grid; gap: var(--space-xl); }
-  .wd-process__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); transition: translate 500ms var(--ease-out); }
-  .wd-process__item:global(.is-active) { translate: 0.5rem 0; }
-  .wd-process__when { font-weight: 600; color: var(--accent-text); }
-  .wd-process__name { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1; letter-spacing: -0.04em; color: var(--ink-strong); }
-  .wd-process__body { margin-top: 0.5rem; max-width: 46ch; }
-  @media (max-width: 1023px) {
-    .wd-process { grid-template-columns: 1fr; }
-    .wd-process__head { position: static; }
-    .wd-process__item { grid-template-columns: 1fr; gap: 0.25rem; }
+  /* ---- Gantt ---- */
+  .gantt { --label: 1fr; border-top: 1px solid var(--rule-strong); }
+  @media (min-width: 64rem) { .gantt { --label: minmax(0, 4fr); } }
+  .gantt__ruler, .gantt__row { display: grid; grid-template-columns: var(--label) minmax(0, 8fr); column-gap: var(--gutter); }
+  .gantt__ruler { padding-block: var(--s-3); border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+  .gantt__weeks, .gantt__track { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+  .gantt__weeks span { padding-left: 0.35rem; border-left: 1px solid var(--rule); font-size: 0.6875rem; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+  .gantt__row { padding-block: var(--s-5); border-bottom: 1px solid var(--rule); align-items: center; }
+  .gantt__step { display: grid; gap: var(--s-1); }
+  .gantt__when { color: var(--accent-text); }
+  .gantt__name { font-size: 1.25rem; font-stretch: 112%; line-height: 1.2; }
+  .gantt__body { color: var(--ink-2); font-size: var(--t-small); max-width: 46ch; }
+  .gantt__track { position: relative; height: 2.25rem; background-image: linear-gradient(90deg, var(--rule) 1px, transparent 1px); background-size: calc(100% / var(--cols)) 100%; }
+  .gantt__bar { align-self: center; height: 1.25rem; background: var(--ink-2); }
+  .gantt__bar.is-build { background: var(--field); height: 2.25rem; }
+  .gantt__bar.is-open { background: repeating-linear-gradient(90deg, var(--ink-2) 0 8px, transparent 8px 12px); }
+  @media (max-width: 63.99rem) {
+    .gantt__ruler { display: none; }
+    .gantt__row { grid-template-columns: 1fr; row-gap: var(--s-3); }
   }
 
-  .wd-work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-m); margin-bottom: var(--space-xl); }
-  .wd-work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-xl) var(--gutter); }
-  .wd-work__item--wide { grid-column: 1 / -1; }
-  .wd-card { display: grid; gap: var(--space-xs); text-decoration: none; color: inherit; }
-  .wd-card :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
-  .wd-card:hover :global(.media img) { scale: 1.04; }
-  .wd-card__meta { margin-top: var(--space-xs); font-size: var(--step--1); color: var(--muted); }
-  .wd-card__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
-  @media (max-width: 767px) { .wd-work__grid { grid-template-columns: 1fr; } }
+  /* ---- Pricing ---- */
+  .tiers { grid-template-columns: 1fr; }
+  @media (min-width: 64rem) { .tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .tier { gap: var(--s-5); }
+  .tier__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+  .tier__name { font-size: var(--t-h3); font-stretch: 125%; line-height: 1.1; text-transform: uppercase; }
+  .tier__flag { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.2rem 0.5rem; border: 1px solid currentColor; }
+  .tier__price { display: grid; gap: var(--s-2); }
+  .tier__from { color: var(--ink-2); }
+  .tier__figure { font-size: clamp(2.75rem, 1.8rem + 2.6vw, 4.25rem); }
+  .tier__facts { display: grid; border-top: 1px solid var(--rule); }
+  .tier__facts div { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--s-3); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
+  .tier__facts dt { color: var(--ink-2); padding-top: 0.15rem; }
+  .tier__facts dd { font-size: var(--t-small); font-weight: 550; }
+  .tier__list { font-size: var(--t-small); }
+  .tier__cta { margin-top: auto; }
+  .tiers__care { margin-top: var(--s-5); color: var(--ink-2); max-width: 60ch; }
+  .tiers__care strong { color: var(--ink); }
 
-  .pricing { background: var(--bg-raised); }
-  .pricing__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; margin-bottom: var(--space-2xl); }
-  .pricing__head h2 { grid-column: 1 / span 7; }
-  .pricing__head p { grid-column: 9 / -1; }
-  .pricing__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); align-items: stretch; }
-  .tier { display: flex; flex-direction: column; gap: var(--space-s); padding: clamp(1.5rem, 2.5vw, 2.25rem); background: var(--bg); transform-style: preserve-3d; }
-  .tier--featured { background: var(--field); color: var(--field-ink); box-shadow: var(--shadow-float); }
-  .tier__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
-  .tier__price { font-family: var(--font-display); font-size: var(--step-3); font-weight: 600; line-height: 1; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
-  .tier__from { font-size: var(--step-0); font-weight: 500; letter-spacing: 0; opacity: 0.75; }
-  .tier__time { font-weight: 600; color: var(--accent-text); }
-  .tier--featured .tier__time { color: var(--moss-200); }
-  .tier__best { min-height: 3em; }
-  .tier__list { display: grid; gap: 0.55rem; margin-block: var(--space-s) var(--space-l); }
-  .tier__list li { display: flex; gap: 0.55rem; }
-  .tier__check { color: var(--accent-text); margin-top: 0.15em; }
-  .tier--featured .tier__check { color: var(--moss-200); }
-  .tier .btn { margin-top: auto; }
-  .pricing__care { margin-top: var(--space-l); color: var(--muted); }
-  .pricing__care strong { color: var(--ink-strong); }
-  @media (max-width: 1023px) {
-    .pricing__head h2, .pricing__head p { grid-column: 1 / -1; }
-    .pricing__grid { grid-template-columns: 1fr; }
-  }
+  /* ---- Promises ---- */
+  .promises { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .promises { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) { .promises { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .promise { gap: var(--s-3); }
+  @media (min-width: 64rem) { .promise { min-height: 15rem; } }
+  .promise__figure { font-size: clamp(2.25rem, 1.5rem + 2vw, 3.25rem); font-weight: 750; font-stretch: 125%; line-height: 1; letter-spacing: -0.02em; color: var(--accent-text); font-variant-numeric: tabular-nums; }
+  .promise__title { margin-top: auto; font-size: 1.1875rem; font-stretch: 112%; line-height: 1.2; }
+  .promise__body { color: var(--ink-2); font-size: var(--t-small); }
 
-  .wd-promises { overflow: clip; }
-  .wd-promises__head { margin-bottom: var(--space-xl); }
+  /* ---- Related ---- */
+  .related { row-gap: var(--s-6); align-items: start; border-top: 1px solid var(--rule-strong); padding-top: var(--s-5); }
+  .related__copy { display: grid; gap: var(--s-5); }
+  .related__text { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; max-width: 52ch; }
+  .related__text a { color: var(--ink); }
+  .related__list { border-top: 1px solid var(--rule-strong); }
+  .related__link { position: relative; display: grid; grid-template-columns: 1fr auto; gap: var(--s-1) var(--s-4); padding-block: var(--s-4); border-bottom: 1px solid var(--rule); text-decoration: none; }
+  .related__name { font-size: 1.25rem; font-weight: 700; font-stretch: 112%; }
+  .related__summary { grid-column: 1; color: var(--ink-2); font-size: var(--t-small); }
+  .related__arrow { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 1.5rem; height: 1.5rem; transition: transform var(--t-ui) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .related__link:hover .related__arrow { transform: translate(3px, -3px); color: var(--accent-text); } }
 
-  .related__text { margin-top: var(--space-m); max-width: 70ch; color: var(--muted); }
-  .related__text a { color: var(--ink-strong); }
-  .related__list { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-l); margin-top: var(--space-l); }
+  .cards { row-gap: var(--s-7); }
+  .section-more { margin-top: var(--s-6); }
 </style>

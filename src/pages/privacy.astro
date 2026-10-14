@@ -1,5 +1,6 @@
 ---
 import LegalLayout from '@/layouts/LegalLayout.astro';
+import DataFlow from '@/components/heroes/DataFlow.astro';
 import { site, fullAddress } from '@/config/site';
 import { pages } from '@/data/pages';
 
@@ -9,7 +10,14 @@ const crumbs = [
 ];
 ---
 
-<LegalLayout {...pages.privacy} heading="Privacy policy" updated="2026-10-13" crumbs={crumbs}>
+<LegalLayout
+  {...pages.privacy}
+  heading="Privacy policy"
+  lead="What we collect when you visit or send an enquiry, why we collect it, who handles it on the way and how long it is kept."
+  updated="2026-10-13"
+  crumbs={crumbs}
+>
+  <DataFlow slot="instrument" />
   <p>
     This policy explains how {site.legalName} (“Akrostech”, “we”, “us”) collects, uses and protects personal information when you visit
     {site.url.replace('https://', '')} or contact us. It does not cover the data we process on behalf of clients under a services agreement; that
