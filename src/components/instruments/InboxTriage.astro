@@ -1,6 +1,6 @@
 ---
 /**
- * Virtual Assistance hero instrument: a sample inbox. "Before" shows every message waiting on
+ * Virtual Assistance instrument (in the page body): a sample inbox. "Before" shows every message waiting on
  * you; "With your VA" sorts them into three ruled lanes (handled, drafted for approval, needs
  * you) and a counter shows what is left on your desk. Each message can be moved between lanes.
  * Sample messages only: senders are roles, not people or companies.
@@ -87,7 +87,7 @@ const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
 <div class="ib" data-instrument="inbox" data-mode="va">
   <div class="ib__bar">
     <p class="ib__title">
-      <span class="label">Sample inbox</span>
+      <span class="ib__name">Sample inbox</span>
       <span class="small ib__date">One morning, {messages.length} messages</span>
     </p>
     <div class="ib__switch" role="group" aria-label="Show the inbox">
@@ -99,26 +99,26 @@ const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
   <div class="ib__meter" aria-live="polite">
     <p class="ib__left">
       <span class="ib__fig" data-out="you">{count('you')}</span>
-      <span class="ib__left-text"><span class="label">Still need you</span><span class="small">of {messages.length} messages this morning</span></span>
+      <span class="ib__left-text"><span class="ib__left-key">Still need you</span><span class="small">of {messages.length} messages this morning</span></span>
     </p>
     <dl class="ib__tally">
-      <div><dt class="label">Handled</dt><dd data-out="va">{count('va')}</dd></div>
-      <div><dt class="label">Drafted</dt><dd data-out="draft">{count('draft')}</dd></div>
+      <div><dt>Handled</dt><dd data-out="va">{count('va')}</dd></div>
+      <div><dt>Drafted</dt><dd data-out="draft">{count('draft')}</dd></div>
     </dl>
   </div>
 
   <div class="ib__board">
     <section class="ib__lane ib__lane--all" data-lane="all" aria-label="Inbox, all messages unread" hidden>
-      <h2 class="ib__lane-head"><span class="label">Inbox</span><span class="ib__lane-n">{messages.length} unread</span></h2>
+      <h3 class="ib__lane-head"><span>Inbox</span><span class="ib__lane-n">{messages.length} unread</span></h3>
       <ol class="ib__list" role="list" data-list="all"></ol>
     </section>
     {
       lanes.map((lane) => (
         <section class={`ib__lane ib__lane--${lane.id}`} data-lane={lane.id} aria-label={lane.title}>
-          <h2 class="ib__lane-head">
-            <span class="label">{lane.title}</span>
+          <h3 class="ib__lane-head">
+            <span>{lane.title}</span>
             <span class="ib__lane-n" data-lane-n={lane.id}>{count(lane.id)}</span>
-          </h2>
+          </h3>
           <ol class="ib__list" role="list" data-list={lane.id}>
             {messages.map((m, i) =>
               m.lane === lane.id ? (
@@ -152,18 +152,18 @@ const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
 
   .ib__bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-3) var(--s-5); }
   .ib__title { display: grid; gap: 2px; }
+  .ib__name { font-family: var(--font-display); font-size: 1.25rem; font-weight: 650; letter-spacing: -0.015em; }
   .ib__date { color: var(--ink-2); }
-  .ib__switch { display: inline-flex; border: 1px solid var(--rule-strong); }
+  .ib__switch { display: inline-flex; padding: 4px; gap: 4px; border-radius: var(--radius-pill); border: 1px solid var(--rule-strong); }
   .ib__mode {
     min-height: 44px;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: var(--radius-pill);
     font-size: 0.9375rem;
     font-weight: 650;
-    font-stretch: 112%;
     color: var(--ink-2);
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
   }
-  .ib__mode + .ib__mode { border-left: 1px solid var(--rule-strong); }
   .ib__mode:active { transform: scale(0.97); }
   .ib__mode[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); }
   @media (hover: hover) and (pointer: fine) { .ib__mode:hover:not([aria-pressed='true']) { color: var(--ink); } }
@@ -175,48 +175,50 @@ const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
     justify-content: space-between;
     align-items: end;
     gap: var(--s-4) var(--s-6);
-    padding: var(--s-4) var(--s-5);
+    padding: var(--s-5);
+    border-radius: var(--radius);
     background: var(--plate);
     border: 1px solid var(--rule);
   }
   .ib__left { display: flex; align-items: end; gap: var(--s-4); }
-  .ib__fig { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 750; font-stretch: 125%; line-height: 0.82; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--accent-text); }
+  .ib__fig { font-family: var(--font-display); font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 700; line-height: 0.82; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--accent-text); }
   .ib[data-mode='before'] .ib__fig { color: var(--danger); }
   .ib__left-text { display: grid; gap: 2px; padding-bottom: 2px; }
+  .ib__left-key { font-weight: 650; }
   .ib__left-text .small { color: var(--ink-2); }
   .ib__tally { display: flex; gap: var(--s-6); }
   .ib__tally div { display: grid; gap: 2px; }
-  .ib__tally dt { color: var(--ink-2); }
-  .ib__tally dd { font-size: 1.75rem; font-weight: 750; font-stretch: 125%; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ib__tally dt { color: var(--ink-2); font-size: var(--t-small); }
+  .ib__tally dd { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .ib[data-mode='before'] .ib__tally { opacity: 0.4; }
 
   /* ---- Lanes ---- */
-  .ib__board { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .ib__lane { background: var(--ground); min-width: 0; }
+  .ib__board { display: grid; gap: var(--s-3); }
+  .ib__lane { min-width: 0; border-radius: var(--radius); border: 1px solid var(--rule); background: var(--plate); overflow: hidden; }
   .ib[data-mode='before'] .ib__lane:not(.ib__lane--all) { display: none; }
   .ib[data-mode='before'] .ib__lane--all { display: block; }
-  .ib__lane-head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4); min-height: 2.5rem; font-weight: inherit; }
-  .ib__lane-n { font-size: 0.9375rem; font-weight: 750; font-stretch: 112%; font-variant-numeric: tabular-nums; }
+  .ib__lane-head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4) var(--s-2) var(--s-5); min-height: 2.75rem; font-family: var(--font); font-size: 0.9375rem; font-weight: 650; }
+  .ib__lane-n { display: inline-grid; place-items: center; min-width: 1.9rem; height: 1.9rem; padding-inline: 0.4rem; border-radius: var(--radius-pill); background: var(--plate-3); font-size: 0.875rem; font-weight: 700; font-variant-numeric: tabular-nums; }
   .ib__lane--va .ib__lane-head { background: var(--field); color: var(--field-ink); }
+  .ib__lane--va .ib__lane-n { background: var(--carbon-950); color: var(--lime-400); }
   .ib__lane--draft .ib__lane-head { background: var(--plate-2); }
-  .ib__lane--you .ib__lane-head { background: var(--plate-3); }
-  .ib__lane--all .ib__lane-head { background: var(--plate-3); }
+  .ib__lane--you .ib__lane-head, .ib__lane--all .ib__lane-head { background: var(--violet-600); color: var(--carbon-50); }
+  .ib__lane--you .ib__lane-n, .ib__lane--all .ib__lane-n { background: var(--carbon-50); color: var(--violet-700); }
   .ib__list { display: grid; min-height: 0.5rem; }
-  .ib__list:empty::after { content: 'Nothing here'; display: block; padding: var(--s-3) var(--s-4); font-size: 0.875rem; color: var(--ink-3); }
+  .ib__list:empty::after { content: 'Nothing here'; display: block; padding: var(--s-3) var(--s-5); font-size: 0.875rem; color: var(--ink-3); }
 
   .ib__msg {
     display: grid;
     grid-template-columns: 3rem minmax(0, 8.5rem) minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--s-1) var(--s-4);
-    padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
+    padding: var(--s-2) var(--s-2) var(--s-2) var(--s-5);
     border-top: 1px solid var(--rule);
-    background: var(--ground);
     position: relative;
   }
   .ib__list > .ib__msg:first-child { border-top: 0; }
   .ib__time { font-size: 0.8125rem; color: var(--ink-3); font-weight: 600; }
-  .ib__from { font-size: 0.875rem; font-weight: 650; font-stretch: 112%; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ib__from { font-size: 0.875rem; font-weight: 650; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ib__body { display: grid; min-width: 0; line-height: 1.3; }
   .ib__subject { font-size: 0.9375rem; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
   .ib__note { font-size: 0.8125rem; color: var(--ink-2); }
@@ -232,33 +234,33 @@ const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
   .ib__msg[data-at='va'] .ib__subject { color: var(--ink-2); }
 
   /* Before: every message bold and unread */
-  .ib[data-mode='before'] .ib__msg::before { content: ''; position: absolute; left: 0.4rem; top: 50%; width: 0.4rem; height: 0.4rem; margin-top: -0.2rem; border-radius: 50%; background: var(--accent-text); }
-  .ib[data-mode='before'] .ib__subject { color: var(--ink); font-weight: 750; }
+  .ib[data-mode='before'] .ib__msg::before { content: ''; position: absolute; left: 0.6rem; top: 50%; width: 0.45rem; height: 0.45rem; margin-top: -0.225rem; border-radius: 50%; background: var(--accent-text); }
+  .ib[data-mode='before'] .ib__subject { color: var(--ink); font-weight: 700; }
   .ib[data-mode='before'] .ib__note::before { display: none; }
   .ib[data-mode='before'] .ib__move { visibility: hidden; }
 
-  .ib__move { display: inline-flex; border: 1px solid var(--rule); }
+  .ib__move { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--radius-pill); border: 1px solid var(--rule); }
   .ib__to {
     min-width: 2.75rem;
-    min-height: 44px;
-    padding: 0 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-stretch: 112%;
+    min-height: 40px;
+    padding: 0 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 650;
     color: var(--ink-2);
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
   }
-  .ib__to + .ib__to { border-left: 1px solid var(--rule); }
   .ib__to:active { transform: scale(0.94); }
   .ib__to[aria-pressed='true'] { background: var(--ink); color: var(--ground); }
   .ib__to[data-to='va'][aria-pressed='true'] { background: var(--field); color: var(--field-ink); }
-  .ib__to:focus-visible { outline-offset: -2px; }
-  @media (hover: hover) and (pointer: fine) { .ib__to:hover:not([aria-pressed='true']) { color: var(--ink); background: var(--plate-2); } }
+  .ib__to[data-to='you'][aria-pressed='true'] { background: var(--violet-600); color: var(--carbon-50); }
+  @media (hover: hover) and (pointer: fine) { .ib__to:hover:not([aria-pressed='true']) { color: var(--ink); background: var(--plate-3); } }
 
+  @media (min-width: 64rem) {
+    .ib__board { grid-template-columns: minmax(0, 1fr); }
+  }
   @media (max-width: 39.99rem) {
-    .ib__msg { grid-template-columns: 2.25rem minmax(0, 1fr) auto; padding-left: var(--s-3); row-gap: 0; }
+    .ib__msg { grid-template-columns: 2.25rem minmax(0, 1fr) auto; padding-left: var(--s-4); row-gap: 0; }
     .ib__time { grid-column: 1; grid-row: 1; }
     .ib__from { grid-column: 2; grid-row: 1; }
     .ib__move { grid-column: 3; grid-row: 1; }

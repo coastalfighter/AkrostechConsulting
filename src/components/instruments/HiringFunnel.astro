@@ -1,8 +1,8 @@
 ---
 /**
- * Recruitment hero instrument: a hiring-funnel planning model. The visitor sets how many hires
+ * Recruitment instrument (in the page body): a hiring-funnel planning model. The visitor sets how many hires
  * they need and the pass-through rate between stages; the funnel works backwards and shows how
- * many candidates each stage must hold. Lime bars are stages the recruiter runs; plate bars are
+ * many candidates each stage must hold. Chartreuse bars are stages the recruiter runs; plate bars are
  * your team's interviews and decisions. The rates are editable planning assumptions, not
  * Akrostech performance figures. Server-rendered at the defaults.
  */
@@ -19,7 +19,7 @@ const offers = counts[4] ?? 0;
 <div class="fn" data-instrument="funnel" data-defaults={rates.join(',')}>
   <div class="fn__hires">
     <label class="fn__hires-label" for="fn-hires">
-      <span class="label">Hires needed</span>
+      <span class="fn__hires-key">Hires needed</span>
       <span class="small muted">Signed offers you want this quarter</span>
     </label>
     <output class="fn__hires-fig" for="fn-hires" data-out="hires">{HIRES.default}</output>
@@ -28,9 +28,9 @@ const offers = counts[4] ?? 0;
   </div>
 
   <div class="fn__head" aria-hidden="true">
-    <span class="label">Stage</span>
-    <span class="label fn__head-rate">Pass-through: assumptions you can change</span>
-    <span class="label fn__head-n">Needed</span>
+    <span>Stage</span>
+    <span class="fn__head-rate">Pass-through: assumptions you can change</span>
+    <span class="fn__head-n">Needed</span>
   </div>
 
   <ol class="fn__stages" role="list" aria-label="Candidates needed at each stage">
@@ -82,15 +82,15 @@ const offers = counts[4] ?? 0;
 
   <dl class="fn__sum ruled" aria-live="polite">
     <div class="module lime">
-      <dt class="label">Your recruiter works</dt>
+      <dt>Your recruiter works</dt>
       <dd><span data-sum="recruiter">{recruiterTotal}</span> profiles</dd>
     </div>
     <div class="module">
-      <dt class="label">Your team meets</dt>
+      <dt>Your team meets</dt>
       <dd><span data-sum="meet">{meet}</span> candidates</dd>
     </div>
     <div class="module">
-      <dt class="label">Offers to decide</dt>
+      <dt>Offers to decide</dt>
       <dd><span data-sum="offers">{offers}</span></dd>
     </div>
   </dl>
@@ -107,22 +107,24 @@ const offers = counts[4] ?? 0;
     align-items: end;
     gap: var(--s-3) var(--s-5);
     padding: var(--s-4) var(--s-5) var(--s-3);
+    border-radius: var(--radius);
     background: var(--plate);
     border: 1px solid var(--rule);
   }
   .fn__hires-label { display: grid; gap: 2px; }
-  .fn__hires-fig { grid-row: 1 / span 1; grid-column: 2; font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 750; font-stretch: 125%; line-height: 0.82; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  .fn__hires-key { font-family: var(--font-display); font-size: 1.25rem; font-weight: 650; letter-spacing: -0.015em; }
+  .fn__hires-fig { grid-row: 1 / span 1; grid-column: 2; font-family: var(--font-display); font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 700; line-height: 0.82; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
   .fn__range { grid-column: 1 / -1; width: 100%; height: 44px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
-  .fn__range::-webkit-slider-runnable-track { height: 2px; background: var(--rule-strong); }
-  .fn__range::-moz-range-track { height: 2px; background: var(--rule-strong); }
-  .fn__range::-moz-range-progress { height: 2px; background: var(--accent-text); }
-  .fn__range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.5rem; height: 1.5rem; margin-top: -0.7rem; background: var(--lime-400); border: 3px solid var(--carbon-950); transition: transform var(--t-press) var(--ease-out); }
-  .fn__range::-moz-range-thumb { width: 1.5rem; height: 1.5rem; border-radius: 0; background: var(--lime-400); border: 3px solid var(--carbon-950); }
+  .fn__range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--rule-strong); }
+  .fn__range::-moz-range-track { height: 4px; border-radius: 2px; background: var(--rule-strong); }
+  .fn__range::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--lime-400); }
+  .fn__range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.6rem; height: 1.6rem; margin-top: -0.7rem; border-radius: 50%; background: var(--lime-400); border: 3px solid var(--carbon-950); transition: transform var(--t-press) var(--ease-out); }
+  .fn__range::-moz-range-thumb { width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--lime-400); border: 3px solid var(--carbon-950); }
   .fn__range:active::-webkit-slider-thumb { transform: scale(1.12); }
-  .fn__range:focus-visible { outline-offset: 0; }
+  .fn__range:focus-visible { outline-offset: 0; border-radius: var(--radius-pill); }
   .fn__scale { grid-column: 1 / -1; display: flex; justify-content: space-between; margin-top: calc(var(--s-3) * -1); color: var(--ink-3); }
   @media (min-width: 40rem) {
-    .fn__hires { grid-template-columns: 10.5rem minmax(0, 1fr) 4.5rem; align-items: center; row-gap: 0; padding-block: var(--s-3) var(--s-2); }
+    .fn__hires { grid-template-columns: 11.5rem minmax(0, 1fr) 4.5rem; align-items: center; row-gap: 0; padding-block: var(--s-4) var(--s-2); }
     .fn__hires-label { grid-column: 1; grid-row: 1; }
     .fn__range { grid-column: 2; grid-row: 1; }
     .fn__hires-fig { grid-column: 3; grid-row: 1; text-align: right; }
@@ -133,35 +135,36 @@ const offers = counts[4] ?? 0;
   .fn__head,
   .fn__stage,
   .fn__rate { display: grid; grid-template-columns: minmax(7.5rem, 11rem) minmax(0, 1fr) 4rem; gap: var(--s-4); align-items: center; }
-  .fn__head { padding-inline: var(--s-4); color: var(--ink-2); }
+  .fn__head { padding-inline: var(--s-5); color: var(--ink-2); font-size: 0.8125rem; font-weight: 600; }
   .fn__head-n { text-align: right; }
-  .fn__head-rate { color: var(--accent-text); }
-  .fn__stages { border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); }
-  .fn__stage { padding: 0.3rem var(--s-4); min-height: 2.75rem; }
+  .fn__stages { border-radius: var(--radius); border: 1px solid var(--rule); background: var(--plate); overflow: hidden; }
+  .fn__stage { padding: 0.4rem var(--s-5); min-height: 3rem; }
   .fn__stage + .fn__rate, .fn__rate + .fn__stage { border-top: 1px solid var(--rule); }
   .fn__name { display: grid; line-height: 1.2; }
-  .fn__stage-label { font-weight: 750; font-stretch: 125%; text-transform: uppercase; font-size: 0.9375rem; letter-spacing: 0.01em; }
-  .fn__note { font-size: 0.75rem; color: var(--ink-2); }
-  .fn__track { position: relative; height: 1.5rem; background: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 10%); }
+  .fn__stage-label { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; letter-spacing: -0.01em; }
+  .fn__note { font-size: 0.8125rem; color: var(--ink-2); }
+  .fn__track { position: relative; height: 1.5rem; border-radius: var(--radius-pill); background: var(--plate-2); overflow: hidden; }
   .fn__bar {
     position: absolute;
     inset: 0;
+    border-radius: var(--radius-pill);
     transform-origin: 0 50%;
     transform: scaleX(var(--w, 1));
     transition: transform 260ms var(--ease-out);
   }
-  .fn__stage--rpo .fn__bar { background: var(--field); }
-  .fn__stage--you .fn__bar { background: var(--plate-3); box-shadow: inset 0 0 0 1px var(--rule-strong); }
-  .fn__count { font-size: 1.375rem; font-weight: 750; font-stretch: 125%; text-align: right; line-height: 1; letter-spacing: -0.02em; }
+  .fn__stage--rpo .fn__bar { background: var(--lime-400); }
+  .fn__stage--you .fn__bar { background: var(--violet-400); }
+  .fn__count { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: right; line-height: 1; letter-spacing: -0.02em; }
 
-  .fn__rate { padding: 0 var(--s-4); background: var(--plate); }
+  .fn__rate { padding: 0 var(--s-5); background: var(--plate-2); }
   .fn__rate-label { color: var(--ink-2); font-size: 0.8125rem; line-height: 1.2; }
-  .fn__stepper { display: inline-flex; align-items: center; justify-self: start; }
+  .fn__stepper { display: inline-flex; align-items: center; justify-self: start; gap: 2px; }
   .fn__step {
     width: 44px;
     height: 44px;
     display: grid;
     place-items: center;
+    border-radius: 50%;
     font-size: 1.125rem;
     font-weight: 700;
     color: var(--ink);
@@ -169,31 +172,30 @@ const offers = counts[4] ?? 0;
   }
   .fn__step:active { transform: scale(0.92); }
   .fn__step[aria-disabled='true'] { color: var(--ink-3); cursor: not-allowed; transform: none; }
-  .fn__step:focus-visible { outline-offset: -3px; }
   @media (hover: hover) and (pointer: fine) { .fn__step:hover:not([aria-disabled='true']) { background: var(--plate-3); } }
-  .fn__rate-val { min-width: 3.5rem; text-align: center; font-weight: 750; font-stretch: 112%; border-bottom: 1px dashed var(--accent-text); padding-block: 2px; }
+  .fn__rate-val { min-width: 3.75rem; padding: 0.2rem 0.5rem; text-align: center; font-weight: 700; border-radius: var(--radius-pill); border: 1px dashed var(--rule-strong); }
 
   .fn__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-2) var(--s-5); }
   .fn__legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); color: var(--ink-2); }
-  .fn__key { display: inline-block; width: 1.25rem; height: 0.6rem; margin-right: 0.5rem; vertical-align: middle; }
-  .fn__key--rpo { background: var(--field); }
-  .fn__key--you { background: var(--plate-3); box-shadow: inset 0 0 0 1px var(--rule-strong); }
+  .fn__key { display: inline-block; width: 1.25rem; height: 0.6rem; margin-right: 0.5rem; border-radius: var(--radius-pill); vertical-align: middle; }
+  .fn__key--rpo { background: var(--lime-400); }
+  .fn__key--you { background: var(--violet-400); }
   .fn__reset[aria-disabled='true'] { color: var(--ink-3); cursor: default; }
   .fn__reset { min-height: 44px; font-weight: 650; text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: var(--rule-strong); color: var(--ink); }
   @media (hover: hover) and (pointer: fine) { .fn__reset:hover { text-decoration-color: currentColor; } }
 
   .fn__sum { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .fn__sum .module { padding: var(--s-3) var(--s-4); display: grid; gap: var(--s-1); align-content: start; }
-  .fn__sum dt { color: var(--ink-2); }
+  .fn__sum .module { padding: var(--s-4) var(--s-5); display: grid; gap: var(--s-1); align-content: start; }
+  .fn__sum dt { color: var(--ink-2); font-size: var(--t-small); font-weight: 600; }
   .fn__sum dd { font-size: 1rem; font-weight: 600; }
-  .fn__sum dd span { font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); font-weight: 750; font-stretch: 125%; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .fn__sum dd span { font-family: var(--font-display); font-size: clamp(1.6rem, 1.2rem + 1vw, 2.25rem); font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 
   @media (max-width: 39.99rem) {
     .fn__head { display: none; }
-    .fn__stage { grid-template-columns: minmax(0, 1fr) 3.5rem; }
+    .fn__stage { grid-template-columns: minmax(0, 1fr) 3.5rem; padding-inline: var(--s-4); }
     .fn__track { grid-column: 1 / -1; grid-row: 2; height: 1rem; }
     .fn__count { grid-row: 1; grid-column: 2; }
-    .fn__rate { grid-template-columns: minmax(0, 1fr) auto; }
+    .fn__rate { grid-template-columns: minmax(0, 1fr) auto; padding-inline: var(--s-4); }
     .fn__sum { grid-template-columns: 1fr; }
   }
 

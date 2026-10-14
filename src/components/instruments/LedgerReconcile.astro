@@ -1,6 +1,6 @@
 ---
 /**
- * Accounting hero instrument: a mini bank reconciliation on sample data. Bank feed lines on the
+ * Accounting instrument (in the page body): a mini bank reconciliation on sample data. Bank feed lines on the
  * left, ledger entries on the right, in different orders and wording. "Reconcile next" (or a
  * line's own Match button) pairs a bank line with its ledger entry; the unreconciled difference
  * counts down to $0.00 and a five-day close calendar advances as reconciliation completes.
@@ -53,7 +53,7 @@ const days = [
 <div class="lg" data-instrument="ledger" data-matched={[...matched].join(',')}>
   <div class="lg__top">
     <p class="lg__title">
-      <span class="label">Sample data</span>
+      <span class="lg__name">Sample data</span>
       <span class="small muted">Operating account, April close</span>
     </p>
     <div class="lg__actions">
@@ -63,7 +63,7 @@ const days = [
   </div>
 
   <div class="lg__diff" aria-live="polite">
-    <p class="lg__diff-key label">Unreconciled difference</p>
+    <p class="lg__diff-key">Unreconciled difference</p>
     <p class="lg__fig" data-out="diff">${money(open)}</p>
     <p class="lg__progress small">
       <span class="lg__segs" aria-hidden="true">{bank.map((b) => <i class:list={{ 'is-on': matched.has(b.id) }} data-seg={b.id} />)}</span>
@@ -73,7 +73,7 @@ const days = [
 
   <div class="lg__cols">
     <section class="lg__col" aria-label="Bank feed">
-      <h2 class="lg__col-head"><span class="label">Bank feed</span><span class="small muted">Imported</span></h2>
+      <h3 class="lg__col-head"><span>Bank feed</span><span class="small muted">Imported</span></h3>
       <ol class="lg__lines" role="list">
         {
           bank.map((b) => (
@@ -98,7 +98,7 @@ const days = [
       </ol>
     </section>
     <section class="lg__col" aria-label="Ledger">
-      <h2 class="lg__col-head"><span class="label">Ledger</span><span class="small muted">Booked</span></h2>
+      <h3 class="lg__col-head"><span>Ledger</span><span class="small muted">Booked</span></h3>
       <ol class="lg__lines" role="list">
         {
           ledger.map((l) => (
@@ -128,7 +128,7 @@ const days = [
     {
       days.map((d, i) => (
         <li class:list={['lg__day', { 'is-done': i === 0, 'is-now': i === 1 }]} data-day={i}>
-          <span class="label lg__day-n">{d.day}</span>
+          <span class="lg__day-n">{d.day}</span>
           <span class="lg__day-title">{d.title}</span>
           <span class="lg__day-state small" data-day-state>
             {i === 0 ? 'Done' : i === 1 ? 'In progress' : 'Next'}
@@ -143,6 +143,7 @@ const days = [
   .lg { display: grid; gap: var(--s-4); }
   .lg__top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-3) var(--s-5); }
   .lg__title { display: grid; gap: 2px; }
+  .lg__name { font-family: var(--font-display); font-size: 1.25rem; font-weight: 650; letter-spacing: -0.015em; }
   .lg__actions { display: flex; align-items: center; gap: var(--s-4); }
   .lg__reset { min-height: 44px; font-weight: 650; color: var(--ink); text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: var(--rule-strong); }
   @media (hover: hover) and (pointer: fine) { .lg__reset:hover { text-decoration-color: currentColor; } }
@@ -153,91 +154,93 @@ const days = [
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
     gap: var(--s-2) var(--s-5);
-    padding: var(--s-4) var(--s-5);
+    padding: var(--s-5);
+    border-radius: var(--radius);
     background: var(--plate);
     border: 1px solid var(--rule);
     transition: background-color 400ms ease, color 400ms ease;
   }
-  .lg__diff-key { grid-column: 1 / -1; color: var(--ink-2); }
-  .lg__fig { font-size: clamp(2.5rem, 1.6rem + 3vw, 4.25rem); font-weight: 750; font-stretch: 125%; line-height: 0.86; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lg__diff-key { grid-column: 1 / -1; color: var(--ink-2); font-weight: 600; font-size: var(--t-small); }
+  .lg__fig { font-family: var(--font-display); font-size: clamp(2.5rem, 1.6rem + 3vw, 4.25rem); font-weight: 700; line-height: 0.86; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .lg__progress { display: grid; gap: var(--s-2); justify-items: end; color: var(--ink-2); font-variant-numeric: tabular-nums; }
   .lg__progress b { color: var(--ink); }
-  .lg__segs { display: flex; gap: 3px; }
-  .lg__segs i { width: 0.9rem; height: 0.5rem; background: var(--plate-3); transition: background-color var(--t-ui) ease; }
-  .lg__segs i.is-on { background: var(--accent-text); }
-  .lg.is-done .lg__diff { background: var(--field); color: var(--field-ink); --ink: var(--field-ink); --ink-2: var(--field-ink-2); --accent-text: var(--carbon-950); --plate-3: rgb(11 12 10 / 0.15); border-color: var(--field); }
+  .lg__segs { display: flex; gap: 4px; }
+  .lg__segs i { width: 1rem; height: 0.55rem; border-radius: var(--radius-pill); background: var(--plate-3); transition: background-color var(--t-ui) ease; }
+  .lg__segs i.is-on { background: var(--lime-400); }
+  .lg.is-done .lg__diff { background: var(--field); color: var(--field-ink); --ink: var(--field-ink); --ink-2: var(--field-ink-2); --plate-3: rgb(22 17 16 / 0.15); border-color: var(--field); }
+  .lg.is-done .lg__segs i.is-on { background: var(--carbon-950); }
 
   /* ---- Two columns ---- */
-  .lg__cols { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .lg__cols { display: grid; gap: var(--s-3); }
   @media (min-width: 40rem) { .lg__cols { grid-template-columns: 1fr 1fr; } }
-  .lg__col { background: var(--ground); min-width: 0; }
-  .lg__col-head { display: flex; justify-content: space-between; align-items: baseline; padding: var(--s-2) var(--s-3) var(--s-2) var(--s-4); border-bottom: 1px solid var(--rule-strong); font-weight: inherit; }
+  .lg__col { min-width: 0; border-radius: var(--radius); border: 1px solid var(--rule); background: var(--plate); overflow: hidden; }
+  .lg__col-head { display: flex; justify-content: space-between; align-items: baseline; padding: var(--s-3) var(--s-4) var(--s-3) var(--s-5); border-bottom: 1px solid var(--rule); font-family: var(--font); font-size: 0.9375rem; font-weight: 650; background: var(--plate-2); }
   .lg__line {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto 3.25rem;
+    grid-template-columns: minmax(0, 1fr) auto 3.75rem;
     grid-template-rows: auto auto;
     column-gap: var(--s-3);
     align-items: center;
-    padding: 0.35rem var(--s-2) 0.35rem var(--s-4);
-    min-height: 3.5rem;
+    padding: 0.4rem var(--s-3) 0.4rem var(--s-5);
+    min-height: 3.6rem;
     transition: background-color var(--t-ui) ease;
   }
   .lg__line + .lg__line { border-top: 1px solid var(--rule); }
-  .lg__meta { grid-column: 1; font-size: 0.6875rem; letter-spacing: 0.04em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .lg__meta { grid-column: 1; font-size: 0.75rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
   .lg__meta b { color: var(--ink-2); font-weight: 700; margin-right: 0.25rem; }
   .lg__text { grid-column: 1; font-size: 0.875rem; line-height: 1.25; font-weight: 550; overflow-wrap: anywhere; }
-  .lg__text--bank { font-size: 0.8125rem; letter-spacing: 0.02em; font-stretch: 112%; }
+  .lg__text--bank { font-size: 0.8125rem; letter-spacing: 0.02em; }
   .lg__amt { grid-column: 2; grid-row: 1 / span 2; font-size: 0.9375rem; font-weight: 650; text-align: right; white-space: nowrap; }
   .lg__state { grid-column: 3; grid-row: 1 / span 2; display: grid; place-items: center; position: relative; min-height: 44px; }
   .lg__match {
     width: 100%;
-    min-height: 44px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    min-height: 40px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 650;
     border: 1px solid var(--rule-strong);
     transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
   }
   .lg__match:active { transform: scale(0.94); }
-  @media (hover: hover) and (pointer: fine) { .lg__match:hover { border-color: var(--ink); background: var(--plate-2); } }
+  @media (hover: hover) and (pointer: fine) { .lg__match:hover { border-color: var(--ink); background: var(--plate-3); } }
   .lg__tick, .lg__pair { display: none; }
-  .lg__line.is-matched { background: var(--plate); }
+  .lg__line.is-matched { background: var(--plate-2); }
   .lg__line.is-matched .lg__text, .lg__line.is-matched .lg__amt { color: var(--ink-2); }
   .lg__line.is-matched .lg__match { display: none; }
   .lg__line.is-matched .lg__tick {
     display: block;
     width: 1.5rem;
     height: 1.5rem;
+    border-radius: 50%;
     background: var(--lime-400);
     position: relative;
   }
   .lg__line.is-matched .lg__tick::after {
     content: '';
     position: absolute;
-    inset: 0.3rem;
+    inset: 0.38rem;
     background: var(--carbon-950);
     clip-path: polygon(0 50%, 35% 85%, 100% 10%, 100% 30%, 35% 100%, 0 68%);
   }
-  .lg__line.is-matched .lg__pair { display: block; font-size: 0.6875rem; font-weight: 700; color: var(--ink-2); letter-spacing: 0.04em; }
+  .lg__line.is-matched .lg__pair { display: block; font-size: 0.75rem; font-weight: 700; color: var(--ink-2); }
   .lg__line.is-matched .lg__state { align-content: center; gap: 2px; }
   .lg__line.just-matched .lg__tick { animation: lg-tick 260ms var(--ease-out); }
   @keyframes lg-tick { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
 
   /* ---- Five-day close ---- */
-  .lg__close { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .lg__day { display: grid; align-content: start; gap: 2px; padding: var(--s-3); background: var(--ground); min-width: 0; transition: background-color 300ms ease, color 300ms ease; }
-  .lg__day-n { color: var(--ink-3); }
-  .lg__day-title { font-size: 0.8125rem; font-weight: 650; line-height: 1.25; font-stretch: 112%; }
-  .lg__day-state { font-size: 0.75rem; color: var(--ink-3); margin-top: var(--s-2); }
-  .lg__day.is-now { background: var(--plate-2); }
-  .lg__day.is-now .lg__day-state { color: var(--accent-text); font-weight: 650; }
-  .lg__day.is-done { background: var(--field); color: var(--field-ink); }
+  .lg__close { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s-2); }
+  .lg__day { display: grid; align-content: start; gap: 2px; padding: var(--s-3) var(--s-4); border-radius: var(--radius-sm); border: 1px solid var(--rule); background: var(--plate); min-width: 0; transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease; }
+  .lg__day-n { color: var(--ink-3); font-size: 0.8125rem; font-weight: 600; }
+  .lg__day-title { font-size: 0.875rem; font-weight: 650; line-height: 1.25; }
+  .lg__day-state { font-size: 0.8125rem; color: var(--ink-3); margin-top: var(--s-2); }
+  .lg__day.is-now { background: var(--violet-600); border-color: var(--violet-600); color: var(--carbon-50); }
+  .lg__day.is-now .lg__day-n, .lg__day.is-now .lg__day-state { color: var(--violet-100); font-weight: 650; }
+  .lg__day.is-done { background: var(--field); border-color: var(--field); color: var(--field-ink); }
   .lg__day.is-done .lg__day-n, .lg__day.is-done .lg__day-state { color: var(--field-ink-2); }
 
   @media (max-width: 39.99rem) {
     .lg__close { grid-template-columns: 1fr; }
-    .lg__day { grid-template-columns: 4rem minmax(0, 1fr) auto; align-items: baseline; gap: var(--s-3); padding-block: var(--s-2); }
+    .lg__day { grid-template-columns: 3.5rem minmax(0, 1fr) auto; align-items: baseline; gap: var(--s-3); padding-block: var(--s-2); }
     .lg__day-state { margin-top: 0; }
     .lg__diff { grid-template-columns: 1fr; }
     .lg__progress { justify-items: start; }

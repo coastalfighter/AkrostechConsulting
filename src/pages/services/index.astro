@@ -1,18 +1,22 @@
 ---
+/**
+ * Services hub, in the Sample-3 order: the promise (orbits field), the new service, the
+ * services index, what each team takes off your plate (the service matrix instrument),
+ * the comparison at a glance, the four-step process, the tools we work in, and the call.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
+import FieldHero from '@/components/FieldHero.astro';
 import ServiceMatrix from '@/components/instruments/ServiceMatrix.astro';
+import TrailSteps from '@/components/TrailSteps.astro';
 import Photo from '@/components/Photo.astro';
-import Faq from '@/components/Faq.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
 import { pages } from '@/data/pages';
-import { services, serviceHref } from '@/data/services';
-import { servicePhoto, serviceSecondPhoto } from '@/data/photos';
-import { webSubServices } from '@/data/webdev';
-import { commitments, generalFaqs } from '@/data/company';
-import { canonical, faqSchema, serviceSchema } from '@/lib/seo';
+import { services, serviceHref, serviceBySlug } from '@/data/services';
+import { servicePhoto } from '@/data/photos';
+import { processSteps } from '@/data/home';
+import { canonical, serviceSchema } from '@/lib/seo';
 
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -25,178 +29,80 @@ const itemList = {
   itemListElement: services.map((s, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(serviceHref(s.slug)), name: s.name })),
 };
 
-const highlights = (slug: string) =>
-  slug === 'website-development'
-    ? webSubServices.slice(0, 5).map((w) => w.title)
-    : (services.find((s) => s.slug === slug)?.capabilities.map((c) => c.title) ?? []);
+// Website Development (new) leads; the rest keep their published order.
+const ordered = [...services].sort((a, b) => Number(Boolean(b.isNew)) - Number(Boolean(a.isNew)));
+const web = serviceBySlug('website-development');
 
-const models = [
-  { title: 'One specialist', body: 'A dedicated professional on your hours, full-time or part-time, with a team lead reviewing their work.', best: 'Founders and small teams with one function to hand off.' },
-  { title: 'A pod', body: 'Two to ten specialists and a lead who owns coverage, quality and the weekly report.', best: 'Recurring, high-volume work: support desks, hiring funnels, month-end close.' },
-  { title: 'A fixed-scope project', body: 'A defined deliverable for a fixed fee and a finish date.', best: 'Backlogs, clean-ups, migrations and website builds.' },
-];
-const f = site.figures;
+// "Works inside your stack": the tools on either side of your team, and more besides (Sample-3).
+const stackLeft = ['HubSpot', 'Salesforce', 'Google Workspace'];
+const stackRight = ['QuickBooks', 'Xero', 'Shopify'];
+const stackMore = ['Slack', 'Zoho Books', 'WordPress', 'Figma'];
+const rowY = [10, 30, 50];
 ---
 
-<BaseLayout {...pages.services} image="/og/services.png" breadcrumbs={crumbs} schema={[itemList, ...services.map((s) => serviceSchema(s)), faqSchema(generalFaqs)]}>
-  <Hero labelledby="services-title" split="5-7" crumbs={crumbs}>
-    <h1 class="h1 hero__title svc-title" id="services-title">
-      Five practices. <span class="accent">One way of working.</span>
-    </h1>
-    <p class="hero__lead">
-      Virtual assistance, recruitment, accounting, legal process outsourcing and website development, delivered by vetted professionals in India on
-      your U.S. hours. Open any practice to see what it covers.
-    </p>
+<BaseLayout {...pages.services} image="/og/services.png" breadcrumbs={crumbs} schema={[itemList, ...services.map((s) => serviceSchema(s))]}>
+  <FieldHero scene="orbits" labelledby="services-title" crumbs={crumbs} hint="Five orbits, one centre. Move through them; press to send a ripple.">
+    <h1 class="fhero__title" id="services-title">One partner. <span class="quiet">Five specialist teams.</span></h1>
+    <p class="fhero__lead">{site.promise} Every team is dedicated to you, works your U.S. hours and is backed by process-driven quality checks.</p>
     <div class="actions">
-      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
-        Book a discovery call <Icon name="arrow-up-right" class="btn__arrow" />
-      </a>
-      <a class="btn btn--ghost" href="#compare">Compare services <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></a>
+      <a class="btn btn--ghost" href="#compare-title">Compare at a glance <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
     </div>
-    <ServiceMatrix slot="instrument" />
+    <p class="hero-note small muted">Built for startups, scaled by enterprises, trusted by leaders.</p>
+    {
+      web && (
+        <a slot="after" class="newsvc panel" href={serviceHref(web.slug)}>
+          <span class="newsvc__photo">
+            <Photo name={servicePhoto[web.slug]} alt="" fill sizes="10rem" />
+          </span>
+          <span class="newsvc__copy">
+            <span class="newsvc__title">
+              <span class="badge">New</span> Website Development is here.
+            </span>
+            <span class="muted">Fast, accessible websites and web apps from a dedicated offshore team.</span>
+          </span>
+          <span class="newsvc__go">
+            See the service <Icon name="arrow-right" />
+          </span>
+        </a>
+      )
+    }
+  </FieldHero>
 
-    <div slot="strip" class="strip ruled">
-      <div class="module module--flex lime">
-        <p class="figure">{f.matchHours}h</p>
-        <p class="strip__text">To a shortlist of vetted professionals, in any of the five practices.</p>
-      </div>
-      <div class="module module--flex">
-        <p class="figure">{f.onboardingHours}h</p>
-        <p class="strip__text">From the first call to a specialist working inside your tools.</p>
-      </div>
-      <div class="module module--flex">
-        <p class="figure"><span data-count>{f.professionals}</span>+</p>
-        <p class="strip__text">Vetted professionals on U.S. shifts: Eastern, Central, Mountain or Pacific.</p>
-      </div>
-      <div class="module module--flex">
-        <p class="figure"><span data-count>{f.accuracy}</span>%</p>
-        <p class="strip__text">Task accuracy, checked by a team lead before work reaches you.</p>
-      </div>
-    </div>
-  </Hero>
-
-  <!-- The five practices: photograph-led modules -->
-  <section class="section practices" aria-labelledby="practices-title">
+  <!-- Services index: one generous row per service -->
+  <section class="section" aria-labelledby="route-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="practices-title" data-split>Each practice, on one sheet.</h2>
-        <p data-reveal>What each practice covers, when it starts, what it typically saves and who it is built for. Every one runs to the same standard.</p>
+        <h2 class="h2" id="route-title" data-split>Choose your route.</h2>
+        <p data-reveal>A dedicated specialist for each function, on your hours, with a team lead behind every one.</p>
       </div>
-
-      {
-        services.map((s, i) => (
-          <article class:list={['pm grid', { 'pm--flip': i % 2 === 1 }]} id={s.slug} aria-labelledby={`pm-${s.slug}`}>
-            <div class="pm__photos">
-              <Photo name={servicePhoto[s.slug]} ratio="4 / 3" sizes="(min-width: 64rem) 42vw, 100vw" reveal="clip" class="pm__main" />
-              <Photo name={serviceSecondPhoto[s.slug]} alt="" ratio="3 / 4" sizes="(min-width: 64rem) 17vw, 30vw" class="pm__second" />
-            </div>
-            <div class="pm__copy">
-              <h3 class="pm__name" id={`pm-${s.slug}`}>
-                {s.name}
-                {s.isNew && <span class="pm__new">New</span>}
-              </h3>
-              <p class="pm__summary">{s.summary}</p>
-              <p class="pm__intro">{s.intro}</p>
-              <dl class="spec pm__spec">
-                <div>
-                  <dt>Starts</dt>
-                  <dd>{s.startsIn}</dd>
-                </div>
-                <div>
-                  <dt>Typical saving</dt>
-                  <dd>{s.saving}</dd>
-                </div>
-                <div>
-                  <dt>Built for</dt>
-                  <dd>{s.audience}</dd>
-                </div>
-              </dl>
-              <a class="btn btn--ghost pm__btn" href={serviceHref(s.slug)}>
-                Explore {s.shortName.charAt(0).toLowerCase() + s.shortName.slice(1)} <Icon name="arrow-right" class="btn__arrow btn__arrow--right" />
-              </a>
-            </div>
-            <div class="pm__covers">
-              <p class="label pm__covers-key">What it covers</p>
-              <ul class="pm__list" role="list">
-                {highlights(s.slug).map((h) => (
-                  <li>
-                    <Icon name="check" class="icon pm__check" />
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
-  <!-- Comparison table -->
-  <section class="section plate" id="compare" aria-labelledby="compare-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="compare-title" data-split>Compare at a glance.</h2>
-        <p data-reveal>When each practice starts, what it typically saves and who it is built for, on one sheet.</p>
-      </div>
-      <div class="cmp" role="region" aria-labelledby="compare-title" tabindex="0">
-        <table class="cmp__table">
-          <thead>
-            <tr>
-              <th scope="col" class="label">Service</th>
-              <th scope="col" class="label">Starts</th>
-              <th scope="col" class="label">Typical saving</th>
-              <th scope="col" class="label">Built for</th>
-              <th scope="col"><span class="sr-only">Link</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              services.map((s) => (
-                <tr>
-                  <th scope="row">
-                    <a class="cmp__name" href={serviceHref(s.slug)}>
-                      {s.name}
-                    </a>
-                  </th>
-                  <td>{s.startsIn}</td>
-                  <td class="cmp__saving">{s.saving}</td>
-                  <td>{s.audience}</td>
-                  <td class="cmp__go">
-                    <a class="cmp__arrow" href={serviceHref(s.slug)} aria-label={`${s.name} details`}>
-                      <Icon name="arrow-up-right" />
-                    </a>
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
-      <p class="cmp__note small">
-        Savings compare a monthly Akrostech fee with the fully loaded cost of an equivalent local hire or U.S. agency. Your figure is confirmed after
-        discovery.
-      </p>
-    </div>
-  </section>
-
-  <!-- Engagement models -->
-  <section class="section" aria-labelledby="models-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="models-title" data-split>Three ways to work with us.</h2>
-        <p data-reveal>Every practice is bought the same three ways. Start with one person and grow into a pod when the work proves itself.</p>
-      </div>
-      <ul class="models ruled" role="list" data-reveal-group>
+      <ul class="route" role="list" data-reveal-group>
         {
-          models.map((m, i) => (
-            <li class:list={['module module--flex model', { lime: i === 1 }]} data-reveal>
-              <h3 class="h3">{m.title}</h3>
-              <p class="model__body">{m.body}</p>
-              <p class="model__best">
-                <span class="label">Best for</span>
-                <span>{m.best}</span>
-              </p>
+          ordered.map((s) => (
+            <li class="route__row" data-reveal>
+              <a class="route__link" href={serviceHref(s.slug)}>
+                <span class="route__name">
+                  {s.name}
+                  {s.isNew && <span class="badge">New</span>}
+                </span>
+                <span class="route__sum">{s.summary}</span>
+                <span class="route__facts small">
+                  <span>
+                    <span class="muted">Starts in </span>
+                    <b>{s.facts.startsIn}</b>
+                  </span>
+                  <span>
+                    <span class="muted">Saves </span>
+                    <b>{s.facts.savings}</b>
+                  </span>
+                </span>
+                <span class="route__thumb">
+                  <Photo name={servicePhoto[s.slug]} alt="" fill sizes="8rem" />
+                  <span class="route__go" aria-hidden="true">
+                    <Icon name="arrow-up-right" />
+                  </span>
+                </span>
+              </a>
             </li>
           ))
         }
@@ -204,109 +110,309 @@ const f = site.figures;
     </div>
   </section>
 
-  <!-- Commitments -->
-  <section class="section section--flush-top" aria-labelledby="commit-title">
+  <!-- What each team takes off your plate: the service matrix -->
+  <section class="section section--flush-top" aria-labelledby="plate-title">
+    <div class="wrap">
+      <div class="plate ink-plate">
+        <div class="plate__aside">
+          <h2 class="h2" id="plate-title" data-split>What each team takes off your plate.</h2>
+          <p class="plate__lead">Choose the work you want handed over. The matrix shows which teams cover it, and the smallest team that covers all of it.</p>
+          <ul class="ticks plate__ticks" role="list">
+            <li>One specialist when one practice covers everything</li>
+            <li>A pod across practices, under one team lead</li>
+            <li>One weekly report, whatever the shape</li>
+          </ul>
+          <div class="plate__photo">
+            <Photo name="people-virtual-assistants" fill sizes="(min-width: 64rem) 26vw, 100vw" reveal="clip" />
+          </div>
+        </div>
+        <div class="plate__main">
+          <ServiceMatrix />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compare at a glance -->
+  <section class="section section--flush-top" aria-labelledby="compare-title">
+    <div class="wrap">
+      <div class="glance violet">
+        <div class="glance__head">
+          <h2 class="h2" id="compare-title" data-split>Compare at a glance.</h2>
+          <p>Pricing depends on role, seniority and scope. We confirm it after a 30-minute discovery call.</p>
+        </div>
+        <div class="glance__frame">
+          <table class="glance__table">
+            <caption class="sr-only">Akrostech services compared by best fit, start time and cost savings</caption>
+            <thead>
+              <tr>
+                <th scope="col">Service</th>
+                <th scope="col">Best for</th>
+                <th scope="col">Get started in</th>
+                <th scope="col">Cost savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                services.map((s) => (
+                  <tr>
+                    <th scope="row">
+                      <a class="glance__name" href={serviceHref(s.slug)}>
+                        {s.name}
+                        <Icon name="arrow-up-right" class="icon glance__arrow" />
+                      </a>
+                      {s.isNew && <span class="badge">New</span>}
+                    </th>
+                    <td data-key="Best for">{s.facts.bestFor}</td>
+                    <td data-key="Get started in">{s.facts.startsIn}</td>
+                    <td data-key="Cost savings" class="glance__save">
+                      {s.facts.savings}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="glance__foot">
+          <a class="btn btn--primary" href="/contact">Get a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+          <a class="more" href={site.calendly} target="_blank" rel="noopener">Book a 30-minute call <Icon name="arrow-up-right" /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="section" aria-labelledby="process-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="commit-title" data-split>The same six commitments, in every practice.</h2>
-        <p data-reveal>Written into every engagement letter, whether you hire one assistant or a team across all five practices.</p>
+        <h2 class="h2" id="process-title" data-split>From first call to a working team in 48 hours.</h2>
+        <p data-reveal>The same four steps on every engagement, so you always know what happens next.</p>
       </div>
-      <div class="commit grid">
-        <div class="commit__photo c-4">
-          <Photo name="team-table" ratio="3 / 4" sizes="(min-width: 64rem) 30vw, 100vw" reveal="clip" />
+      <TrailSteps steps={processSteps} highlight={2} />
+    </div>
+  </section>
+
+  <!-- Works inside your stack -->
+  <section class="section section--flush-top" aria-labelledby="stack-title">
+    <div class="wrap grid stack">
+      <div class="stack__copy c-5">
+        <h2 class="h2" id="stack-title" data-split>Your tools. Our team. No new software.</h2>
+        <p class="stack__lead" data-reveal>Specialists work inside the CRM, accounting and web platforms you already run, with your logins, permissions and SOPs.</p>
+        <div class="stack__more" data-reveal>
+          <p class="small muted">Also at home in</p>
+          <ul class="chips" role="list">
+            {stackMore.map((t) => <li class="chip">{t}</li>)}
+            <li class="chip stack__and">and more</li>
+          </ul>
         </div>
-        <ul class="commit__list ruled c-8" role="list" data-reveal-group>
+      </div>
+      <div class="beams panel c-7" data-reveal>
+        <svg class="beams__lines" viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true">
           {
-            commitments.map((c) => (
-              <li class="module module--flex commit__item" data-reveal>
-                <p class="commit__fig">{c.figure}</p>
-                <h3 class="commit__title">{c.title}</h3>
-                <p class="commit__body">{c.body}</p>
-              </li>
+            rowY.map((y) => (
+              <>
+                <path class="beams__base" d={`M16.7 ${y} C33 ${y} 33 30 50 30`} />
+                <path class="beams__flow" pathLength="100" d={`M16.7 ${y} C33 ${y} 33 30 50 30`} />
+                <path class="beams__base" d={`M83.3 ${y} C67 ${y} 67 30 50 30`} />
+                <path class="beams__flow beams__flow--in" pathLength="100" d={`M50 30 C67 30 67 ${y} 83.3 ${y}`} />
+              </>
             ))
           }
+        </svg>
+        <ul class="beams__col" role="list" aria-label="Sales and operations tools">
+          {stackLeft.map((t) => <li class="beams__node">{t}</li>)}
+        </ul>
+        <div class="beams__hub">
+          <span class="beams__disc">Your Akrostech team</span>
+        </div>
+        <ul class="beams__col" role="list" aria-label="Finance and commerce tools">
+          {stackRight.map((t) => <li class="beams__node">{t}</li>)}
         </ul>
       </div>
     </div>
   </section>
 
-  <Faq faqs={generalFaqs} name="services" intro="The questions we hear most before a first engagement." />
-  <CtaBand />
+  <CtaBand photo="team-highfive" />
 </BaseLayout>
 
 <style>
-  .svc-title { font-size: clamp(2.5rem, 0.9rem + 3.6vw, 4.25rem); }
+  .hero-note { max-width: 36ch; }
 
-  /* ---- Hero strip ---- */
-  .strip { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .strip { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 64rem) { .strip { grid-template-columns: repeat(4, 1fr); } }
-  .strip .module { min-height: 9rem; gap: var(--s-4); justify-content: space-between; }
-  .strip .figure { font-size: clamp(2.5rem, 1.6rem + 2vw, 3.5rem); white-space: nowrap; }
-  .strip__text { max-width: 30ch; font-size: var(--t-small); color: var(--ink-2); }
-
-  /* ---- Practice modules ---- */
-  .pm { row-gap: var(--s-6); padding-block: var(--s-8); border-top: 1px solid var(--rule-strong); scroll-margin-top: var(--header-h); }
-  .pm:first-of-type { border-top: 0; padding-top: 0; }
-  .pm__copy { display: grid; gap: var(--s-5); align-content: start; }
-  .pm__name { font-size: clamp(1.75rem, 1.1rem + 2vw, 3rem); font-stretch: 125%; font-weight: 750; line-height: 0.95; letter-spacing: -0.03em; text-transform: uppercase; }
-  .pm__new { display: inline-block; margin-left: 0.4em; padding: 0.2em 0.5em; vertical-align: middle; background: var(--accent); color: var(--accent-ink); font-size: 0.8125rem; letter-spacing: 0.06em; font-stretch: 112%; line-height: 1.2; }
-  .pm__summary { font-size: var(--t-lead); line-height: 1.4; font-weight: 550; max-width: 40ch; }
-  .pm__intro { color: var(--ink-2); max-width: 52ch; }
-  .pm__btn { justify-self: start; }
-  .pm__covers { display: grid; gap: var(--s-4); align-content: start; }
-  .pm__covers-key { color: var(--ink-2); }
-  .pm__list { display: grid; border-top: 1px solid var(--rule-strong); }
-  @media (min-width: 40rem) { .pm__list { grid-template-columns: 1fr 1fr; column-gap: var(--gutter); } }
-  .pm__list li { display: flex; gap: var(--s-3); align-items: start; padding-block: var(--s-3); border-bottom: 1px solid var(--rule); font-weight: 550; }
-  .pm__check { color: var(--accent-text); margin-top: 0.15em; }
-  .pm__photos { display: grid; grid-template-columns: 5fr 2fr; gap: var(--s-3); align-items: end; }
-  .pm__photos :global(.pm__second) { margin-bottom: var(--s-7); }
-  @media (max-width: 39.99rem) { .pm__photos { grid-template-columns: 1fr; } .pm__photos :global(.pm__second) { display: none; } }
-  @media (min-width: 64rem) {
-    .pm { grid-template-rows: auto 1fr; }
-    .pm__photos { grid-column: 1 / span 7; grid-row: 1; }
-    .pm__covers { grid-column: 1 / span 7; grid-row: 2; }
-    .pm__copy { grid-column: 8 / -1; grid-row: 1 / span 2; padding-left: var(--s-5); }
-    .pm--flip .pm__photos { grid-column: 6 / -1; grid-template-columns: 2fr 5fr; }
-    .pm--flip .pm__photos :global(.pm__second) { order: -1; }
-    .pm--flip .pm__covers { grid-column: 6 / -1; }
-    .pm--flip .pm__copy { grid-column: 1 / span 5; padding-left: 0; padding-right: var(--s-5); }
+  /* ---- New service strip (under the hero) ---- */
+  .newsvc {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s-4) var(--s-5);
+    padding: var(--s-3);
+    border-radius: calc(var(--radius) * 1.2);
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-color var(--t-ui) ease;
+  }
+  .newsvc__photo { display: block; width: 5.5rem; height: 5.5rem; }
+  .newsvc__photo :global(.photo) { border-radius: var(--radius-sm); }
+  .newsvc__copy { display: grid; gap: var(--s-1); }
+  .newsvc__title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); font-family: var(--font-display); font-size: clamp(1.2rem, 1rem + 0.7vw, 1.6rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  .newsvc__go { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: var(--s-2); min-height: 44px; padding-inline: var(--s-3); font-weight: 650; }
+  .newsvc__go :global(.icon) { transition: transform var(--t-ui) var(--ease-out); }
+  @media (min-width: 48rem) {
+    .newsvc { grid-template-columns: auto minmax(0, 1fr) auto; padding-right: var(--s-6); }
+    .newsvc__go { grid-column: auto; padding-inline: 0; }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .newsvc:hover { border-color: var(--ink); }
+    .newsvc:hover .newsvc__go :global(.icon) { transform: translateX(4px); }
   }
 
-  /* ---- Compare table ---- */
-  .cmp { position: relative; overflow-x: auto; border-top: 1px solid var(--rule-strong); }
-  .cmp:focus-visible { outline-offset: 4px; }
-  .cmp__table { min-width: 48rem; }
-  .cmp__table th, .cmp__table td { text-align: left; vertical-align: top; padding: var(--s-4) var(--s-4) var(--s-4) 0; border-bottom: 1px solid var(--rule); }
-  .cmp__table thead th { color: var(--ink-2); padding-block: var(--s-3); }
-  .cmp__name { font-size: 1.1875rem; font-weight: 750; font-stretch: 125%; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.1; text-decoration: none; }
-  @media (hover: hover) and (pointer: fine) { .cmp__name:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; } }
-  .cmp__table td { color: var(--ink-2); }
-  .cmp__table .cmp__saving { color: var(--accent-text); font-weight: 650; }
-  .cmp__go { width: 3rem; padding-right: 0 !important; }
-  .cmp__arrow { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--rule-strong); color: var(--ink); transition: background-color var(--t-ui) ease, color var(--t-ui) ease; }
-  @media (hover: hover) and (pointer: fine) { .cmp__arrow:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); } }
-  .cmp__note { margin-top: var(--s-5); color: var(--ink-2); max-width: 70ch; }
+  /* ---- Route index ---- */
+  .route { border-top: 1px solid var(--rule-strong); }
+  .route__row { border-bottom: 1px solid var(--rule); transition: opacity var(--t-ui) ease; }
+  .route__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--s-2) var(--s-5);
+    align-items: center;
+    padding-block: var(--s-5);
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .route__name { grid-column: 1; display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); font-family: var(--font-display); font-size: clamp(1.6rem, 1.15rem + 1.5vw, 2.4rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; transition: transform 500ms var(--ease-out); }
+  .route__sum { grid-column: 1; color: var(--ink-2); max-width: 46ch; }
+  .route__facts { grid-column: 1; display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-6); }
+  .route__facts b { font-weight: 650; }
+  .route__thumb { grid-column: 2; grid-row: 1 / span 3; position: relative; width: clamp(5.5rem, 4rem + 4vw, 8rem); aspect-ratio: 1; }
+  .route__thumb :global(.photo) { border-radius: var(--radius); }
+  .route__go {
+    position: absolute;
+    right: -0.5rem;
+    bottom: -0.5rem;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--ground);
+    border: 1px solid var(--rule-strong);
+    transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out);
+  }
+  @media (min-width: 64rem) {
+    .route__link { grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr) auto; gap: var(--s-6); }
+    .route__name { grid-column: 1; grid-row: 1; }
+    .route__sum { grid-column: 2; grid-row: 1; }
+    .route__facts { grid-column: 3; grid-row: 1; display: grid; gap: var(--s-1); text-align: right; justify-items: end; }
+    .route__thumb { grid-column: 4; grid-row: 1; }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .route:has(.route__row:hover) .route__row:not(:hover) { opacity: 0.45; }
+    .route__row:hover .route__name { transform: translateX(6px); }
+    .route__row:hover .route__go { background: var(--mark); border-color: var(--mark); color: var(--mark-ink); transform: rotate(45deg); }
+  }
+  .route:has(.route__link:focus-visible) .route__row:not(:has(:focus-visible)) { opacity: 0.45; }
 
-  /* ---- Models ---- */
-  .models { grid-template-columns: 1fr; }
-  @media (min-width: 64rem) { .models { grid-template-columns: repeat(3, 1fr); } }
-  .model { gap: var(--s-4); }
-  @media (min-width: 64rem) { .model { min-height: 20rem; } }
-  .model__body { color: var(--ink-2); max-width: 40ch; }
-  .model__best { margin-top: auto; padding-top: var(--s-4); border-top: 1px solid var(--rule); display: grid; gap: var(--s-1); font-weight: 550; }
-  .model__best .label { color: var(--ink-2); }
+  /* ---- Matrix plate ---- */
+  .plate { display: grid; gap: var(--s-7); padding: clamp(1.5rem, 1rem + 3vw, 4rem); border-radius: calc(var(--radius) * 1.6); }
+  .plate__aside { display: grid; gap: var(--s-5); align-content: start; }
+  .plate__lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; max-width: 40ch; }
+  .plate__ticks li::before { background: var(--lime-400); }
+  .plate__photo { min-height: 16rem; margin-top: var(--s-3); }
+  @media (min-width: 64rem) {
+    .plate { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--s-8); }
+    .plate__aside { position: sticky; top: calc(var(--header-h) + var(--s-5)); align-self: start; }
+    .plate__photo { aspect-ratio: 4 / 5; min-height: 0; }
+  }
+  @media (max-width: 63.99rem) { .plate__photo { display: none; } }
 
-  /* ---- Commitments ---- */
-  .commit { row-gap: var(--s-6); }
-  .commit__list { grid-template-columns: 1fr; align-self: start; }
-  @media (min-width: 40rem) { .commit__list { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 64rem) { .commit__list { grid-template-columns: repeat(3, 1fr); } }
-  .commit__item { gap: var(--s-3); }
-  @media (min-width: 64rem) { .commit__item { min-height: 14rem; } }
-  .commit__fig { font-size: clamp(2rem, 1.5rem + 1.6vw, 3rem); font-weight: 750; font-stretch: 125%; line-height: 1; color: var(--accent-text); letter-spacing: -0.02em; }
-  .commit__title { font-size: 1.125rem; font-stretch: 112%; line-height: 1.2; margin-top: auto; }
-  .commit__body { color: var(--ink-2); font-size: var(--t-small); }
-  @media (min-width: 64rem) { .commit__photo { position: sticky; top: calc(var(--header-h) + var(--s-5)); align-self: start; } }
+  /* ---- At a glance ---- */
+  .glance { display: grid; gap: var(--s-7); padding: clamp(1.5rem, 1rem + 3vw, 4rem); border-radius: calc(var(--radius) * 1.6); }
+  .glance__head { display: grid; gap: var(--s-4); align-items: end; }
+  .glance__head p { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.45; max-width: 40ch; }
+  @media (min-width: 64rem) { .glance__head { grid-template-columns: 7fr 5fr; gap: var(--gutter); } }
+  .glance__frame { border-radius: var(--radius); overflow: hidden; background: var(--ground); color: var(--ink); --ink: var(--carbon-950); --ink-2: var(--carbon-600); --rule: rgb(22 17 16 / 0.13); }
+  :global(:root[data-theme='dark']) .glance__frame { --ink: var(--carbon-50); --ink-2: var(--carbon-300); --rule: rgb(243 242 238 / 0.13); background: var(--carbon-950); }
+  .glance__table { text-align: left; }
+  .glance__table thead th { padding: var(--s-4) var(--s-5); font-size: var(--t-small); font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--rule); }
+  .glance__table tbody tr + tr { border-top: 1px solid var(--rule); }
+  .glance__table tbody th, .glance__table td { padding: var(--s-5); vertical-align: middle; }
+  .glance__table td { color: var(--ink-2); }
+  .glance__table tbody th { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); }
+  .glance__name { display: inline-flex; align-items: center; gap: var(--s-2); min-height: 44px; font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-decoration: none; color: var(--ink); }
+  .glance__arrow { width: 1rem; height: 1rem; opacity: 0.55; transition: transform var(--t-ui) var(--ease-out), opacity var(--t-ui) ease; }
+  @media (hover: hover) and (pointer: fine) { .glance__name:hover .glance__arrow { opacity: 1; transform: translate(3px, -3px); } }
+  .glance__table td:nth-child(3) { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .glance__save { font-family: var(--font-display); font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em; color: var(--ink) !important; white-space: nowrap; }
+  @media (max-width: 47.99rem) {
+    .glance__table, .glance__table tbody, .glance__table tr, .glance__table th, .glance__table td { display: block; }
+    .glance__table thead { display: none; }
+    .glance__table tbody tr { padding: var(--s-4) var(--s-5); display: grid; gap: var(--s-2); }
+    .glance__table tbody th, .glance__table td { padding: 0; }
+    .glance__table td { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--s-3); white-space: normal !important; }
+    .glance__table td::before { content: attr(data-key); color: var(--ink-2); font-family: var(--font); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; }
+    .glance__save { font-size: 1.125rem; }
+  }
+  .glance__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4) var(--s-6); }
+
+  /* ---- Stack ---- */
+  .stack { row-gap: var(--s-7); align-items: center; }
+  .stack__copy { display: grid; gap: var(--s-5); align-content: start; }
+  .stack__lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; max-width: 40ch; }
+  .stack__more { display: grid; gap: var(--s-3); }
+  .stack__and { border-style: dashed; color: var(--ink-2); }
+  @media (min-width: 64rem) { .beams { grid-column: 7 / span 6; } }
+  .beams {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    min-height: 22rem;
+    padding-block: var(--s-4);
+    border-radius: calc(var(--radius) * 1.6);
+    overflow: hidden;
+  }
+  .beams__lines { position: absolute; inset: var(--s-4) 0; width: 100%; height: calc(100% - 2 * var(--s-4)); }
+  .beams__base { fill: none; stroke: var(--rule-strong); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+  .beams__flow { fill: none; stroke: var(--violet-600); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 6 94; stroke-dashoffset: 100; vector-effect: non-scaling-stroke; opacity: 0; }
+  :global(:root[data-theme='dark']) .beams__flow { stroke: var(--lime-400); }
+  .beams__col { position: relative; display: grid; grid-template-rows: repeat(3, 1fr); align-items: center; justify-items: center; padding-inline: var(--s-2); }
+  .beams__node {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: var(--ground);
+    border: 1px solid var(--rule-strong);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.15;
+  }
+  .beams__hub { position: relative; display: grid; place-items: center; }
+  .beams__disc {
+    display: grid;
+    place-items: center;
+    width: clamp(7rem, 5rem + 6vw, 9.5rem);
+    aspect-ratio: 1;
+    padding: var(--s-4);
+    border-radius: 50%;
+    background: var(--lime-400);
+    color: var(--carbon-950);
+    font-family: var(--font-display);
+    font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.2rem);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    text-align: center;
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--lime-400) 25%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .beams__flow { opacity: 1; animation: beam 2.8s linear infinite; }
+    .beams__flow--in { animation-delay: 1.4s !important; }
+    @keyframes beam { to { stroke-dashoffset: 0; } }
+  }
+  @media (max-width: 39.99rem) {
+    .beams__node { font-size: 0.8125rem; padding-inline: 0.6rem; }
+  }
 </style>
