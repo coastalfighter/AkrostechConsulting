@@ -53,8 +53,9 @@ export interface Particle {
   hy: number;
   c: number;
   s: number;
-  /** Per-particle random seed, 0–1. */
+  /** Per-particle random seeds, 0–1, independent of each other. */
   r: number;
+  q: number;
   /** Free scratch value for scenes (phase, lane, age). */
   k: number;
 }
@@ -139,6 +140,7 @@ export class Field {
     const next: Particle[] = targets.slice(0, n).map((t, i) => {
       const old = this.particles[i];
       const r = rand();
+      const q = rand();
       return {
         x: old ? old.x : this.reduced ? t.x : this.w * rand(),
         y: old ? old.y : this.reduced ? t.y : this.h * rand(),
@@ -151,11 +153,15 @@ export class Field {
         c: t.c ?? 0,
         s: t.s ?? 1,
         r,
+        q,
         k: old ? old.k : r,
       };
     });
     this.particles = next;
-    if (fresh || this.reduced || !this.running) this.draw((performance.now() - this.start) / 1000);
+    // Without animation, run the scene forward a few seconds off-screen so the single still
+    // frame shows the formation (lanes sorted, funnel narrowed, current flowing).
+    if (this.reduced) this.settle(6);
+    if (fresh || this.reduced || !this.running) this.draw(this.reduced ? 6 : (performance.now() - this.start) / 1000);
   }
 
   private bind(): void {
@@ -220,14 +226,27 @@ export class Field {
     }
   }
 
+  /** Integrate `seconds` of motion at 60 fps without drawing or pointer input. */
+  private settle(seconds: number): void {
+    const frames = Math.round(seconds * 60);
+    for (let f = 0; f < frames; f++) this.integrate(f / 60, 0, false);
+  }
+
   private step(t: number, now: number): void {
+    this.integrate(t, now, true);
+    this.draw(t);
+  }
+
+  private integrate(t: number, now: number, interactive: boolean): void {
     const ctx = this.context();
     const k = this.scene.stiffness ?? 0.035;
     const damping = 0.86;
     const R = Math.max(70, Math.min(150, this.w * 0.12));
     const R2 = R * R;
-    const { x: px, y: py, active } = this.pointer;
-    this.ripples = this.ripples.filter((r) => now - r.t < 1100);
+    const { x: px, y: py } = this.pointer;
+    const active = interactive && this.pointer.active;
+    if (interactive) this.ripples = this.ripples.filter((r) => now - r.t < 1100);
+    const ripples = interactive ? this.ripples : [];
 
     for (const p of this.particles) {
       if (this.scene.move) this.scene.move(p, t, ctx);
@@ -250,7 +269,7 @@ export class Field {
           ay += (dy / d) * f;
         }
       }
-      for (const rp of this.ripples) {
+      for (const rp of ripples) {
         const age = (now - rp.t) / 1100;
         const ring = age * Math.max(this.w, this.h) * 0.7;
         const dx = p.x - rp.x;
@@ -268,7 +287,6 @@ export class Field {
       p.x += p.vx;
       p.y += p.vy;
     }
-    this.draw(t);
   }
 
   private draw(t: number): void {

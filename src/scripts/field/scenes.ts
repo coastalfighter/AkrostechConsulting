@@ -74,14 +74,14 @@ const lanes: Scene = {
   move(p, t, ctx) {
     // Each particle travels left to right: tangled on the left, sorted into three lanes on the right.
     const period = 9 + p.r * 5;
-    const phase = ((t / period + p.r) % 1 + 1) % 1;
-    const lane = Math.floor(p.r * 3);
+    const phase = ((t / period + ((p.r * 7.13 + p.q * 3.17) % 1)) % 1 + 1) % 1;
+    const lane = Math.floor(p.q * 3);
     const laneY = ctx.h * (0.3 + lane * 0.2);
-    const tangled = ctx.h * (0.15 + ((p.r * 7.31) % 1) * 0.7);
+    const tangled = ctx.h * (0.12 + ((p.q * 7.31 + p.r * 3.7) % 1) * 0.76);
     const sort = Math.min(1, Math.max(0, (phase - 0.3) / 0.35));
     const ease = sort * sort * (3 - 2 * sort);
     p.tx = ctx.w * (-0.05 + phase * 1.1);
-    p.ty = tangled + (laneY + Math.sin(p.r * 40) * 6 - tangled) * ease + Math.sin(t * 2 + p.r * 30) * (1 - ease) * 10;
+    p.ty = tangled + (laneY + (p.q * 3 - lane - 0.5) * 22 - tangled) * ease + Math.sin(t * 2 + p.r * 30) * (1 - ease) * 10;
     p.c = ease > 0.9 ? (lane === 1 ? 1 : lane === 0 ? 0 : 2) : 0;
     // Wrap without a visible streak.
     if (phase < 0.01) {
@@ -99,13 +99,13 @@ const funnel: Scene = {
   },
   move(p, t, ctx) {
     const period = 7 + p.r * 6;
-    const phase = ((t / period + p.r) % 1 + 1) % 1;
+    const phase = ((t / period + ((p.r * 5.31 + p.q * 2.71) % 1)) % 1 + 1) % 1;
     const cx = ctx.w / 2;
     // Most particles leave the stream at each stage; one in twelve reaches the end.
-    const survives = p.r > 0.92;
-    const exitAt = 0.25 + ((p.r * 13.7) % 1) * 0.55;
+    const survives = p.q > 0.92;
+    const exitAt = 0.25 + ((p.q * 13.7) % 1) * 0.55;
     const width = ctx.w * 0.46 * (1 - phase) ** 1.6 + 6;
-    const lateral = Math.sin(p.r * 91) * width;
+    const lateral = (p.q * 2 - 1) * width;
     p.tx = cx + lateral;
     p.ty = ctx.h * (0.04 + phase * 0.92);
     if (!survives && phase > exitAt) {
@@ -282,17 +282,23 @@ function flow(seed: number): Scene {
       return Array.from({ length: ctx.n }, (_, i) => ({ x: ctx.rand() * ctx.w, y: ctx.rand() * ctx.h, c: i % 9 === 0 ? 1 : i % 4 === 0 ? 2 : 0 }));
     },
     move(p, t, ctx) {
-      // Particles ride a slowly turning flow field and wrap at the edges.
-      const s = 0.0042;
-      const angle = Math.sin(p.x * s + seed) * 1.6 + Math.cos(p.y * s * 1.3 + t * 0.15 + seed * 2) * 1.6;
-      p.tx = p.x + Math.cos(angle) * 9;
-      p.ty = p.y + Math.sin(angle) * 9;
-      if (p.x < -10) p.x = p.tx = ctx.w + 5;
-      if (p.x > ctx.w + 10) p.x = p.tx = -5;
-      if (p.y < -10) p.y = p.ty = ctx.h + 5;
-      if (p.y > ctx.h + 10) p.y = p.ty = -5;
+      // Each particle rides its own wave line left to right, like a current read from above;
+      // the lines stay evenly spread down the panel and wrap at the right edge.
+      const speed = 0.018 + p.q * 0.022;
+      const phase = (((p.r + t * speed) % 1) + 1) % 1;
+      const x = (phase * 1.1 - 0.05) * ctx.w;
+      const lines = 15;
+      const line = Math.floor(p.q * lines);
+      const base = ((line + 0.5) / lines) * ctx.h + (((p.q * lines) % 1) - 0.5) * 6;
+      const y = base + Math.sin(x * 0.007 + t * 0.55 + seed + line * 0.45) * ctx.h * 0.035 + Math.sin(x * 0.0026 - t * 0.25 + seed * 3) * ctx.h * 0.07;
+      p.tx = x;
+      p.ty = y;
+      if (phase < 0.004) {
+        p.x = x;
+        p.y = y;
+      }
     },
-    stiffness: 0.06,
+    stiffness: 0.12,
     density: 4.5,
   };
 }
@@ -307,17 +313,17 @@ const relay: Scene = {
     const a = { x: ctx.w * 0.24, y: ctx.h * 0.55 };
     const b = { x: ctx.w * 0.76, y: ctx.h * 0.45 };
     const home = p.r < 0.5 ? a : b;
-    const traveller = ((p.r * 17.3) % 1) < 0.22;
+    const traveller = p.q < 0.2;
     if (!traveller) {
-      const ang = p.r * 200 + t * (0.25 + p.r * 0.2);
-      const rr = 18 + ((p.r * 53.1) % 1) * Math.min(ctx.w, ctx.h) * 0.2;
+      const ang = p.r * 200 + t * (0.25 + p.q * 0.2);
+      const rr = 14 + Math.sqrt(p.q) * Math.min(ctx.w, ctx.h) * 0.22;
       p.tx = home.x + Math.cos(ang) * rr;
       p.ty = home.y + Math.sin(ang) * rr * 0.8;
       p.c = p.r < 0.5 ? 0 : 2;
       return;
     }
-    const period = 5 + p.r * 3;
-    const phase = ((t / period + p.r) % 1 + 1) % 1;
+    const period = 5 + p.q * 3;
+    const phase = ((t / period + p.r * 7.1) % 1 + 1) % 1;
     const from = p.r < 0.5 ? a : b;
     const to = p.r < 0.5 ? b : a;
     const lift = Math.sin(phase * Math.PI) * ctx.h * 0.3;
