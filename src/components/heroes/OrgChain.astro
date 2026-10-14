@@ -280,8 +280,8 @@ const links: Record<string, string> = {
   .org__member--bench::before { background: none; border-left: 1px dashed var(--rule-strong); }
   .org__code { font-weight: 750; font-stretch: var(--wide); font-size: 0.875rem; letter-spacing: 0.02em; text-transform: uppercase; }
   .org__member-name { font-size: 0.75rem; line-height: 1.25; color: var(--ink-2); }
-  .org__state { margin-top: auto; padding-top: 0.35rem; font-size: 0.6875rem; font-weight: 650; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); }
-  .org__pod-label { grid-column: 1 / -1; display: flex; justify-content: space-between; margin-top: var(--s-2); color: var(--ink-3); font-size: 0.6875rem; }
+  .org__state { margin-top: auto; padding-top: 0.35rem; font-size: 0.6875rem; font-weight: 650; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-2); }
+  .org__pod-label { grid-column: 1 / -1; display: flex; justify-content: space-between; margin-top: var(--s-2); color: var(--ink-2); font-size: 0.6875rem; }
   @media (max-width: 30rem) {
     .org__member-name { display: none; }
     .org__member { min-height: 4.25rem; }
@@ -290,7 +290,7 @@ const links: Record<string, string> = {
   }
 
   /* ---- Selection: the chosen node becomes a lime field; the rest dim ---- */
-  .org[data-selected] .org__node, .org[data-selected] .org__pod { opacity: 0.45; }
+  .org[data-selected] .org__node, .org[data-selected] .org__pod { opacity: 0.72; }
   .org[data-selected='you'] [data-node='you'],
   .org[data-selected='partner'] [data-node='partner'],
   .org[data-selected='delivery'] [data-node='delivery'],

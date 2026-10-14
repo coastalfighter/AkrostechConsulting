@@ -121,14 +121,15 @@ The full system is documented in `DESIGN.md`. In short, `src/styles/tokens.css` 
 | --- | --- | --- | --- | --- |
 | Home | 99 | 100 | 100 | 100 |
 | Services | 99 | 100 | 100 | 100 |
+| Virtual assistance | 99 | 100 | 100 | 100 |
 | Website development | 99 | 100 | 100 | 100 |
-| About | 99 | 100 | 100 | 100 |
+| About | 100 | 100 | 100 | 100 |
 | Work | 99 | 100 | 100 | 100 |
 | Blog | 100 | 100 | 100 | 100 |
-| Contact | 99 | 100 | 100 | 100 |
-| Wilmington | 99 | 100 | 100 | 100 |
+| Contact | 100 | 100 | 100 | 100 |
+| Wilmington | 100 | 100 | 100 | 100 |
 
-CLS 0 on all pages; LCP 1.7–2.2 s. Scores vary a few points between runs; re-measure on the deployed site.
+CLS 0 (0.002 on Contact); LCP 1.5–2.0 s; TBT 0–10 ms. Scores vary a few points between runs; re-measure on the deployed site.
 
 ## Before launch: confirm with the business
 

@@ -99,13 +99,13 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
 
   <div class="ca__grid">
     <article class="ca__doc has-selection" aria-label="Sample agreement excerpt" data-doc>
-      <h3 class="ca__doc-title">Master Services Agreement</h3>
+      <h2 class="ca__doc-title">Master Services Agreement</h2>
       {
         clauses.map((c) => (
           <section class:list={['ca__clause', { 'is-selected': c.id === selected, 'is-done': done.has(c.id) }]} id={`ca-${c.id}`} data-clause={c.id}>
-            <h4 class="ca__clause-h">
+            <h3 class="ca__clause-h">
               <span class="ca__sec tabular">{c.section}</span> {c.heading}
-            </h4>
+            </h3>
             <p class="ca__clause-p">
               {c.pre}<mark class="ca__span">{c.span}</mark>{c.post}
             </p>
@@ -116,7 +116,7 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
 
     <div class="ca__sheet">
       <div class="ca__sheet-head">
-        <h3 class="label">Abstraction sheet</h3>
+        <h2 class="label">Abstraction sheet</h2>
         <p class="small muted" aria-live="polite">
           <b data-out="done">{done.size}</b> of {clauses.length} fields
         </p>
@@ -177,7 +177,7 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
   .ca__span { background: none; color: inherit; transition: background-color var(--t-ui) ease, color var(--t-ui) ease; }
   .ca__clause.is-done .ca__span { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-text); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
   /* Isolate the selected clause, dim the rest */
-  .ca__doc.has-selection .ca__clause:not(.is-selected) { opacity: 0.55; }
+  .ca__doc.has-selection .ca__clause:not(.is-selected) { color: var(--ink-3); }
   .ca__clause.is-selected { background: var(--ground); outline: 1px solid var(--rule-strong); }
   .ca__clause.is-selected .ca__clause-p { color: var(--ink); }
   .ca__clause.is-selected .ca__span { background: var(--field); color: var(--field-ink); text-decoration: none; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0.05em 0.15em; }
@@ -185,7 +185,7 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
   /* ---- The sheet ---- */
   .ca__sheet { background: var(--ground); display: grid; align-content: start; }
   .ca__sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--rule-strong); }
-  .ca__sheet-head h3 { font-weight: 600; }
+  .ca__sheet-head h2 { font-weight: 600; }
   .ca__sheet-head b { color: var(--ink); }
   .ca__fields li + li { border-top: 1px solid var(--rule); }
   .ca__field {

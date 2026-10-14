@@ -44,7 +44,7 @@ const { wordmark = true, class: className, draw = false, label } = Astro.props;
   :global(.lime) .logo__mark { color: var(--carbon-950); }
   .logo__type { display: grid; gap: 0.28em; }
   .logo__name { font-size: 1.18em; font-weight: 750; font-stretch: 112%; letter-spacing: -0.02em; }
-  .logo__sub { font-size: 0.56em; font-weight: 600; font-stretch: 125%; letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-2); }
+  .logo__sub { font-size: max(0.56em, 0.6875rem); font-weight: 600; font-stretch: 112%; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-2); }
 
   .logo--draw .logo__wave, .logo--draw .logo__dash { stroke-dasharray: 1; stroke-dashoffset: 1; }
   @media (prefers-reduced-motion: no-preference) {

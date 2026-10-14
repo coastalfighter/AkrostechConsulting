@@ -192,6 +192,7 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
   .grid > .c-12 { grid-column: 1 / -1; }
   /* Start columns keep the element's span: class="c-7 s-6" runs from column 6 for 7 columns. */
   .grid > .s-2 { grid-column: 2 / span var(--span, 1); }
+  .grid > .s-5 { grid-column: 5 / span var(--span, 1); }
   .grid > .s-6 { grid-column: 6 / span var(--span, 1); }
   .grid > .s-7 { grid-column: 7 / span var(--span, 1); }
   .grid > .s-8 { grid-column: 8 / span var(--span, 1); }

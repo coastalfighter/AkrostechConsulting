@@ -36,7 +36,7 @@ const year = [
 ---
 
 <BaseLayout {...pages.about} image="/og/about.png" breadcrumbs={crumbs} webPage={{ '@type': ['WebPage', 'AboutPage'] }}>
-  <Hero labelledby="about-title" split="5-7" crumbs={crumbs}>
+  <Hero labelledby="about-title" split="5-7" crumbs={crumbs} class="about-hero">
     <h1 class="h1 hero__title" id="about-title">Offshore teams, <span class="accent">onshore standard.</span></h1>
     <p class="hero__lead">
       Akrostech places vetted professionals in India on U.S. working hours, from our headquarters in Wilmington, Delaware. We exist so growing
@@ -328,7 +328,7 @@ const year = [
   }
   @media (min-width: 40rem) { .story__chapter { grid-template-columns: 9rem 1fr; } }
   @media (min-width: 64rem) {
-    .story__chapter { min-height: 52svh; align-content: center; opacity: 0.4; }
+    .story__chapter { min-height: 52svh; align-content: center; opacity: 0.72; }
     .story__chapter.is-active { opacity: 1; }
     :global(html:not(.js)) .story__chapter { opacity: 1; }
   }
@@ -399,4 +399,6 @@ const year = [
   .places__name { text-wrap: balance; font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem); font-weight: 750; font-stretch: var(--wide); line-height: 1; letter-spacing: -0.025em; text-transform: uppercase; }
   .places__body { color: var(--ink-2); max-width: 40ch; }
   .places__photo { min-height: 18rem; }
+  /* The longest headline on the site: one step smaller so it clears the org diagram. */
+  :global(.about-hero .hero__title) { font-size: clamp(2.5rem, 1.1rem + 3.4vw, 4.5rem); }
 </style>

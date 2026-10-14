@@ -109,16 +109,16 @@ const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
 
   <div class="ib__board">
     <section class="ib__lane ib__lane--all" data-lane="all" aria-label="Inbox, all messages unread" hidden>
-      <h3 class="ib__lane-head"><span class="label">Inbox</span><span class="ib__lane-n">{messages.length} unread</span></h3>
+      <h2 class="ib__lane-head"><span class="label">Inbox</span><span class="ib__lane-n">{messages.length} unread</span></h2>
       <ol class="ib__list" role="list" data-list="all"></ol>
     </section>
     {
       lanes.map((lane) => (
         <section class={`ib__lane ib__lane--${lane.id}`} data-lane={lane.id} aria-label={lane.title}>
-          <h3 class="ib__lane-head">
+          <h2 class="ib__lane-head">
             <span class="label">{lane.title}</span>
             <span class="ib__lane-n" data-lane-n={lane.id}>{count(lane.id)}</span>
-          </h3>
+          </h2>
           <ol class="ib__list" role="list" data-list={lane.id}>
             {messages.map((m, i) =>
               m.lane === lane.id ? (

@@ -57,3 +57,16 @@ describe('fuzzy page finder', () => {
     expect(search('new york', entries)[0]?.path).toBe('/locations/new-york-ny');
   });
 });
+
+import { bestMatch as confidentMatch } from '@/lib/fuzzy';
+
+describe('404 closest page', () => {
+  const entries = [
+    { title: 'Website Development', path: '/services/website-development', group: 'Practices', keywords: 'landing pages shopify' },
+    { title: 'Virtual Assistance', path: '/services/virtual-assistance', group: 'Practices' },
+  ];
+  it('suggests a page only for a confident match', () => {
+    expect(confidentMatch('nope page', entries)).toBeUndefined();
+    expect(confidentMatch('virtual assistant', entries)?.path).toBe('/services/virtual-assistance');
+  });
+});

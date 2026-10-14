@@ -3,7 +3,7 @@
  * site's real pages, offers the closest page, and runs a fuzzy page finder as an accessible
  * combobox (Up/Down to move, Enter to open, Escape to clear).
  */
-import { normalise, pathWords, search, type SearchEntry } from '@/lib/fuzzy';
+import { normalise, pathWords, search, bestMatch, type SearchEntry } from '@/lib/fuzzy';
 
 interface Payload {
   entries: SearchEntry[];
@@ -120,7 +120,7 @@ export default function initLost(root: HTMLElement): void {
   }
 
   // ---- Closest page to the broken address ----
-  const best = fromPath ? search(fromPath, data.entries, 1)[0] : undefined;
+  const best = fromPath ? bestMatch(fromPath, data.entries) : undefined;
   const suggest = root.querySelector<HTMLElement>('[data-suggest]');
   if (best && suggest) {
     const link = suggest.querySelector<HTMLAnchorElement>('[data-suggest-link]');
@@ -160,7 +160,7 @@ export default function initLost(root: HTMLElement): void {
     if (q) {
       results = search(q, data!.entries, 7);
       heading = 'Matching pages';
-    } else if (fromPath && search(fromPath, data!.entries, 1).length) {
+    } else if (fromPath && bestMatch(fromPath, data!.entries)) {
       results = search(fromPath, data!.entries, 6);
       heading = 'Closest to the address you followed';
     } else {

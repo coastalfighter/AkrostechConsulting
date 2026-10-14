@@ -119,3 +119,13 @@ export function search(query: string, entries: SearchEntry[], limit = 6): Search
     .slice(0, limit)
     .map((r) => r.e);
 }
+
+/**
+ * The single best entry, only when it is a confident match: every query word must match well
+ * (an average word score of at least `min`). Used to suggest a page for a broken address,
+ * where a weak partial match ("nope-page" → any page mentioning "pages") would mislead.
+ */
+export function bestMatch(query: string, entries: SearchEntry[], min = 2): SearchEntry | undefined {
+  const [top] = search(query, entries, 1);
+  return top && score(query, top) >= min ? top : undefined;
+}

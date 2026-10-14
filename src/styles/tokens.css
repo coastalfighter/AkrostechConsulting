@@ -87,7 +87,7 @@
   --track-display: -0.025em;
   --track-heading: -0.02em;
   --track-label: 0.08em;
-  --measure: 66ch;
+  --measure: 60ch; /* Archivo is wide: 60ch is about 75 characters a line */
 
   /* ---- Grid & space (8px base) ---- */
   --margin: clamp(1.25rem, 0.6rem + 3vw, 4rem);
