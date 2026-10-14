@@ -1,32 +1,121 @@
 {
   "schema": 1,
   "source": "DESIGN.md",
-  "world": "Standards Manual",
-  "theme": { "default": "dark", "alternate": "light", "attribute": "data-theme" },
+  "world": "v3: paper and ink, chartreuse highlighter, lavender/violet fields",
+  "theme": {
+    "default": "light",
+    "alternate": "dark",
+    "attribute": "data-theme"
+  },
   "motion": {
     "easeOut": "cubic-bezier(0.23, 1, 0.32, 1)",
     "easeInOut": "cubic-bezier(0.77, 0, 0.175, 1)",
     "easeDrawer": "cubic-bezier(0.32, 0.72, 0, 1)",
-    "press": { "duration": "160ms", "transform": "scale(0.97)" },
+    "press": {
+      "duration": "160ms",
+      "transform": "scale(0.97)"
+    },
     "ui": "220ms",
     "reveal": "900ms",
     "stagger": "60ms",
     "reducedMotion": "content visible and static; instruments fully operable"
   },
-  "focus": { "outline": "2px solid var(--focus)", "offset": "3px", "dark": "#c9ff4a", "light": "#0b0c0a", "onLime": "#0b0c0a" },
-  "selection": { "background": "#c9ff4a", "text": "#0b0c0a" },
+  "focus": {
+    "outline": "2px solid var(--focus)",
+    "offset": "3px",
+    "light": "#6327c5",
+    "dark": "#dbde2e",
+    "onChartreuse": "#161110"
+  },
+  "selection": {
+    "background": "#dbde2e",
+    "text": "#161110"
+  },
   "shadows": {
-    "float": "0 24px 64px -24px rgb(0 0 0 / .6), 0 2px 8px rgb(0 0 0 / .3)",
-    "usage": "floating UI only; never on cards"
+    "float": "0 24px 60px -28px rgb(22 17 16 / .35), 0 2px 8px rgb(22 17 16 / .08)",
+    "usage": "floating UI only (services menu); never cards"
   },
-  "grid": { "columns": { "phone": 4, "tablet": 8, "desktop": 12 }, "breakpoints": { "tablet": "40rem", "desktop": "64rem" }, "maxWidth": "1680px" },
+  "grid": {
+    "columns": {
+      "phone": 4,
+      "tablet": 8,
+      "desktop": 12
+    },
+    "breakpoints": {
+      "tablet": "40rem",
+      "desktop": "64rem"
+    },
+    "maxWidth": "1600px"
+  },
   "heroes": {
-    "/": "dial", "/services": "matrix", "/services/virtual-assistance": "inbox",
-    "/services/recruitment-process-outsourcing": "funnel", "/services/accounting-assistance": "ledger",
-    "/services/legal-process-outsourcing": "clauses", "/services/website-development": "builder",
-    "/about": "org", "/work": "board", "/work/[slug]": "timeline", "/contact": "week",
-    "/blog": "search", "/blog/[slug]": "toc", "/locations": "corridor", "/locations/[slug]": "route",
-    "/privacy": "flow", "/terms": "index-cards", "/404": "lost"
+    "type": "generative field (canvas)",
+    "scenes": {
+      "/": "wave",
+      "/services": "orbits",
+      "/services/virtual-assistance": "lanes",
+      "/services/recruitment": "funnel",
+      "/services/accounting": "ledger",
+      "/services/legal": "document",
+      "/services/website-development": "wireframe",
+      "/about": "network",
+      "/blog": "flow",
+      "/blog/[slug]": "flow-article",
+      "/contact": "relay",
+      "/privacy": "shield",
+      "/terms": "index",
+      "/404": "lost"
+    }
   },
-  "photography": { "source": "Unsplash License", "credits": "src/assets/photos/credits.json", "rule": "generic people at work; never presented as Akrostech staff, clients or offices" }
+  "photography": {
+    "source": "Unsplash License",
+    "credits": "src/assets/photos/credits.json",
+    "rule": "generic people at work; never presented as Akrostech staff, clients or offices"
+  },
+  "instruments": {
+    "/": [
+      "dial",
+      "compare",
+      "service index",
+      "audience tabs"
+    ],
+    "/services": [
+      "matrix"
+    ],
+    "/services/virtual-assistance": [
+      "inbox"
+    ],
+    "/services/recruitment": [
+      "funnel"
+    ],
+    "/services/accounting": [
+      "ledger"
+    ],
+    "/services/legal": [
+      "clauses"
+    ],
+    "/services/website-development": [
+      "builder"
+    ],
+    "/about": [
+      "org"
+    ],
+    "/contact": [
+      "week"
+    ],
+    "/blog": [
+      "search"
+    ],
+    "/blog/[slug]": [
+      "toc"
+    ],
+    "/privacy": [
+      "flow"
+    ],
+    "/terms": [
+      "index-cards"
+    ],
+    "/404": [
+      "lost"
+    ]
+  }
 }

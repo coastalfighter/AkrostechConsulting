@@ -343,20 +343,31 @@ export function samplePath(d: string, viewBox: [number, number, number, number],
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', d);
   const total = path.getTotalLength();
+  // getPointAtLength is slow; read a fixed polyline once and interpolate along it.
+  const steps = 320;
+  const xs = new Float32Array(steps + 1);
+  const ys = new Float32Array(steps + 1);
+  for (let i = 0; i <= steps; i++) {
+    const pt = path.getPointAtLength((i / steps) * total);
+    xs[i] = pt.x;
+    ys[i] = pt.y;
+  }
   const [vx, vy, vw, vh] = viewBox;
   const scale = Math.min(box.w / vw, box.h / vh);
   const ox = box.x + (box.w - vw * scale) / 2;
   const oy = box.y + (box.h - vh * scale) / 2;
   const out: Point[] = [];
   for (let i = 0; i < count; i++) {
-    const at = (i / count) * total;
-    const p = path.getPointAtLength(at);
-    const q = path.getPointAtLength(Math.min(total, at + 1));
-    const nx = -(q.y - p.y);
-    const ny = q.x - p.x;
+    const f = (i / count) * steps;
+    const j = Math.min(steps - 1, Math.floor(f));
+    const u = f - j;
+    const px = xs[j]! + (xs[j + 1]! - xs[j]!) * u;
+    const py = ys[j]! + (ys[j + 1]! - ys[j]!) * u;
+    const nx = -(ys[j + 1]! - ys[j]!);
+    const ny = xs[j + 1]! - xs[j]!;
     const len = Math.hypot(nx, ny) || 1;
     const off = (rand() - 0.5) * thickness;
-    out.push({ x: ox + (p.x - vx) * scale + (nx / len) * off * scale, y: oy + (p.y - vy) * scale + (ny / len) * off * scale });
+    out.push({ x: ox + (px - vx) * scale + (nx / len) * off * scale, y: oy + (py - vy) * scale + (ny / len) * off * scale });
   }
   return out;
 }

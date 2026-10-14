@@ -118,6 +118,6 @@ const { scene, labelledby, crumbs, seed, hint = 'Move through the field. Press t
   }
 
   .fhero :global(.fhero__title) { font-size: var(--t-h1); line-height: var(--lh-display); letter-spacing: var(--track-display); max-width: 13ch; }
-  .fhero--wide :global(.fhero__title) { max-width: 18ch; }
+  .fhero--wide :global(.fhero__title) { max-width: 18ch; font-size: clamp(2.4rem, 1.2rem + 3.4vw, 4.25rem); }
   .fhero :global(.fhero__lead) { font-size: var(--t-lead); line-height: 1.5; color: var(--ink-2); max-width: 42ch; }
 </style>

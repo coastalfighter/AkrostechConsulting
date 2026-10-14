@@ -116,7 +116,7 @@
   --track-display: -0.035em;
   --track-heading: -0.025em;
   --track-label: 0.06em;
-  --measure: 64ch;
+  --measure: 38rem; /* about 75 characters of Figtree body text */
 
   /* ---- Grid & space ---- */
   --margin: clamp(1.25rem, 0.6rem + 3vw, 4rem);

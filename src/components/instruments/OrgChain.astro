@@ -163,8 +163,6 @@ const links: Record<string, string> = {
     justify-items: center;
     align-content: center;
     padding: var(--s-6) var(--s-4);
-    border-radius: var(--radius);
-    background: var(--plate-2);
     background-image: radial-gradient(var(--rule-strong) 1px, transparent 1.4px);
     background-size: 1.25rem 1.25rem;
     background-position: center;
@@ -233,7 +231,7 @@ const links: Record<string, string> = {
   .org__state { justify-self: center; margin-top: auto; padding: 0.1rem 0.6rem; border-radius: var(--radius-pill); background: var(--plate-2); font-size: 0.75rem; font-weight: 650; color: var(--ink-2); }
 
   /* ---- Selection: the chosen node becomes a chartreuse field; the rest dim ---- */
-  .org[data-selected] .org__node, .org[data-selected] .org__member:not(.org__member--bench) { opacity: 0.7; }
+  .org[data-selected] .org__node, .org[data-selected] .org__member:not(.org__member--bench) { border-style: dashed; }
   .org[data-selected='you'] [data-node='you'],
   .org[data-selected='manager'] [data-node='manager'],
   .org[data-selected='lead'] [data-node='lead'],

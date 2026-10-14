@@ -278,8 +278,8 @@ html { scrollbar-color: var(--carbon-400) var(--ground); scrollbar-width: thin; 
   --accent-text: var(--lime-400);
 }
 .ruled > .violet, .ruled > .field-second { background: var(--second); }
-/* Ink panel: stays ink in both themes (instrument consoles, footer). */
-.ink-plate {
+/* Ink panel: stays ink in both themes (instrument consoles, footer, instrument bands). */
+.ink-plate, section:has(.band) {
   background: var(--carbon-950);
   color: var(--carbon-50);
   --ground: var(--carbon-950);
@@ -302,7 +302,23 @@ html { scrollbar-color: var(--carbon-400) var(--ground); scrollbar-width: thin; 
 }
 
 /* In the dark theme the ink panel lifts one step so it still reads as a panel. */
-:root[data-theme='dark'] .ink-plate { background: var(--carbon-900); box-shadow: inset 0 0 0 1px var(--rule); }
+.ink-plate { --band-bg: var(--carbon-950); }
+:root[data-theme='dark'] .ink-plate { --band-bg: var(--carbon-900); background: var(--carbon-900); box-shadow: inset 0 0 0 1px var(--rule); }
+
+/* Band: an instrument section painted ink edge to edge. The section carries the colour (no
+   radius, no shadow), so the instrument's own panels are first-level, not cards in a card. */
+section:has(.band) {
+  background: var(--carbon-950);
+  padding-block: var(--s-9) !important;
+}
+:root[data-theme='dark'] section:has(.band) { background: var(--carbon-900); }
+.band {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
 
 /* ---- Sections ---- */
 .section { padding-block: var(--s-9); position: relative; }

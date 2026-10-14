@@ -50,7 +50,7 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
 ---
 
 <BaseLayout {...meta} image="/og/legal.png" breadcrumbs={crumbs} preloader={false}>
-  <FieldHero scene={scene} labelledby="legal-title" crumbs={crumbs}>
+  <FieldHero scene={scene} labelledby="legal-title" crumbs={crumbs} wide>
     <h1 class="fhero__title" id="legal-title">{heading}{quiet && <> <span class="quiet">{quiet}</span></>}</h1>
     <p class="fhero__lead">{lead}</p>
     <dl class="legal__meta">
@@ -66,7 +66,7 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
         <h2 class="h2" id="legal-tool-title" data-split>{toolTitle}</h2>
         <p data-reveal>{toolIntro}</p>
       </div>
-      <div class:list={['legal-tool__panel', toolTone === 'ink' ? 'ink-plate' : 'panel']}>
+      <div class:list={['legal-tool__panel', toolTone === 'ink' ? 'ink-plate band' : 'legal-tool__panel--open']}>
         <slot name="instrument" />
       </div>
     </div>

@@ -1,202 +1,170 @@
 ---
-name: Akrostech Consulting, Standards Manual
-description: The site is Akrostech's own corporate identity manual. Black plates, whole lime fields, expanded grotesk capitals, a visible 12-column grid and a working diagram in every hero.
+name: Akrostech Consulting, v3
+description: Paper and ink with a chartreuse highlighter and lavender/violet fields; Sample-3 structure; a live generative field in every hero and the interactive instruments in the page bodies.
 colors:
-  lime: "#c9ff4a"
-  lime-hover: "#d4fe6e"
-  lime-deep: "#b2ec2b"
-  lime-ink-light: "#4b6a0d"
-  carbon-950: "#0b0c0a"
-  carbon-900: "#13150f"
-  carbon-850: "#1b1e17"
-  carbon-800: "#24271f"
-  carbon-600: "#555a4c"
-  carbon-400: "#929787"
-  carbon-300: "#b5b9ab"
-  carbon-50: "#f4f5ef"
-  field-ink-2: "#2c3a12"
-  signal-red: "#ff5c45"
-  signal-red-deep: "#b5321f"
+  paper: "#f3f2ee"
+  ink: "#161110"
+  chartreuse: "#dbde2e"
+  lavender: "#c5baea"
+  violet: "#6327c5"
+  plate-light: "#fbfaf8"
+  plate-2-light: "#e9e7e1"
+  ink-2-light: "#5c524d"
+  ink-3-light: "#736963"
+  plate-dark: "#1c1615"
+  ink-2-dark: "#bfb8b1"
+  chartreuse-text-light: "#4f510f"
+  danger-light: "#c2361f"
+  danger-dark: "#ff7a5c"
 typography:
-  display:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "clamp(2.75rem, 1.25rem + 5vw, 6rem)"
-    fontWeight: 700
-    lineHeight: 0.94
-    letterSpacing: "-0.025em"
   h1:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "clamp(2.5rem, 1.1rem + 4.2vw, 5.25rem)"
+    fontFamily: "'Bricolage Grotesque', 'Bricolage Fallback', 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "clamp(2.6rem, 1.3rem + 4.4vw, 5.25rem)"
     fontWeight: 700
-    lineHeight: 0.94
-    letterSpacing: "-0.025em"
+    lineHeight: 0.96
+    letterSpacing: "-0.035em"
   h2:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "clamp(1.875rem, 1.1rem + 2.6vw, 3.5rem)"
+    fontFamily: "'Bricolage Grotesque', 'Bricolage Fallback', 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "clamp(2rem, 1.2rem + 2.6vw, 3.5rem)"
     fontWeight: 700
-    lineHeight: 1.02
-    letterSpacing: "-0.02em"
+    lineHeight: 1.04
+    letterSpacing: "-0.025em"
   h3:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "clamp(1.25rem, 1.02rem + 0.75vw, 1.75rem)"
-    fontWeight: 700
+    fontFamily: "'Bricolage Grotesque', 'Bricolage Fallback', 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "clamp(1.3rem, 1.1rem + 0.7vw, 1.75rem)"
+    fontWeight: 650
     lineHeight: 1.25
-    letterSpacing: "-0.01em"
-  lead:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem)"
-    fontWeight: 400
-    lineHeight: 1.45
+    letterSpacing: "-0.015em"
   body:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
+    fontFamily: "'Figtree', 'Figtree Fallback', 'Helvetica Neue', Arial, sans-serif"
     fontSize: "1.0625rem"
     fontWeight: 400
     lineHeight: 1.6
+  lead:
+    fontFamily: "'Figtree', 'Figtree Fallback', 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "clamp(1.125rem, 1.03rem + 0.4vw, 1.375rem)"
+    fontWeight: 400
+    lineHeight: 1.5
   label:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
+    fontFamily: "'Figtree', 'Figtree Fallback', 'Helvetica Neue', Arial, sans-serif"
     fontSize: "0.8125rem"
     fontWeight: 600
     lineHeight: 1.3
-    letterSpacing: "0.08em"
-  figure:
-    fontFamily: "Archivo, 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "clamp(3rem, 1.5rem + 5vw, 6rem)"
-    fontWeight: 700
-    lineHeight: 0.9
-    letterSpacing: "-0.03em"
+    letterSpacing: "0.06em"
 rounded:
-  none: "0"
+  sm: "0.75rem"
+  md: "1.25rem"
+  lg: "2rem"
   pill: "999px"
 spacing:
-  s-1: "0.25rem"
-  s-2: "0.5rem"
   s-3: "0.75rem"
   s-4: "1rem"
   s-5: "1.5rem"
   s-6: "2rem"
   s-7: "3rem"
   s-8: "clamp(3rem, 2rem + 3vw, 4.5rem)"
-  s-9: "clamp(4rem, 2.5rem + 5vw, 7rem)"
+  s-9: "clamp(4.5rem, 2.8rem + 5vw, 7.5rem)"
   margin: "clamp(1.25rem, 0.6rem + 3vw, 4rem)"
   gutter: "clamp(1rem, 0.6rem + 1.4vw, 2rem)"
-  module-pad: "clamp(1.25rem, 0.8rem + 1.6vw, 2.5rem)"
 components:
   button-primary:
-    backgroundColor: "{colors.lime}"
-    textColor: "{colors.carbon-950}"
-    rounded: "{rounded.none}"
-    padding: "0.85rem 1.15rem 0.85rem 1.35rem"
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.paper}"
+    rounded: "{rounded.pill}"
     height: "3.25rem"
   button-primary-hover:
-    backgroundColor: "{colors.lime-hover}"
-    textColor: "{colors.carbon-950}"
+    backgroundColor: "{colors.chartreuse}"
+    textColor: "{colors.ink}"
+  button-primary-dark:
+    backgroundColor: "{colors.chartreuse}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
   button-ghost:
     backgroundColor: "transparent"
-    textColor: "{colors.carbon-50}"
-    rounded: "{rounded.none}"
-    height: "3.25rem"
-  button-on-lime:
-    backgroundColor: "{colors.carbon-950}"
-    textColor: "{colors.lime}"
-    rounded: "{rounded.none}"
-  module:
-    backgroundColor: "{colors.carbon-950}"
-    textColor: "{colors.carbon-50}"
-    rounded: "{rounded.none}"
-    padding: "{spacing.module-pad}"
-  module-plate:
-    backgroundColor: "{colors.carbon-900}"
-    textColor: "{colors.carbon-50}"
-  lime-field:
-    backgroundColor: "{colors.lime}"
-    textColor: "{colors.carbon-950}"
-  chip:
-    backgroundColor: "transparent"
-    textColor: "{colors.carbon-50}"
-    rounded: "{rounded.none}"
-    height: "44px"
-  chip-pressed:
-    backgroundColor: "{colors.lime}"
-    textColor: "{colors.carbon-950}"
-  input:
-    backgroundColor: "{colors.carbon-900}"
-    textColor: "{colors.carbon-50}"
-    rounded: "{rounded.none}"
-    height: "3.25rem"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+  field-hero-panel:
+    backgroundColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+  field-hero-panel-dark:
+    backgroundColor: "{colors.violet}"
+    rounded: "{rounded.lg}"
+  highlight-field:
+    backgroundColor: "{colors.chartreuse}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+  soft-field:
+    backgroundColor: "{colors.lavender}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+  soft-field-dark:
+    backgroundColor: "{colors.violet}"
+    textColor: "{colors.paper}"
+  panel:
+    backgroundColor: "{colors.plate-light}"
+    rounded: "{rounded.md}"
+  badge-new:
+    backgroundColor: "{colors.chartreuse}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
 ---
 
-# Akrostech Consulting: Standards Manual
+# Akrostech Consulting, v3
 
 ## Overview
 
-The site is Akrostech's own corporate identity manual: every page reads like a plate from a Swiss standards book. Near-black plates carry white type; the brand lime from the M-wave mark arrives as **whole fields** (a module, a band, a table column), never as a tint or a gradient. Display type is Archivo pushed to its 125% width, bold, in capitals. A faint 12-column construction grid shows behind every hero, and content sits in modules separated by 1px hairlines.
+Daylight paper with an ink night window. The visitor reads on warm paper (`#f3f2ee`); each page opens beside a rounded ink panel (violet in the dark theme) holding a **generative field**: a canvas of particles that forms a page-specific shape (the M-wave mark on Home, five orbits on Services, sorting lanes for virtual assistance, a narrowing funnel for recruitment, balancing columns for accounting, lines of a page for legal, a wireframe for web, a team network on About, wave-line currents on the blog, two linked clusters on Contact, a boundary on Privacy, an index grid on Terms, a scattered "404"). The pointer parts the field and a press sends a ripple. These are interactive graphics, not images or infographics.
 
-Two things carry the brand promise, *offshore talent, onshore quality*:
+The site's working **instruments** (live shift dial, comparison divider, service matrix, inbox triage, hiring funnel, bank reconciliation, clause abstractor, page builder, org chain, call week, article search, reading outline, data flow, clause index, page finder) sit further down each page in their own sections, usually on an edge-to-edge ink band.
 
-1. **Every hero is a working instrument, unique to its page**, drawn like a diagram from the manual (hairlines, tabular figures, `.label` keys, lime as state): the shift dial (home), practice matrix, inbox triage, hiring funnel, bank reconciliation, clause abstractor, page builder with a Core Web Vitals gauge, org chain, blueprint board, engagement timeline, call week, live article search, reading outline, I-95 corridor, city route, privacy data flow, clause index and the 404 page finder. Each is server-rendered in a meaningful state and enhanced by a lazy module in `src/scripts/heroes/`.
-2. **Real photography in grid modules**: stock photos of people at work (Unsplash License, `src/assets/photos/credits.json`), always generic, never captioned as Akrostech staff, clients or offices.
-
-Mode: Persuade for marketing pages, Read for articles and legal pages, Operate inside the instruments.
+Structure and copy follow the Sample-3 site: home (ten sections), services hub, five service pages at short URLs, about, blog with 18 guides, contact, privacy, terms, 404.
 
 ## Colors
 
-- **Ground `carbon-950` #0B0C0A** is the page. **Plates** step up: `carbon-900` (#13150F) and `carbon-850` (#1B1E17) for instrument panels and alternating sections; `carbon-800` for tracks and disabled fills.
-- **Ink**: `carbon-50` (#F4F5EF) primary, `carbon-300` (#B5B9AB) secondary (`--ink-2`), `carbon-400` (#929787) tertiary. Hairlines are ink at 14% (`--rule`) and 32% (`--rule-strong`).
-- **Lime #C9FF4A** is the only action colour and the only state colour: primary buttons, pressed chips, the selected node, the lit arc, the featured pricing tier. Lime text (`.accent`) is reserved for the second line of a headline, data keys and figures.
-- **`.lime` fields** re-map the cascade inside them: ink becomes carbon-950, secondary ink `#2C3A12`, rules carbon at 18%, focus and buttons invert (black button, lime text).
-- **Signal red** (#FF5C45; #B5321F in light) only for errors, the absent specialist, the 404 break and "Poor" performance.
-- **Light theme** (`data-theme="light"`, the printed-manual variant): paper `carbon-50`, white plates, black ink, black primary buttons with lime text, lime text darkened to `#4B6A0D`. Dark is the default and the brand.
+- **Paper `#f3f2ee`** is the light ground (default theme); **ink `#161110`** is the text, the primary button and the hero/instrument panels.
+- **Chartreuse `#dbde2e`** is the highlighter: the "New" badge, the CTA band, selected states, the comparison's Akrostech column, button hover, the `.mark` stroke behind a word. It is a fill, never text on paper (text on chartreuse is always ink). On ink panels chartreuse can be text.
+- **Lavender `#c5baea`** (light) and **violet `#6327c5`** (dark) are the soft fields: a lead bento cell, the services-menu header, the mission panel, key-takeaway boxes, focus rings in light (`--focus` violet).
+- **Dark theme**: ink ground, paper text, chartreuse primary buttons, violet hero panels and soft fields; ink bands lift to `#1c1615` with a hairline.
+- Secondary text: `#5c524d` on paper (7:1), `#bfb8b1` on ink (9:1). All body text ≥ 4.5:1 in both themes.
 
 ## Typography
 
-One family, **Archivo variable** (wght 100–900, wdth 62–125%), self-hosted with a metric-matched Arial fallback.
-
-- `.display` / `.h1`: 125% width, 700, uppercase, leading 0.94, tracking −0.025em, max 6rem. Headlines are written as two short sentences; the second goes lime (`<span class="accent">`).
-- `.h2`: 125% width, sentence case, leading 1.02. Sits on a strong rule in `.section-head`, with the supporting paragraph on columns 9–12.
-- `.h3`: 112% width. `.label`: 0.8125rem, 600, 112% width, tracked 0.08em, uppercase; used for data keys and captions **inside** modules, never as an eyebrow above a heading.
-- `.figure`: tabular lining numerals for proof numbers (48h, 100+, 98%).
-- Body 1.0625rem / 1.6; prose measure 60ch (≈75 characters in Archivo).
+- **Bricolage Grotesque** (variable, optical size) for every heading and figure, 700, tight tracking, sentence case. Headlines are two phrases; the second steps back in tone (`.quiet`).
+- **Figtree** for text, labels and controls.
+- Body 1.0625rem / 1.6; prose measure 38rem (about 75 characters).
 
 ## Layout
 
-- `.wrap` (max 1680px, fluid margin) + `.grid`: 4 columns on phones, 8 from 40rem, 12 from 64rem. Children are full width by default; `.c-N` sets the desktop span and `.s-N` the start column while keeping the span (`class="c-7 s-6"`).
-- **Hero frame** (`Hero.astro`): construction lines, breadcrumbs, words on the left columns (`split="5-7"` by default), the instrument on the right, an optional ruled `strip` of modules below. Instruments stack under the words on phones, with no horizontal scroll at 360px.
-- **Ruled modules** (`.ruled`): a rule-coloured container with 1px gaps, so every hairline is drawn once. `.module` pads; `.module--flex` stacks.
-- **Signature compositions**: the photo-and-headline *seam* (a headline module overlapping the corner of an 8-column photo on a 6px lime top rule), the *compare* divider (local hire vs Akrostech, draggable), the lime closing band with a photo bleeding into the footer.
-- Section rhythm: `.section` uses `s-9` vertical padding; alternate plates (`.plate`) break long pages.
+- `.wrap` (max 1600px) + `.grid` (4 / 8 / 12 columns; `.c-N` spans, `.s-N` starts that keep the span).
+- `FieldHero`: words on 5 columns, field panel on 6 (switches with `wide` for long headlines); stacks on phones.
+- Section heads: h2 left, supporting paragraph right. Sections alternate paper, bands of ink (instruments) and one chartreuse CTA band per page.
+- Compositions vary by section: hover-photo service index, ink band with the dial and a shared-day timeline, a step track, a bento, tabs, the comparison divider, a sticky-heading FAQ.
 
 ## Elevation & Depth
 
-Flat. Depth comes from plate steps and hairlines, never shadows on cards. `--shadow-float` exists only for floating UI (menus, the builder's chat widget). No glass, no blur, no gradients except the hatched "placeholder" stripes in instruments.
+Flat with hairlines (`--rule`) and plate steps. Shadows only for floating UI (the services menu). Instrument bands are full-width section colour, so the instruments' own panels are first-level (no cards in cards).
 
 ## Shapes
 
-Square everything (`--radius: 0`): buttons, chips, inputs, modules, photos, markers. Only status dots (`.live`) and the dial's handles are round. The M-wave mark is the one curve, and it is the line that draws on in the preloader.
+Rounded: panels `1.25rem`, large panels and the field window `2rem`, inputs `0.75rem`, buttons and chips pills, icon buttons round. Icons are drawn with round caps and joins, matching the logo's line.
 
 ## Components
 
-- **Buttons**: `.btn--primary` lime / `.btn--ghost` outline / `.btn--small` / `.btn--block`; square, 3.25rem tall, label plus arrow icon that nudges on hover; `:active` scales to 0.97 over 160ms; disabled uses plate-3; `aria-busy` spins the arrow.
-- **Links**: `.link` drawn underline that retracts on hover; `.more` arrow link at module feet; `.stretch` makes a whole card the target.
-- **Chips**: 44px buttons with `aria-pressed`; pressed = lime field.
-- **Photo** (`Photo.astro`): AVIF/WebP via Astro `<Picture>`, ratio or fill, optional clip reveal and square caption tab.
-- **Cards**: `WorkCard` (labelled "Blueprint") and `PostCard`; photo, meta line, title link; image scales 1.03 on hover.
-- **FAQ**: native `<details name>` accordion; sticky heading column; the icon square fills lime when open.
-- **Header**: logo, primary nav with a lime underline for the current page, a two-city clock (DE / IN) at wide sizes, theme switch, lime "Book a call"; becomes solid on scroll and hides on scroll down. Mobile: full-screen `<dialog>` menu with expanded capitals.
-- **Footer**: black plate, tagline in display capitals, four ruled columns, legal line.
-- **Forms**: `.input` with label, hint, error; invalid state turns the border signal red; errors appear after interaction.
+- **Buttons**: `.btn--primary` (ink → chartreuse on hover; chartreuse in dark), `.btn--ghost` (outline), press `scale(.97)` at 160ms, hover only on fine pointers, `aria-busy` spinner.
+- **Header**: logo, Services disclosure menu (all services & comparison, then five services with "New"), About, Blog, Contact, New York and India clocks (wide screens), theme switch, Book a call. Mobile: full-screen dialog menu.
+- **Footer**: ink panel with brand column, Services, Company, Contact, legal line.
+- **FieldHero**: canvas field + caption + pause button (WCAG 2.2.2); static settled frame under reduced motion; starts after first paint at idle; pauses off-screen.
+- **Compare**: draggable divider, option switch (in-house hire / freelance marketplace), keyboard slider.
+- **Photo**: AVIF/WebP via Astro, rounded, clip reveal; stock photography never presented as Akrostech people.
 
 ## Do's and Don'ts
 
 **Do**
-- Use lime as a whole field or as state. One lime field per viewport is usually enough.
-- Give every new page hero its own working instrument that renders meaningfully without JavaScript and is keyboard operable.
-- Use `.label` keys, tabular numbers and hairlines for anything that is data.
-- Use real photography in grid modules, alt text describing the scene, and keep it generic.
-- Keep UI motion under 300ms with `--ease-out`; reserve longer motion (900ms clip reveals, the dial's zone turn) for one authored moment per view. Everything must hold under `prefers-reduced-motion`.
+- Keep chartreuse as a fill; let lavender/violet carry the soft emphasis.
+- Give every new page a field formation of its own and put any working tool in the body, on an ink band.
+- Use the Sample-3 copy and the published figures only.
+- Keep motion purposeful: one authored moment per view, ease-out curves, under 300ms for UI, everything usable with reduced motion and without JavaScript.
 
 **Don't**
-- No eyebrow or kicker text above headings, no decorative section numbers ("01"), no grids of same-size icon cards.
-- No gradients on text or surfaces, no glassmorphism, no drop shadows on cards, no rounded corners, no side-stripe borders thicker than 1px.
-- No display text above 6rem or tracking tighter than −0.04em.
-- No invented clients, testimonials, logos, names, quotes or statistics. Only figures in `src/config/site.ts`. Work stays labelled as blueprints until a real case study is approved.
-- Never present stock photographs as Akrostech's people, clients or offices.
+- No chartreuse text on paper, no gradient text, no glass, no side-stripe borders, no eyebrows above headings, no decorative numbering, no cards inside cards, no logo walls or invented proof.
+- No images or infographics in hero sections; the hero graphic is the field.
