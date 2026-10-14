@@ -3,10 +3,13 @@ import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import Media from '@/components/Media.astro';
+import ArticleOutline from '@/components/heroes/ArticleOutline.astro';
+import Photo from '@/components/Photo.astro';
+import PostCard from '@/components/PostCard.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
+import { photoFor } from '@/data/photos';
 import { formatDate, getPosts, postHref, readingMinutes, wordCount, type Post } from '@/lib/blog';
 import { articleSchema, canonical } from '@/lib/seo';
 
@@ -44,6 +47,18 @@ const share = {
   x: `https://x.com/intent/post?url=${encodeURIComponent(url)}&text=${encodeURIComponent(d.title)}`,
   email: `mailto:?subject=${encodeURIComponent(d.title)}&body=${encodeURIComponent(`${d.excerpt}\n\n${url}`)}`,
 };
+
+// Reading time per section: split the source at its level-2 headings, in document order.
+const WPM = 230;
+const parts = (post.body ?? '').split(/^## .*$/m);
+const introWords = wordCount(parts[0]);
+const sectionWords = parts.slice(1).map((p) => wordCount(p));
+const evenShare = Math.round((wordCount(post.body) - introWords) / Math.max(1, toc.length));
+const sections = toc.map((h, i) => ({
+  slug: h.slug,
+  text: h.text,
+  words: sectionWords.length === toc.length ? (sectionWords[i] ?? 0) : evenShare,
+}));
 ---
 
 <BaseLayout
@@ -69,132 +84,95 @@ const share = {
     }),
   ]}
 >
-  <div class="read-progress" aria-hidden="true"><span data-read-progress></span></div>
+  <article class="art" aria-labelledby="article-title">
+    <div class="gridlines" aria-hidden="true"><div>{Array.from({ length: 12 }, () => <span />)}</div></div>
+    <div class="wrap art__wrap">
+      <div class="art__crumbs"><Breadcrumbs items={crumbs} /></div>
+      <div class="art__grid grid">
+        <header class="art__head">
+          <p class="art__cat"><a class="link link--quiet" href={`/blog?category=${d.category.toLowerCase().replace(/[^a-z]+/g, '-')}#articles`}>{d.category}</a></p>
+          <h1 class="art__title" id="article-title">{d.title}</h1>
+          <p class="art__excerpt">{d.excerpt}</p>
+          <dl class="art__meta">
+            <div><dt class="label">Author</dt><dd>{d.author}</dd></div>
+            <div><dt class="label">Published</dt><dd><time datetime={d.published.toISOString()}>{formatDate(d.published)}</time></dd></div>
+            {
+              d.updated && (
+                <div>
+                  <dt class="label">Updated</dt>
+                  <dd>
+                    <time datetime={d.updated.toISOString()}>{formatDate(d.updated)}</time>
+                  </dd>
+                </div>
+              )
+            }
+            <div><dt class="label">Reading time</dt><dd class="tabular">{minutes} min</dd></div>
+          </dl>
+        </header>
 
-  <article class="art" data-article>
-    <header class="art__head wrap">
-      <Breadcrumbs items={crumbs} />
-      <p class="art__cat">{d.category}</p>
-      <h1 class="art__title">{d.title}</h1>
-      <p class="art__excerpt">{d.excerpt}</p>
-      <p class="art__meta">
-        {d.author} · <time datetime={d.published.toISOString()}>{formatDate(d.published)}</time> · {minutes} min read
-      </p>
-    </header>
+        <div class="art__main">
+          {toc.length > 1 && <ArticleOutline sections={sections} introWords={introWords} totalMinutes={minutes} wpm={WPM} />}
 
-    <div class="art__hero wrap">
-      <Media id={`blog-${post.id}`} alt="" priority ratio="21 / 9" sizes="100vw" widths={[800, 1200, 1600, 2000, 2400]} />
-    </div>
+          <div class="art__cover">
+            <Photo name={photoFor(d.art, d.artVariant)} alt="" ratio="16 / 9" priority sizes="(min-width: 64rem) 62vw, 100vw" />
+          </div>
 
-    <div class="art__layout wrap">
-      <aside class="art__aside">
-        {
-          toc.length > 1 && (
-            <nav class="toc" aria-label="On this page">
-              <p class="toc__title">On this page</p>
-              <ol role="list">
-                {toc.map((h) => (
+          <div class="art__body prose" data-article-body>
+            <Content />
+          </div>
+
+          <footer class="art__foot">
+            <div class="art__about ruled">
+              <div class="module module--flex">
+                <p class="h3">About Akrostech</p>
+                <p class="muted">
+                  {site.name} places vetted professionals in India on U.S. working hours: virtual assistants, recruiters, accountants, legal support and web
+                  developers. Headquartered in Wilmington, Delaware.
+                </p>
+                <a class="more" href="/services">Explore our services <Icon name="arrow-right" /></a>
+              </div>
+              <div class="module module--flex art__share">
+                <p class="label">Share this article</p>
+                <ul role="list" class="share">
+                  <li><a class="share__btn" href={share.linkedin} target="_blank" rel="noopener" aria-label="Share on LinkedIn"><Icon name="linkedin" /></a></li>
                   <li>
-                    <a class="toc__link" href={`#${h.slug}`} data-toc-link={h.slug}>
-                      {h.text}
+                    <a class="share__btn" href={share.x} target="_blank" rel="noopener" aria-label="Share on X">
+                      <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M4 4l16 16M20 4 4 20" stroke="currentColor" stroke-width="1.75" fill="none"></path></svg>
                     </a>
                   </li>
-                ))}
-              </ol>
-            </nav>
-          )
-        }
-        <div class="share">
-          <p class="toc__title">Share</p>
-          <ul role="list" class="share__list">
-            <li><a class="share__btn" href={share.linkedin} target="_blank" rel="noopener" aria-label="Share on LinkedIn"><Icon name="linkedin" /></a></li>
-            <li>
-              <a class="share__btn" href={share.x} target="_blank" rel="noopener" aria-label="Share on X">
-                <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M4 4l16 16M20 4 4 20" stroke="currentColor" stroke-width="1.75" fill="none"></path></svg>
-              </a>
-            </li>
-            <li><a class="share__btn" href={share.email} aria-label="Share by email"><Icon name="mail" /></a></li>
-            <li>
-              <button class="share__btn" type="button" data-copy={url} aria-label="Copy link to this article">
-                <Icon name="route" />
-              </button>
-            </li>
-          </ul>
+                  <li><a class="share__btn" href={share.email} aria-label="Share by email"><Icon name="mail" /></a></li>
+                  <li>
+                    <button class="share__btn" type="button" data-copy={url} aria-label="Copy link to this article">
+                      <Icon name="route" />
+                    </button>
+                  </li>
+                </ul>
+                {d.updated && <p class="small muted">Last updated <time datetime={d.updated.toISOString()}>{formatDate(d.updated)}</time></p>}
+              </div>
+            </div>
+          </footer>
         </div>
-      </aside>
-
-      <div class="art__body prose" data-article-body>
-        <Content />
       </div>
     </div>
-
-    <footer class="art__foot wrap">
-      <div class="art__about">
-        <p class="art__about-title">About Akrostech</p>
-        <p>
-          {site.name} places vetted professionals in India on U.S. working hours: virtual assistants, recruiters, accountants, legal support and web
-          developers. Headquartered in Wilmington, Delaware.
-        </p>
-        <a class="arrow-link" href="/services">Explore our services <Icon name="arrow-up-right" /></a>
-      </div>
-      {d.updated && <p class="art__updated">Last updated <time datetime={d.updated.toISOString()}>{formatDate(d.updated)}</time></p>}
-    </footer>
   </article>
 
-  <section class="more wrap section" aria-labelledby="more-title">
-    <h2 class="h2" id="more-title">Keep reading.</h2>
-    <ul class="more__grid" role="list">
-      {
-        related.map((p) => (
-          <li>
-            <a class="more__card" href={postHref(p)} data-cursor-label="Read">
-              <Media id={`blog-${p.id}`} alt="" ratio="16 / 10" sizes="(min-width: 768px) 31vw, 92vw" widths={[480, 720, 960]} />
-              <p class="more__meta">
-                {p.data.category} · {readingMinutes(p.body)} min read
-              </p>
-              <h3 class="more__title">{p.data.title}</h3>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+  <section class="section keep" aria-labelledby="more-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="more-title" data-split>Keep reading.</h2>
+        <p data-reveal>More guides on the same work, chosen to follow this one.</p>
+      </div>
+      <ul class="keep__grid grid" role="list" data-reveal-group>
+        {related.map((p) => <li class="c-4" data-reveal><PostCard post={p} /></li>)}
+      </ul>
+      <a class="more keep__all" href="/blog">All articles <Icon name="arrow-right" /></a>
+    </div>
   </section>
 
   <CtaBand />
 </BaseLayout>
 
 <script>
-  // Reading progress across the article body, plus active section in the table of contents.
-  const body = document.querySelector<HTMLElement>('[data-article-body]');
-  const bar = document.querySelector<HTMLElement>('[data-read-progress]');
-  if (body && bar) {
-    let ticking = false;
-    const update = () => {
-      ticking = false;
-      const r = body.getBoundingClientRect();
-      const total = r.height - window.innerHeight * 0.6;
-      const p = Math.min(1, Math.max(0, (window.innerHeight * 0.3 - r.top) / Math.max(1, total)));
-      bar.style.scale = `${p} 1`;
-    };
-    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
-    update();
-  }
-
-  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
-  if (links.length) {
-    const map = new Map([...links].map((l) => [l.dataset.tocLink!, l]));
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          links.forEach((l) => l.removeAttribute('aria-current'));
-          map.get(e.target.id)?.setAttribute('aria-current', 'true');
-        }),
-      { rootMargin: '-20% 0px -70% 0px' },
-    );
-    document.querySelectorAll('[data-article-body] h2[id]').forEach((h) => io.observe(h));
-  }
-
   document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const announcer = document.querySelector('[data-announcer]');
@@ -211,50 +189,64 @@ const share = {
 </script>
 
 <style>
-  .read-progress { position: fixed; inset: var(--header-h) 0 auto; z-index: calc(var(--z-header) - 1); height: 3px; pointer-events: none; }
-  .read-progress span { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; scale: 0 1; }
+  .art { position: relative; isolation: isolate; padding-top: calc(var(--header-h) + var(--s-5)); }
+  .art__wrap { position: relative; z-index: 1; }
+  .art__crumbs { margin-bottom: var(--s-4); }
+  .art__crumbs :global(li:last-child span) { max-width: 28ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; line-height: 44px; }
+  .art__grid { row-gap: var(--s-7); }
 
-  .art__head { display: grid; gap: var(--space-m); padding-top: calc(var(--header-h) + var(--space-l)); padding-bottom: var(--space-xl); }
-  .art__cat { margin-top: var(--space-l); font-weight: 600; color: var(--accent-text); }
-  .art__title { font-family: var(--font-display); font-size: clamp(2.25rem, 1rem + 4.2vw, 5.5rem); font-weight: 600; line-height: 0.98; letter-spacing: -0.045em; color: var(--ink-strong); max-width: 20ch; }
-  .art__excerpt { max-width: 56ch; font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); line-height: 1.45; }
-  .art__meta { font-size: var(--step--1); color: var(--muted); }
-  @media (prefers-reduced-motion: no-preference) {
-    .art__title { animation: art-rise 900ms var(--ease-out) 100ms both; }
-    .art__excerpt, .art__meta { animation: art-rise 900ms var(--ease-out) 220ms both; }
+  .art__head { display: grid; gap: var(--s-5); align-content: start; padding-top: var(--s-5); }
+  .art__cat { font-weight: 650; font-stretch: 112%; color: var(--accent-text); }
+  .art__cat a { display: inline-flex; min-height: 44px; align-items: center; }
+  .art__title {
+    font-size: clamp(2rem, 1.1rem + 3.4vw, 4.5rem);
+    font-stretch: 125%;
+    font-weight: 750;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    max-width: 18ch;
   }
-  @keyframes art-rise { from { opacity: 0; translate: 0 22px; } }
+  .art__excerpt { font-size: var(--t-lead); line-height: 1.45; color: var(--ink-2); max-width: 52ch; }
+  .art__meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--rule-strong); }
+  @media (min-width: 40rem) { .art__meta { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .art__meta > div { display: grid; gap: var(--s-1); padding: var(--s-3) var(--s-4) var(--s-3) 0; border-bottom: 1px solid var(--rule); }
+  .art__meta dt { color: var(--ink-2); }
+  .art__meta dd { font-weight: 600; font-size: var(--t-small); }
 
-  .art__layout { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 46rem); justify-content: center; gap: var(--space-2xl) clamp(2rem, 6vw, 6rem); padding-block: var(--space-2xl); }
-  .art__aside { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; display: grid; gap: var(--space-xl); }
-  .toc__title { font-size: var(--step--1); font-weight: 600; color: var(--muted); margin-bottom: var(--space-xs); }
-  .toc ol { display: grid; gap: 0.15rem; }
-  .toc__link { display: block; padding: 0.45rem 0 0.45rem 0.8rem; font-size: var(--step--1); color: var(--ink); text-decoration: none; box-shadow: inset 2px 0 0 var(--line); transition: color var(--dur-fast), box-shadow var(--dur-base); }
-  .toc__link:hover { color: var(--ink-strong); }
-  .toc__link[aria-current='true'] { color: var(--ink-strong); font-weight: 600; box-shadow: inset 3px 0 0 var(--accent); }
-  .share__list { display: flex; gap: 6px; }
-  .share__btn { display: grid; place-items: center; width: 44px; height: 44px; background: var(--bg-raised); color: var(--ink-strong); transition: background-color var(--dur-fast), color var(--dur-fast); }
-  .share__btn:hover { background: var(--inverse); color: var(--inverse-ink); }
-  .share__btn:global(.is-done) { background: var(--accent); color: var(--accent-ink); }
-  .art__body { font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem); line-height: 1.7; color: var(--ink); }
-  .art__body :global(h2) { scroll-margin-top: calc(var(--header-h) + 1.5rem); }
-  .art__body :global(table) { display: block; overflow-x: auto; }
-  @media (max-width: 1023px) {
-    .art__layout { grid-template-columns: minmax(0, 1fr); }
-    .art__aside { position: static; order: 2; }
-    .toc { display: none; }
+  /* Flow layout below desktop, so the outline bar can stay sticky through the whole body. */
+  .art__main { display: block; }
+  .art__main > * + * { margin-top: var(--s-7); }
+  .art__cover { margin-inline: calc(var(--margin) * -1); }
+  @media (min-width: 40rem) { .art__cover { margin-inline: 0; } }
+  .art__body { font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem); }
+  .art__body :global(h2) { scroll-margin-top: calc(var(--header-h) + var(--s-6)); }
+  .art__body :global(h2:first-child) { margin-top: 0; }
+
+  /* Desktop: the outline sits beside the title and stays beside the body as it scrolls. */
+  @media (min-width: 64rem) {
+    .art__main { display: contents; }
+    .art__main > * + * { margin-top: 0; }
+    .art__head { grid-column: 1 / span 8; grid-row: 1; }
+    .art__main > :global(.ol) { grid-column: 9 / -1; grid-row: 1 / span 4; align-self: start; position: sticky; top: calc(var(--header-h) + var(--s-5)); margin-top: var(--s-5); }
+    .art__cover { grid-column: 1 / span 8; grid-row: 2; }
+    .art__body { grid-column: 1 / span 7; grid-row: 3; }
+    .art__foot { grid-column: 1 / span 8; grid-row: 4; }
   }
+  /* No outline (a short article): the reading column centres under the title. */
+  .art__main:not(:has(.ol)) .art__body { max-width: var(--measure); }
 
-  .art__foot { max-width: calc(46rem + 2 * var(--gutter)); padding-bottom: var(--space-2xl); }
-  .art__about { display: grid; gap: var(--space-s); padding: clamp(1.25rem, 2.5vw, 2rem); background: var(--surface); }
-  .art__about-title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; color: var(--ink-strong); }
-  .art__updated { margin-top: var(--space-m); font-size: var(--step--1); color: var(--muted); }
+  .art__foot { padding-bottom: var(--s-8); }
+  .art__about { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .art__about { grid-template-columns: 3fr 2fr; } }
+  .art__about .module { gap: var(--s-4); }
+  .art__share .label { color: var(--ink-2); }
+  .share { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .share__btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--rule-strong); color: var(--ink); transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, color var(--t-ui) ease, border-color var(--t-ui) ease; }
+  .share__btn:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) { .share__btn:hover { border-color: var(--ink); } }
+  .share__btn:global(.is-done) { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
-  .more__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); margin-top: var(--space-xl); }
-  .more__card { display: grid; gap: var(--space-xs); text-decoration: none; color: inherit; }
-  .more__card :global(.media img) { transition: scale var(--dur-slower) var(--ease-out), opacity var(--dur-slow), filter var(--dur-slow); }
-  .more__card:hover :global(.media img) { scale: 1.04; }
-  .more__meta { margin-top: var(--space-xs); font-size: var(--step--1); color: var(--accent-text); font-weight: 600; }
-  .more__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink-strong); }
-  @media (max-width: 767px) { .more__grid { grid-template-columns: 1fr; } }
+  .keep__grid { row-gap: var(--s-7); }
+  .keep__all { margin-top: var(--s-6); }
 </style>

@@ -1,10 +1,12 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
+import Hero from '@/components/Hero.astro';
+import CityRoute from '@/components/heroes/CityRoute.astro';
+import Photo from '@/components/Photo.astro';
+import type { PhotoName } from '@/components/Photo.astro';
 import Faq from '@/components/Faq.astro';
 import CtaBand from '@/components/CtaBand.astro';
-import ShiftPlanner from '@/components/ShiftPlanner.astro';
 import Icon from '@/components/Icon.astro';
 import { site, fullAddress, mapsDirectionsUrl } from '@/config/site';
 import { locations, type Location } from '@/data/locations';
@@ -49,50 +51,104 @@ const areaNode = {
     itemListElement: services.map((s) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: `${s.name} in ${l.city}`, url: canonical(serviceHref(s.slug)) } })),
   },
 };
+
+const bodyPhoto: Record<string, PhotoName> = {
+  'wilmington-de': 'desk-overhead',
+  'philadelphia-pa': 'two-women-laptop',
+  'new-york-ny': 'developers',
+};
 ---
 
-<BaseLayout {...l.meta} path={path} heroTone={l.isHeadquarters ? 'field' : 'default'} image={`/og/location-${l.slug}.png`} breadcrumbs={crumbs} schema={[areaNode, faqSchema(l.faqs)]}>
-  <PageHero title={l.headline} lede={l.intro} crumbs={crumbs} tone={l.isHeadquarters ? 'field' : 'default'}>
-    <Fragment slot="actions">
-      <a class:list={['btn', { 'btn--light': l.isHeadquarters }]} href={site.calendly} target="_blank" rel="noopener" data-magnetic>
-        <span class="btn__label">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></span>
-      </a>
-      <a class="btn btn--ghost loc-ghost" href={directions} target="_blank" rel="noopener">
-        <span class="btn__label"><Icon name="route" /> Directions</span>
-      </a>
-    </Fragment>
-  </PageHero>
-
-  <section class="loc wrap section" aria-labelledby="loc-body-title">
-    <div class="loc__body">
-      <h2 class="h2" id="loc-body-title" data-split>{`Offshore teams for ${l.city} businesses.`}</h2>
-      <div class="loc__copy prose">
-        {l.body.map((p) => <p data-reveal>{p}</p>)}
-      </div>
+<BaseLayout {...l.meta} path={path} image={`/og/location-${l.slug}.png`} breadcrumbs={crumbs} schema={[areaNode, faqSchema(l.faqs)]}>
+  <Hero labelledby="page-title" split="6-6" crumbs={crumbs} class="loc-hero">
+    <h1 class="h1 hero__title" id="page-title">{l.headline[0]} <span class="accent">{l.headline[1]}</span></h1>
+    <p class="hero__lead">{l.intro}</p>
+    <div class="actions">
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></a>
+      <a class="btn btn--ghost" href={directions} target="_blank" rel="noopener">Directions <Icon name="arrow-up-right" class="btn__arrow" /></a>
     </div>
-    <aside class="loc__card" aria-label="Contact details">
-      <p class="loc__label">{l.isHeadquarters ? 'Our office' : 'Nearest office'}</p>
-      <address class="loc__addr">{site.legalName}<br />{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}</address>
-      <p class="loc__label">Getting here</p>
-      <p>{l.distance}</p>
-      <p class="loc__label">Hours</p>
-      <p>{site.hoursLabel}</p>
-      <ul role="list" class="loc__direct">
-        <li><a class="link" href={`tel:${site.phoneE164}`}><Icon name="phone" /> {site.phone}</a></li>
-        <li><a class="link" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></li>
-      </ul>
-    </aside>
+    <CityRoute slot="instrument" loc={l} />
+  </Hero>
+
+  <section class="section loc" aria-labelledby="loc-body-title">
+    <div class="wrap grid loc__grid">
+      <div class="loc__body c-7">
+        <h2 class="h2" id="loc-body-title" data-split>{`Offshore teams for ${l.city} businesses.`}</h2>
+        <div class="loc__copy prose">
+          {l.body.map((p) => <p data-reveal>{p}</p>)}
+        </div>
+      </div>
+      <aside class="loc__card c-4 s-9" aria-label="Contact details">
+        <dl class="ruled loc__dl">
+          <div class="module lime">
+            <dt class="label">{l.isHeadquarters ? 'Our office' : 'Nearest office'}</dt>
+            <dd>
+              <address class="loc__addr">{site.legalName}<br />{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}</address>
+            </dd>
+          </div>
+          <div class="module">
+            <dt class="label">Getting here</dt>
+            <dd>{l.distance}</dd>
+          </div>
+          <div class="module">
+            <dt class="label">Hours</dt>
+            <dd>{site.hoursLabel}</dd>
+          </div>
+          <div class="module">
+            <dt class="label">Direct</dt>
+            <dd>
+              <ul role="list" class="loc__direct">
+                <li><a class="link link--quiet" href={`tel:${site.phoneE164}`}><Icon name="phone" /> {site.phone}</a></li>
+                <li><a class="link link--quiet" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
   </section>
 
-  <section class="ind section" aria-labelledby="ind-title">
+  <section class="section plate ind" aria-labelledby="ind-title">
     <div class="wrap">
-      <h2 class="h1 ind__title" id="ind-title" data-split>{`Who we support in ${l.city}.`}</h2>
-      <ul role="list" class="ind__grid" data-reveal-group>
+      <div class="section-head grid">
+        <h2 class="h2" id="ind-title" data-split>{`Who we support in ${l.city}.`}</h2>
+        <p data-reveal>The kinds of {l.city} teams that hand us their recurring work, and what they hand over.</p>
+      </div>
+      <div class="ind__grid grid">
+        <div class="ind__photo c-4">
+          <Photo name={bodyPhoto[l.slug] ?? 'team-table'} ratio="4 / 5" sizes="(min-width: 64rem) 30vw, 100vw" reveal="clip" />
+        </div>
+        <ul class="ind__list c-8" role="list" data-reveal-group>
+          {
+            l.industries.map((i) => (
+              <li class="ind__item" data-reveal>
+                <h3 class="ind__name">{i.name}</h3>
+                <p class="ind__text">{i.body}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section lsvc" aria-labelledby="lsvc-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="lsvc-title" data-split>{`Services in ${l.city}, ${l.region}.`}</h2>
+        <p data-reveal>Five practices, one way of working: vetted people, a team lead on every pod, written procedures and a weekly report.</p>
+      </div>
+      <ul role="list" class="lsvc__list">
         {
-          l.industries.map((i) => (
-            <li class="ind__item" data-reveal data-tilt="4">
-              <h3 class="ind__name">{i.name}</h3>
-              <p>{i.body}</p>
+          services.map((s) => (
+            <li>
+              <a class="lsvc__link" href={serviceHref(s.slug)}>
+                <span class="lsvc__name">
+                  {s.name} in {l.city}
+                </span>
+                <span class="lsvc__meta">{s.startsIn}</span>
+                <Icon name="arrow-up-right" class="icon lsvc__arrow" />
+              </a>
             </li>
           ))
         }
@@ -100,48 +156,38 @@ const areaNode = {
     </div>
   </section>
 
-  <section class="lsvc wrap section" aria-labelledby="lsvc-title">
-    <h2 class="h2" id="lsvc-title" data-split>{`Services in ${l.city}, ${l.region}.`}</h2>
-    <ul role="list" class="lsvc__list">
-      {
-        services.map((s) => (
-          <li>
-            <a class="lsvc__link" href={serviceHref(s.slug)}>
-              <span class="lsvc__name">
-                {s.name} in {l.city}
-              </span>
-              <span class="lsvc__meta">{s.startsIn}</span>
-              <Icon name="arrow-up-right" class="icon" />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <div class="wrap section planner-wrap">
-    <ShiftPlanner id={`planner-${l.slug}`} />
-  </div>
-
-  <section class="lmap wrap section" aria-labelledby="lmap-title">
-    <h2 class="sr-only" id="lmap-title">{`Map of ${l.city}`}</h2>
-    <div class="lmap__frame skeleton" data-map>
-      <iframe title={`Map of ${l.isHeadquarters ? `${site.name} in ` : ''}${l.city}, ${l.regionName}`} src={mapSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="1200" height="600"></iframe>
+  <section class="section section--flush-top lmap" aria-labelledby="lmap-title">
+    <div class="wrap grid lmap__grid">
+      <h2 class="sr-only" id="lmap-title">{`Map of ${l.city}`}</h2>
+      <div class="lmap__frame c-8" data-map>
+        <iframe title={`Map of ${l.isHeadquarters ? `${site.name} in ` : ''}${l.city}, ${l.regionName}`} src={mapSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="1200" height="600"></iframe>
+      </div>
+      <div class="lmap__side c-4">
+        <div class="ruled lmap__mods">
+          <div class="module module--flex">
+            <p class="label lmap__key">Directions</p>
+            <p>{l.distance}</p>
+            <a class="btn btn--ghost btn--small lmap__btn" href={directions} target="_blank" rel="noopener"><Icon name="route" /> Get directions <Icon name="arrow-up-right" class="btn__arrow" /></a>
+          </div>
+          <div class="module module--flex">
+            <p class="label lmap__key">Also serving</p>
+            <p class="lmap__others">
+              {
+                others.map((o, i) => (
+                  <>
+                    <a class="link" href={`/locations/${o.slug}`}>
+                      {o.city}, {o.region}
+                    </a>
+                    {i < others.length - 1 ? ' and ' : ''}
+                  </>
+                ))
+              }{' '}
+              and businesses across the United States.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-    <p class="lmap__others">
-      Also serving{' '}
-      {
-        others.map((o, i) => (
-          <>
-            <a class="link link--static" href={`/locations/${o.slug}`}>
-              {o.city}, {o.region}
-            </a>
-            {i < others.length - 1 ? ' and ' : ''}
-          </>
-        ))
-      }{' '}
-      and businesses across the United States.
-    </p>
   </section>
 
   <Faq faqs={l.faqs} name={l.slug} heading={`${l.city} questions`} />
@@ -150,41 +196,62 @@ const areaNode = {
 
 <script>
   document.querySelectorAll<HTMLElement>('[data-map]').forEach((wrap) => {
-    wrap.querySelector('iframe')?.addEventListener('load', () => wrap.classList.remove('skeleton'), { once: true });
+    wrap.querySelector('iframe')?.addEventListener('load', () => wrap.classList.add('is-loaded'), { once: true });
   });
 </script>
 
 <style>
-  .loc-ghost { --btn-ink: currentColor; }
-  .loc { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: var(--space-2xl) clamp(2rem, 6vw, 6rem); }
-  .loc__copy { margin-top: var(--space-l); font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem); }
-  .loc__card { display: grid; align-content: start; gap: 0.35rem; padding: clamp(1.5rem, 2.5vw, 2rem); background: var(--surface); align-self: start; position: sticky; top: calc(var(--header-h) + 2rem); }
-  .loc__label { margin-top: var(--space-s); font-size: var(--step--1); font-weight: 600; color: var(--muted); }
-  .loc__label:first-child { margin-top: 0; }
-  .loc__addr { font-style: normal; font-family: var(--font-display); font-size: var(--step-1); font-weight: 500; line-height: 1.3; color: var(--ink-strong); }
-  .loc__direct { margin-top: var(--space-s); display: grid; }
-  .loc__direct a { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; color: var(--ink-strong); font-weight: 500; }
-  @media (max-width: 1023px) { .loc { grid-template-columns: 1fr; } .loc__card { position: static; } }
+  /* City headlines carry long words (HEADQUARTERED, PHILADELPHIA): size them to the column. */
+  :global(.loc-hero .hero__words) { container-type: inline-size; }
+  :global(.loc-hero .hero__title) { font-size: clamp(1.75rem, 8cqi, 4.5rem); max-width: none; }
+  .loc__grid { row-gap: var(--s-7); }
+  .loc__copy { margin-top: var(--s-6); }
+  .loc__card { align-self: start; }
+  @media (min-width: 64rem) { .loc__card { position: sticky; top: calc(var(--header-h) + var(--s-6)); } }
+  .loc__dl { grid-template-columns: 1fr; }
+  .loc__dl .module { display: grid; gap: var(--s-2); padding: var(--s-4) var(--s-5); }
+  .loc__dl dt { color: var(--ink-2); }
+  .loc__addr { font-size: 1.375rem; font-weight: 750; font-stretch: 125%; line-height: 1.1; text-transform: uppercase; }
+  .loc__direct { display: grid; }
+  .loc__direct a { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; font-weight: 600; }
 
-  .ind { background: var(--inverse); color: var(--inverse-ink); }
-  .ind__title { color: var(--inverse-ink); margin-bottom: var(--space-2xl); max-width: 18ch; }
-  .ind__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); }
-  .ind__item { display: grid; align-content: start; gap: var(--space-s); padding: clamp(1.5rem, 2.5vw, 2rem); background: light-dark(#262622, #cfc8b6); min-height: 16rem; }
-  .ind__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
-  .ind__item p { color: var(--inverse-muted); }
-  @media (max-width: 1023px) { .ind__grid { grid-template-columns: 1fr; } .ind__item { min-height: auto; } }
+  .ind__grid { row-gap: var(--s-6); }
+  .ind__list { border-top: 1px solid var(--rule-strong); align-self: start; }
+  .ind__item { display: grid; gap: var(--s-3) var(--gutter); padding-block: var(--s-6); border-bottom: 1px solid var(--rule); }
+  @media (min-width: 40rem) { .ind__item { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
+  .ind__name { font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem); font-stretch: 125%; line-height: 1.08; letter-spacing: -0.015em; }
+  .ind__text { color: var(--ink-2); font-size: 1.0625rem; }
 
-  .lsvc__list { display: grid; margin-top: var(--space-xl); }
-  .lsvc__link { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-m); min-height: 4.5rem; padding-block: var(--space-s); text-decoration: none; color: var(--ink-strong); box-shadow: inset 0 -1px 0 var(--line); transition: padding var(--dur-base) var(--ease-out), color var(--dur-fast); }
-  .lsvc__link:hover { padding-left: var(--space-s); color: var(--accent-text); }
-  .lsvc__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
-  .lsvc__meta { font-size: var(--step--1); color: var(--muted); }
-  @media (max-width: 599px) { .lsvc__meta { display: none; } }
+  .lsvc__list { border-top: 1px solid var(--rule-strong); }
+  .lsvc__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--s-5);
+    min-height: 5rem;
+    padding-block: var(--s-4);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: opacity var(--t-ui) ease;
+  }
+  .lsvc__name { font-size: clamp(1.25rem, 1rem + 1vw, 2rem); font-weight: 750; font-stretch: 125%; letter-spacing: -0.015em; line-height: 1.1; }
+  .lsvc__meta { font-size: 0.875rem; font-weight: 650; color: var(--accent-text); }
+  .lsvc__arrow { width: 1.75rem; height: 1.75rem; transition: transform var(--t-ui) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .lsvc__list:has(.lsvc__link:hover) .lsvc__link:not(:hover) { opacity: 0.4; }
+    .lsvc__link:hover .lsvc__arrow { transform: translate(4px, -4px); color: var(--accent-text); }
+  }
+  @media (max-width: 39.99rem) { .lsvc__meta { display: none; } }
 
-  .planner-wrap { padding-bottom: 0; }
-  .lmap__frame { position: relative; aspect-ratio: 2 / 1; overflow: hidden; }
-  .lmap__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(0.35) contrast(1.05); }
-  .lmap__others { margin-top: var(--space-m); color: var(--muted); }
-  .lmap__others a { color: var(--ink-strong); }
-  @media (max-width: 767px) { .lmap__frame { aspect-ratio: 4 / 5; } }
+  .lmap__grid { row-gap: var(--s-5); }
+  .lmap__frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--plate-2); border: 1px solid var(--rule-strong); }
+  .lmap__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(0.6) contrast(1.05); }
+  :global(:root:not([data-theme='light'])) .lmap__frame iframe { filter: grayscale(1) invert(0.92) contrast(0.9); }
+  .lmap__side { display: grid; }
+  .lmap__mods { grid-template-columns: 1fr; height: 100%; }
+  .lmap__mods .module { gap: var(--s-3); }
+  .lmap__key { color: var(--ink-2); }
+  .lmap__btn { align-self: start; margin-top: auto; }
+  .lmap__others a { color: var(--ink); }
+  @media (max-width: 39.99rem) { .lmap__frame { aspect-ratio: 4 / 5; } }
 </style>

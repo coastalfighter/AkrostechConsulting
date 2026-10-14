@@ -1,11 +1,15 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
+import Hero from '@/components/Hero.astro';
+import Corridor from '@/components/heroes/Corridor.astro';
+import Photo from '@/components/Photo.astro';
+import type { PhotoName } from '@/components/Photo.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
-import { site } from '@/config/site';
+import { site, mapsDirectionsUrl } from '@/config/site';
 import { pages } from '@/data/pages';
 import { locations } from '@/data/locations';
+import { teamRoles } from '@/data/company';
 import { canonical } from '@/lib/seo';
 
 const crumbs = [
@@ -17,57 +21,172 @@ const itemList = {
   name: 'Akrostech service areas',
   itemListElement: locations.map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(`/locations/${l.slug}`), name: `${l.city}, ${l.region}` })),
 };
+
+const cityPhoto: Record<string, PhotoName> = {
+  'wilmington-de': 'office-hallway',
+  'philadelphia-pa': 'meeting-room',
+  'new-york-ny': 'workspace-cafe',
+};
+
+const partner = teamRoles.find((r) => r.role === 'Client partner');
+const lead = teamRoles.find((r) => r.role === 'Team leads');
+const delivery = [
+  {
+    title: 'A client partner you can meet',
+    body: `${partner?.body ?? ''} Based in Wilmington, they meet clients in Wilmington, Center City or Manhattan by appointment.`,
+  },
+  {
+    title: 'Specialists on your hours',
+    body: 'Your team works your time zone on a fixed shift you choose, Eastern, Central, Mountain or Pacific, so questions are answered the same day.',
+  },
+  {
+    title: 'Reviewed before it reaches you',
+    body: lead?.body ?? '',
+  },
+  {
+    title: 'Your tools, your rules',
+    body: 'Work happens inside your systems with named accounts and least-privilege access, under your policies, removed the day the engagement ends.',
+  },
+];
 ---
 
 <BaseLayout {...pages.locations} image="/og/locations.png" breadcrumbs={crumbs} schema={[itemList]}>
-  <PageHero
-    title={['Local partner,', 'national reach.']}
-    lede={`Our headquarters is in Wilmington, Delaware, a short trip from Philadelphia and New York. We support businesses across the United States, with specialists on Eastern, Central, Mountain and Pacific hours.`}
-    crumbs={crumbs}
-  />
-  <section class="areas wrap section" aria-label="Service areas">
-    <ul role="list" class="areas__list">
-      {
-        locations.map((l) => (
-          <li>
-            <a class="areas__link" href={`/locations/${l.slug}`} data-cursor-label="Open">
-              <span class="areas__kind">{l.isHeadquarters ? 'Headquarters' : 'Service area'}</span>
-              <span class="areas__city">
-                {l.city}, {l.region}
-              </span>
-              <span class="areas__intro">{l.distance}</span>
-              <Icon name="arrow-up-right" class="icon areas__arrow" />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-    <p class="areas__nat">
-      Outside these cities? Most of our clients are elsewhere in the U.S. and Canada. Every engagement runs on your time zone, wherever you are.
-      <a class="link link--static" href="/contact">Talk to {site.shortName}</a>.
+  <Hero labelledby="page-title" split="5-7" crumbs={crumbs}>
+    <h1 class="h1 hero__title" id="page-title">Local partner, <span class="accent">national reach.</span></h1>
+    <p class="hero__lead">
+      Our headquarters is in Wilmington, Delaware, a short trip from Philadelphia and New York. We support businesses across the United States, with
+      specialists on Eastern, Central, Mountain and Pacific hours.
     </p>
+    <div class="actions">
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">Book a 30-minute call <Icon name="arrow-up-right" class="btn__arrow" /></a>
+      <a class="btn btn--ghost" href={mapsDirectionsUrl} target="_blank" rel="noopener">Directions to HQ <Icon name="arrow-up-right" class="btn__arrow" /></a>
+    </div>
+    <Corridor slot="instrument" />
+
+    <div slot="strip" class="lstrip ruled">
+      <div class="module module--flex lime">
+        <p class="label">Headquarters</p>
+        <address class="lstrip__addr">{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}</address>
+      </div>
+      <div class="module module--flex">
+        <p class="label lstrip__key">Phone</p>
+        <a class="lstrip__val link link--quiet" href={`tel:${site.phoneE164}`}>{site.phone}</a>
+        <p class="small muted">A 332 New York number.</p>
+      </div>
+      <div class="module module--flex">
+        <p class="label lstrip__key">Office hours</p>
+        <p class="lstrip__val">{site.hoursLabel}</p>
+      </div>
+      <div class="module module--flex">
+        <p class="label lstrip__key">Delivery</p>
+        <p class="lstrip__val">India, on your U.S. shift</p>
+      </div>
+    </div>
+  </Hero>
+
+  <section class="section cities" aria-labelledby="cities-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="cities-title" data-split>Three cities on one line.</h2>
+        <p data-reveal>One office in Wilmington, ninety minutes from Manhattan and thirty from Center City. Each city has its own page: the industries we support there and how to reach us.</p>
+      </div>
+      <ul class="cities__list ruled" role="list" data-reveal-group>
+        {
+          locations.map((l) => (
+            <li class:list={['city module module--flex', { 'city--hq': l.isHeadquarters }]} data-reveal>
+              <Photo name={cityPhoto[l.slug] ?? 'office-lounge'} alt="" ratio="4 / 3" sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw" />
+              <p class="label city__kind">{l.isHeadquarters ? 'Headquarters' : 'Service area'}</p>
+              <h3 class="city__name">
+                <a class="stretch" href={`/locations/${l.slug}`}>
+                  {l.city}, {l.region}
+                </a>
+              </h3>
+              <p class="city__headline">{l.headline.join(' ')}</p>
+              <p class="city__dist small">{l.distance}</p>
+              <ul class="city__inds" role="list">
+                {l.industries.map((i) => <li>{i.name}</li>)}
+              </ul>
+              <span class="more city__more" aria-hidden="true">
+                {l.isHeadquarters ? 'Visit the office' : `Open ${l.city}`} <Icon name="arrow-right" />
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="nat grid">
+        <p class="nat__text c-8">
+          Outside these cities? Most of our clients are elsewhere in the U.S. and Canada. Every engagement runs on your time zone, wherever you are.
+          <a class="link" href="/contact">Talk to {site.shortName}</a>.
+        </p>
+      </div>
+    </div>
   </section>
-  <CtaBand />
+
+  <section class="section plate remote" aria-labelledby="remote-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="remote-title" data-split>How remote delivery works for local teams.</h2>
+        <p data-reveal>A person you can meet in the region, a team in India on your hours, and the same controls whether you are in Rodney Square or Midtown.</p>
+      </div>
+      <div class="remote__grid grid">
+        <div class="remote__photo c-5">
+          <Photo name="team-table" ratio="4 / 5" sizes="(min-width: 64rem) 38vw, 100vw" reveal="clip" />
+        </div>
+        <ol class="remote__list ruled ruled--plate c-7" role="list" data-reveal-group>
+          {
+            delivery.map((d, i) => (
+              <li class:list={['module module--flex remote__item', { lime: i === 1 }]} data-reveal>
+                <h3 class="h3">{d.title}</h3>
+                <p class="remote__body">{d.body}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand heading="Meet us in Wilmington, or on a call." line="Thirty minutes with a client partner, in person by appointment or by video. You leave with a role plan, a shortlist date and a monthly price." photo="office-lounge" />
 </BaseLayout>
 
 <style>
-  .areas__list { display: grid; }
-  .areas__link {
-    position: relative;
-    display: grid;
-    grid-template-columns: 12rem minmax(0, 1fr) minmax(0, 22rem);
-    align-items: baseline;
-    gap: var(--space-s) var(--gutter);
-    padding-block: var(--space-l);
-    text-decoration: none;
-    color: var(--ink-strong);
-    box-shadow: inset 0 -1px 0 var(--line);
+  .lstrip { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .lstrip { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .lstrip { grid-template-columns: 4fr 3fr 3fr 3fr; } }
+  .lstrip .module { gap: var(--s-3); min-height: 8rem; }
+  .lstrip__addr { font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem); font-weight: 750; font-stretch: 125%; line-height: 1.1; text-transform: uppercase; margin-top: auto; }
+  .lstrip__key { color: var(--ink-2); }
+  .lstrip__val { font-size: 1.125rem; font-weight: 650; font-stretch: 112%; align-self: start; }
+  a.lstrip__val { display: inline-flex; min-height: 44px; align-items: center; }
+
+  .cities__list { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .cities__list { grid-template-columns: repeat(2, 1fr); } .city--hq { grid-column: 1 / -1; } }
+  @media (min-width: 64rem) { .cities__list { grid-template-columns: repeat(3, 1fr); } .city--hq { grid-column: auto; } }
+  .city { gap: var(--s-3); }
+  .city :global(.photo) { margin-bottom: var(--s-3); }
+  .city :global(.photo img) { transition: scale 600ms var(--ease-out); }
+  .city__kind { color: var(--accent-text); }
+  .city__name { font-size: clamp(1.5rem, 1.1rem + 0.7vw, 1.875rem); font-stretch: 125%; font-weight: 750; line-height: 1; letter-spacing: -0.02em; text-transform: uppercase; }
+  .city__name a { text-decoration: none; }
+  .city__headline { font-weight: 650; font-stretch: 112%; }
+  .city__dist { color: var(--ink-2); }
+  .city__inds { display: grid; border-top: 1px solid var(--rule); margin-top: var(--s-2); font-size: var(--t-small); }
+  .city__inds li { padding-block: 0.45rem; border-bottom: 1px solid var(--rule); }
+  .city__more { margin-top: auto; padding-top: var(--s-3); }
+  .city:has(a:focus-visible) { outline: 2px solid var(--focus); outline-offset: -4px; }
+  .city a:focus-visible { outline: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .city:hover :global(.photo img) { scale: 1.03; }
+    .city:hover .city__more :global(.icon) { transform: translateX(4px); }
+    .city:hover .city__name a { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 3px; text-underline-offset: 0.12em; }
   }
-  .areas__kind { font-size: var(--step--1); font-weight: 600; color: var(--muted); }
-  .areas__city { font-family: var(--font-display); font-size: clamp(2.5rem, 1rem + 6vw, 7.5rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.05em; transition: color var(--dur-base), translate var(--dur-slow) var(--ease-out); }
-  .areas__link:hover .areas__city { color: var(--accent-text); translate: 0.06em 0; }
-  .areas__intro { color: var(--ink); font-size: var(--step--1); }
-  .areas__arrow { position: absolute; right: 0; top: var(--space-l); }
-  .areas__nat { margin-top: var(--space-xl); max-width: 64ch; }
-  @media (max-width: 1023px) { .areas__link { grid-template-columns: 1fr; } }
+  .nat { margin-top: var(--s-6); }
+  .nat__text { font-size: var(--t-lead); line-height: 1.45; color: var(--ink-2); max-width: 52ch; }
+  .nat__text a { color: var(--ink); }
+
+  .remote__grid { row-gap: var(--s-6); align-items: stretch; }
+  .remote__list { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .remote__list { grid-template-columns: repeat(2, 1fr); } }
+  .remote__item { gap: var(--s-4); min-height: 13rem; }
+  .remote__body { color: var(--ink-2); margin-top: auto; }
 </style>
