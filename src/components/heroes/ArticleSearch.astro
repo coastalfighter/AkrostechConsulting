@@ -1,0 +1,185 @@
+---
+/**
+ * Blog hero instrument: the article index as a live search. A large query field, category
+ * switches with their counts, a register of one cell per article that lights when it matches,
+ * and the index itself with matched words marked. The same filter drives the article grid in
+ * the page body ([data-filter-item]). Server-rendered with every article listed, so without
+ * JavaScript the index is simply complete.
+ */
+import Icon from '../Icon.astro';
+import { CATEGORIES } from '@/content.config';
+import { categorySlug, postHref, readingMinutes, type Post } from '@/lib/blog';
+
+interface Props {
+  posts: Post[];
+}
+const { posts } = Astro.props;
+const total = posts.length;
+const pad = (n: number) => String(n).padStart(2, '0');
+const cats = CATEGORIES.map((c) => ({ name: c, slug: categorySlug(c), count: posts.filter((p) => p.data.category === c).length })).filter((c) => c.count > 0);
+---
+
+<div class="as" data-hero="search" data-total={total}>
+  <search class="as__search">
+    <form class="as__form" role="search" action="/blog" method="get" data-search-form>
+      <label class="as__label label" for="article-query">Search {total} articles</label>
+      <div class="as__box">
+        <Icon name="search" class="icon as__glass" />
+        <input
+          class="as__input"
+          id="article-query"
+          type="search"
+          name="q"
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          placeholder="bookkeeping, SOPs, cost…"
+          aria-describedby="article-count"
+          data-query
+        />
+        <button class="as__clear" type="button" aria-label="Clear the search" hidden data-clear>
+          <Icon name="plus" class="icon as__x" />
+        </button>
+      </div>
+    </form>
+  </search>
+
+  <div class="as__cats" role="group" aria-label="Filter by category">
+    <button class="as__cat" type="button" aria-pressed="true" data-cat="all">
+      <span>All</span><span class="as__n">{pad(total)}</span>
+    </button>
+    {
+      cats.map((c) => (
+        <button class="as__cat" type="button" aria-pressed="false" data-cat={c.slug}>
+          <span>{c.name}</span>
+          <span class="as__n">{pad(c.count)}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="as__meter">
+    <p class="as__count" id="article-count">
+      <span class="as__shown" data-shown>{pad(total)}</span>
+      <span class="as__of">of {pad(total)}<br />articles shown</span>
+    </p>
+    <ol class="as__register" role="list" aria-hidden="true">
+      {posts.map((p) => <li class="as__cell is-on" data-cell={p.id} title={p.data.title} />)}
+    </ol>
+  </div>
+  <p class="sr-only" role="status" aria-live="polite" data-status></p>
+
+  <ul class="as__index" role="list" aria-label="Article index">
+    {
+      posts.map((p) => (
+        <li class="as__row" data-row={p.id} data-cat={categorySlug(p.data.category)} data-text={`${p.data.title} ${p.data.excerpt} ${p.data.tags.join(' ')} ${p.data.category}`.toLowerCase()}>
+          <a class="as__link" href={postHref(p)}>
+            <span class="as__cat-name label">{p.data.category}</span>
+            <span class="as__title" data-hl>{p.data.title}</span>
+            <span class="as__tags" data-hl>{p.data.tags.join(' · ')}</span>
+            <span class="as__min">{readingMinutes(p.body)} min</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="as__empty" hidden data-empty>
+    <p class="as__empty-title">No article matches <span data-empty-q></span>.</p>
+    <p class="small muted">Try a broader word, another category, or ask us the question on a call.</p>
+    <button class="btn btn--ghost btn--small" type="button" data-reset>Reset the search <Icon name="arrow-left" class="btn__arrow" /></button>
+  </div>
+</div>
+
+<style>
+  .as { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; align-content: start; gap: var(--s-4); border: 1px solid var(--rule-strong); background: var(--plate); padding: var(--module-pad); }
+  .as__form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+  .as__search { min-width: 0; }
+  .as__label { color: var(--ink-2); }
+  .as__box { position: relative; display: flex; align-items: center; border-bottom: 2px solid var(--ink); transition: border-color var(--t-ui) ease; }
+  .as__box:focus-within { border-bottom-color: var(--accent); }
+  .as__glass { width: 1.75rem; height: 1.75rem; color: var(--ink-2); flex: none; }
+  .as__input {
+    flex: 1;
+    min-width: 0;
+    min-height: 4.25rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-size: clamp(1.5rem, 1rem + 1.6vw, 2.5rem);
+    font-weight: 650;
+    font-stretch: 112%;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    appearance: none;
+  }
+  .as__input::placeholder { color: var(--ink-3); font-weight: 450; }
+  .as__input::-webkit-search-cancel-button { display: none; }
+  .as__input:focus-visible { outline: none; }
+  .as__box:has(.as__input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 4px; }
+  .as__clear { display: grid; place-items: center; width: 44px; height: 44px; flex: none; color: var(--ink); border: 1px solid var(--rule-strong); transition: transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease; }
+  .as__clear:active { transform: scale(0.97); }
+  .as__x { rotate: 45deg; width: 1.25rem; height: 1.25rem; }
+  @media (hover: hover) and (pointer: fine) { .as__clear:hover { border-color: var(--ink); } }
+
+  .as__cats { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .as__cat {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-height: 44px;
+    padding: 0.35rem 0.4rem 0.35rem 0.8rem;
+    border: 1px solid var(--rule-strong);
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, color var(--t-ui) ease, border-color var(--t-ui) ease;
+  }
+  .as__cat:active { transform: scale(0.97); }
+  .as__n { min-width: 1.9rem; padding: 0.15rem 0.3rem; text-align: center; font-variant-numeric: tabular-nums; font-size: 0.8125rem; background: var(--plate-3); }
+  .as__cat[aria-pressed='true'] { background: var(--field); border-color: var(--field); color: var(--field-ink); }
+  .as__cat[aria-pressed='true'] .as__n { background: var(--carbon-950); color: var(--lime-400); }
+  .as__cat:disabled { opacity: 0.4; cursor: not-allowed; }
+  @media (hover: hover) and (pointer: fine) { .as__cat:hover:not([aria-pressed='true']) { border-color: var(--ink); } }
+
+  .as__meter { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: var(--s-5); padding-block: var(--s-4) var(--s-3); border-top: 1px solid var(--rule); }
+  .as__count { display: flex; align-items: end; gap: var(--s-3); }
+  .as__shown { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 750; font-stretch: 125%; line-height: 0.85; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .as__of { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.25; color: var(--ink-2); }
+  .as__register { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; height: 2.75rem; align-self: end; }
+  .as__cell { background: var(--plate-3); transform-origin: 50% 100%; transform: scaleY(0.35); transition: transform var(--t-ui) var(--ease-out), background-color var(--t-ui) ease; }
+  .as__cell.is-on { background: var(--field); transform: none; }
+
+  .as__index { border-top: 1px solid var(--rule-strong); }
+  .as__row { border-bottom: 1px solid var(--rule); }
+  .as__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.1rem var(--s-4);
+    padding: var(--s-3) 0;
+    text-decoration: none;
+    transition: opacity var(--t-ui) ease;
+  }
+  .as__cat-name { grid-column: 1; color: var(--accent-text); font-size: 0.6875rem; }
+  .as__title { grid-column: 1; font-weight: 650; font-stretch: 112%; line-height: 1.25; }
+  .as__tags { grid-column: 1; font-size: 0.8125rem; color: var(--ink-3); }
+  .as__min { grid-column: 2; grid-row: 1 / span 3; align-self: center; font-size: 0.875rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .as__index :global(mark) { background: var(--field); color: var(--field-ink); padding: 0 0.08em; }
+  @media (hover: hover) and (pointer: fine) {
+    .as__index:has(.as__link:hover) .as__link:not(:hover) { opacity: 0.45; }
+    .as__link:hover .as__title { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+  }
+  .as__link:focus-visible { outline-offset: 2px; }
+  .as__tags { display: none; }
+  .as[data-active] .as__tags { display: block; }
+
+  .as__empty { display: grid; gap: var(--s-3); justify-items: start; padding: var(--s-5); background: var(--plate-2); border: 1px dashed var(--rule-strong); }
+  .as__empty-title { font-size: 1.25rem; font-weight: 700; font-stretch: 112%; line-height: 1.25; }
+  .as__empty-title span { color: var(--accent-text); }
+
+  :global(html:not(.js)) .as__search, :global(html:not(.js)) .as__cats, :global(html:not(.js)) .as__meter { display: none; }
+  @media (max-width: 39.99rem) {
+    .as__meter { grid-template-columns: 1fr; gap: var(--s-3); }
+    .as__register { height: 1.75rem; }
+  }
+</style>
