@@ -1,15 +1,15 @@
 ---
 /**
- * About hero instrument: the delivery organisation as a working org diagram. You (the client)
- * at the top, then the client partner in Wilmington, the delivery lead, the team lead and a pod
- * of specialists with a vetted bench beside it. Role buttons isolate a node in lime and read
- * out what that role owns; the "Specialist out today" switch marks one specialist absent and
- * draws the cover path from the team lead to the bench, so the work still reaches you reviewed.
- * Server-rendered with the client partner selected and the full pod in.
+ * About instrument (team-structure section): the team behind every client as a working org
+ * diagram. You (the client) at the top, then the account manager, the team lead and your
+ * dedicated professional, with a vetted bench professional beside them. Role buttons isolate a
+ * node in chartreuse and read out what that role owns; the "Specialist out today" switch marks
+ * your professional absent and draws the cover path from the team lead to the bench, so the work
+ * still reaches you reviewed. Server-rendered with the account manager selected and everyone in.
  */
-import { teamRoles } from '@/data/company';
+import { teamStructure } from '@/data/about';
 
-const [partner, delivery, lead, specialists] = teamRoles;
+const [manager, lead, pro] = teamStructure;
 
 interface Role {
   key: string;
@@ -24,74 +24,56 @@ const roles: Role[] = [
     key: 'you',
     name: 'You',
     where: 'The client',
-    body: 'You set the priorities and judge the outcome. You manage results, not people: the chain below you manages the rest.',
-    owns: ['Set the priorities and the hours', 'Approve the written procedures', 'Read the Friday report'],
+    body: 'You set the priorities and judge the outcome. You manage results, not people: the team below you handles the rest.',
+    owns: ['Set the priorities and the hours', 'Approve the written SOPs', 'Read the weekly report'],
   },
   {
-    key: 'partner',
-    name: partner?.role ?? 'Client partner',
-    where: partner?.practice ?? 'Wilmington, Delaware',
-    body: partner?.body ?? '',
-    owns: ['Runs the discovery call', 'Sets the scope and the monthly fee', 'Accountable for the engagement'],
-  },
-  {
-    key: 'delivery',
-    name: delivery?.role ?? 'Delivery lead',
-    where: delivery?.practice ?? 'All practices',
-    body: delivery?.body ?? '',
-    owns: ['Matching and onboarding', 'Quality standards in every practice', 'Steps in when something needs fixing'],
+    key: 'manager',
+    name: manager?.role ?? 'Account manager',
+    where: 'Your single point of contact',
+    body: manager?.description ?? '',
+    owns: ['Sets goals with you', 'Runs the monthly review', 'Accountable for your results'],
   },
   {
     key: 'lead',
-    name: 'Team lead',
-    where: lead?.practice ?? 'One per pod',
-    body: lead?.body ?? '',
-    owns: ['Reviews work before it reaches you', 'Covers absences from the bench', 'Writes the weekly report'],
+    name: lead?.role ?? 'Team lead',
+    where: 'Daily QA and coaching',
+    body: lead?.description ?? '',
+    owns: ['Reviews work before it reaches you', 'Coaches against your SOPs', 'Covers absences from the bench'],
   },
   {
-    key: 'pod',
-    name: specialists?.role ?? 'Specialists',
-    where: specialists?.practice ?? 'VA, recruiting, accounting, legal, web',
-    body: specialists?.body ?? '',
-    owns: ['Work your U.S. hours', 'Inside your tools, on named accounts', 'Trained on your written SOPs'],
+    key: 'pro',
+    name: pro?.role ?? 'Dedicated professional',
+    where: 'Works only for you',
+    body: pro?.description ?? '',
+    owns: ['Works your U.S. hours', 'Inside your tools, on named accounts', 'Trained on your written SOPs'],
   },
 ];
 
-/** The pod: practices from the specialists' role line. The third is the one who is out. */
-const pod = [
-  { code: 'VA', name: 'Virtual assistant' },
-  { code: 'RPO', name: 'Recruiter' },
-  { code: 'ACCT', name: 'Accountant' },
-  { code: 'LPO', name: 'Legal assistant' },
-];
-const ABSENT = 2;
-const absentName = pod[ABSENT]?.name ?? 'Accountant';
+const absentName = 'dedicated professional';
 const selected = roles[1]!;
 const links: Record<string, string> = {
-  partner: 'Scope and review',
-  delivery: 'Standards',
-  lead: 'Quality',
+  manager: 'Goals and reviews',
+  lead: 'Daily quality',
 };
 ---
 
 <div class="org" data-instrument="org" data-selected={selected.key} data-absent-name={absentName}>
-  <div class="org__controls">
-    <div class="org__roles" role="group" aria-label="Select a role in the chain">
-      {
-        roles.map((r) => (
-          <button type="button" class="chip org__role" aria-pressed={r.key === selected.key ? 'true' : 'false'} data-role={r.key} aria-controls="org-readout">
-            {r.name}
-          </button>
-        ))
-      }
-    </div>
+  <div class="org__roles" role="group" aria-label="Select a role in the team">
+    {
+      roles.map((r) => (
+        <button type="button" class="chip org__role" aria-pressed={r.key === selected.key ? 'true' : 'false'} data-role={r.key} aria-controls="org-readout">
+          {r.name}
+        </button>
+      ))
+    }
   </div>
 
   <div class="org__body">
     <figure class="org__diagram" aria-labelledby="org-caption">
       <figcaption id="org-caption" class="sr-only">
-        The delivery chain: you, then the client partner in Wilmington, the delivery lead, the team lead and a pod of four specialists, with a
-        vetted bench specialist beside the pod.
+        The team behind every client: you, then your account manager, the team lead and your dedicated professional, with a vetted bench professional
+        beside them who covers absences.
       </figcaption>
 
       <div class="org__tier">
@@ -101,7 +83,7 @@ const links: Record<string, string> = {
         </div>
       </div>
       {
-        roles.slice(1, 4).map((r) => (
+        roles.slice(1, 3).map((r) => (
           <>
             <div class="org__link" aria-hidden="true">
               <span class="org__link-label">{links[r.key]}</span>
@@ -119,55 +101,48 @@ const links: Record<string, string> = {
         <span class="org__link-label">Review before delivery</span>
       </div>
 
-      <div class="org__pod" data-node="pod">
+      <div class="org__pod">
         <div class="org__bus" aria-hidden="true">
           <span class="org__bus-main"></span>
           <span class="org__bus-bench"></span>
           <span class="org__cover"></span>
         </div>
-        {
-          pod.map((s, i) => (
-            <div class="org__member" data-member={i} data-absent={i === ABSENT ? 'candidate' : undefined}>
-              <span class="org__code">{s.code}</span>
-              <span class="org__member-name">{s.name}</span>
-              <span class="org__state" data-state>In</span>
-            </div>
-          ))
-        }
+        <div class="org__member" data-node="pro" data-absent="candidate">
+          <span class="org__code">{roles[3]!.name}</span>
+          <span class="org__member-name">Works only for you</span>
+          <span class="org__state" data-state>In</span>
+        </div>
         <div class="org__member org__member--bench" data-bench>
-          <span class="org__code">Bench</span>
-          <span class="org__member-name">{absentName}, vetted</span>
+          <span class="org__code">Bench professional</span>
+          <span class="org__member-name">Vetted, trained on your SOPs</span>
           <span class="org__state" data-bench-state>Standby</span>
         </div>
-        <p class="org__pod-label label" aria-hidden="true"><span>Pod</span><span>Bench</span></p>
       </div>
     </figure>
 
     <div class="org__side">
-      <div class="org__readout ruled" id="org-readout" aria-live="polite">
-        <div class="module org__readout-head lime">
+      <div class="org__readout" id="org-readout" aria-live="polite">
+        <div class="org__readout-head">
           <p class="org__readout-name" data-out="name">{selected.name}</p>
-          <p class="label" data-out="where">{selected.where}</p>
+          <p class="small" data-out="where">{selected.where}</p>
         </div>
-        <div class="module org__readout-body">
+        <div class="org__readout-body">
           <p class="org__readout-text" data-out="body">{selected.body}</p>
-          <p class="label org__owns-key">Owns</p>
+          <p class="small org__owns-key">Owns</p>
           <ul class="ticks org__owns" role="list" data-out="owns">
             {selected.owns.map((o) => <li>{o}</li>)}
           </ul>
         </div>
       </div>
 
-      <div class="org__absence ruled">
-        <div class="module org__absence-row">
-          <button type="button" class="org__switch" role="switch" aria-checked="false" data-absence aria-describedby="org-cover">
-            <span class="org__switch-track" aria-hidden="true"><span class="org__switch-thumb"></span></span>
-            <span class="org__switch-label">Specialist out today</span>
-          </button>
-          <p class="org__cover-text small" id="org-cover" aria-live="polite" data-cover>
-            Full pod in. Every piece of work goes from a specialist, through the team lead, to you.
-          </p>
-        </div>
+      <div class="org__absence">
+        <button type="button" class="org__switch" role="switch" aria-checked="false" data-absence aria-describedby="org-cover">
+          <span class="org__switch-track" aria-hidden="true"><span class="org__switch-thumb"></span></span>
+          <span class="org__switch-label">Specialist out today</span>
+        </button>
+        <p class="org__cover-text small" id="org-cover" aria-live="polite" data-cover>
+          Everyone in. Work goes from your professional, through the team lead, to you.
+        </p>
       </div>
     </div>
   </div>
@@ -178,169 +153,129 @@ const links: Record<string, string> = {
 <style>
   .org { display: grid; gap: var(--s-5); }
   .org__roles { display: flex; flex-wrap: wrap; gap: var(--s-2); }
-  .org__body { display: grid; gap: var(--s-5); }
-  @media (min-width: 48rem) { .org__body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: start; } }
+  .org__body { display: grid; gap: var(--s-4); }
+  @media (min-width: 48rem) { .org__body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: stretch; } }
 
   /* ---- Diagram ---- */
-  .org__diagram { display: grid; justify-items: center; padding: var(--s-5) var(--s-3); border: 1px solid var(--rule); background: var(--plate); position: relative; }
-  .org__diagram::before {
-    /* Construction grid behind the diagram: the manual's drafting paper. */
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px);
-    background-size: 2rem 2rem;
-    background-position: center top;
-    opacity: 0.35;
-    pointer-events: none;
+  .org__diagram {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    padding: var(--s-6) var(--s-4);
+    border-radius: var(--radius);
+    background: var(--plate-2);
+    background-image: radial-gradient(var(--rule-strong) 1px, transparent 1.4px);
+    background-size: 1.25rem 1.25rem;
+    background-position: center;
   }
   .org__tier { position: relative; display: flex; justify-content: center; width: 100%; }
   .org__node {
     position: relative;
     display: grid;
     gap: 2px;
-    min-width: min(15rem, 100%);
-    padding: 0.7rem 1rem;
+    min-width: min(16rem, 100%);
+    padding: 0.75rem 1.25rem;
     text-align: center;
-    background: var(--ground);
+    border-radius: var(--radius-pill);
+    background: var(--plate);
     border: 1px solid var(--rule-strong);
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease, border-color var(--t-ui) ease, opacity var(--t-ui) ease;
   }
-  .org__node--you { border-width: 2px; border-color: var(--ink); }
-  .org__name { font-weight: 700; font-stretch: var(--wide); font-size: 1rem; line-height: 1.2; text-transform: uppercase; letter-spacing: -0.005em; }
+  .org__node--you { border: 2px solid var(--ink); }
+  .org__name { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; line-height: 1.2; letter-spacing: -0.01em; }
   .org__where { font-size: 0.8125rem; color: var(--ink-2); }
 
-  /* Spine links between tiers: a hairline with a key on its right. */
-  .org__link { position: relative; width: 100%; height: 2.25rem; }
-  .org__link::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; margin-left: -0.5px; background: var(--rule-strong); transition: background-color var(--t-ui) ease, width var(--t-ui) ease, margin var(--t-ui) ease; }
-  .org__link-label {
-    position: absolute;
-    left: calc(50% + 0.75rem);
-    top: 50%;
-    translate: 0 -50%;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    font-stretch: var(--semi-wide);
-    letter-spacing: var(--track-label);
-    text-transform: uppercase;
-    color: var(--ink-3);
-    max-width: calc(50% - 1rem);
-    line-height: 1.2;
-  }
+  /* Spine links between tiers: a hairline with a note on its right. */
+  .org__link { position: relative; width: 100%; height: 2.5rem; }
+  .org__link::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--rule-strong); transition: background-color var(--t-ui) ease, width var(--t-ui) ease, margin var(--t-ui) ease; }
+  .org__link-label { position: absolute; left: calc(50% + 0.75rem); top: 50%; translate: 0 -50%; font-size: 0.75rem; font-weight: 600; color: var(--ink-2); max-width: calc(50% - 1rem); line-height: 1.2; }
 
-  /* ---- Pod ---- */
+  /* ---- Your professional and the bench ---- */
   .org__pod {
+    --g: var(--s-4);
+    --w: calc((100% - var(--g)) / 2);
+    --c1: calc(var(--w) * 0.5);
+    --c2: calc(var(--w) * 1.5 + var(--g));
     position: relative;
     display: grid;
-    --g: var(--s-2);
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0 var(--g);
-    width: 100%;
+    width: min(100%, 30rem);
     padding-top: 1.75rem;
     transition: opacity var(--t-ui) ease;
   }
   .org__bus { position: absolute; inset: 0 0 auto; height: 1.75rem; pointer-events: none; }
-  /* Bus runs from the first specialist's centre to the fourth; the bench extension is dashed. */
-  .org__bus-main, .org__bus-bench, .org__cover { position: absolute; top: 0; height: 1px; }
-  .org__bus-main { left: var(--c1); right: calc(100% - var(--c4)); background: var(--rule-strong); }
-  .org__bus-bench { left: var(--c4); right: calc(100% - var(--c5)); border-top: 1px dashed var(--rule-strong); }
-  .org__cover {
-    left: var(--c3);
-    right: calc(100% - var(--c5));
-    height: 3px;
-    top: -1px;
-    background: var(--lime-400);
-    transform-origin: 0 50%;
-    scale: 0 1;
-    transition: scale 420ms var(--ease-in-out);
-  }
-  /* Centre of column i (0-based) in a five-column grid with gap g. */
-  .org__pod {
-    --w: calc((100% - 4 * var(--g)) / 5);
-    --c1: calc(var(--w) * 0.5);
-    --c3: calc(var(--w) * 2.5 + 2 * var(--g));
-    --c4: calc(var(--w) * 3.5 + 3 * var(--g));
-    --c5: calc(var(--w) * 4.5 + 4 * var(--g));
-  }
+  .org__bus-main, .org__bus-bench, .org__cover { position: absolute; top: 0; height: 2px; }
+  .org__bus-main { left: var(--c1); right: 50%; background: var(--rule-strong); }
+  .org__bus-bench { left: 50%; right: calc(100% - var(--c2)); border-top: 2px dashed var(--rule-strong); }
+  .org__cover { left: 50%; right: calc(100% - var(--c2)); height: 4px; top: -1px; border-radius: 2px; background: var(--cover); transform-origin: 0 50%; scale: 0 1; transition: scale 420ms var(--ease-in-out); }
+  .org { --cover: var(--lime-600); }
+  :global(:root[data-theme='dark']) .org { --cover: var(--lime-400); }
   .org__member {
     position: relative;
     display: grid;
     align-content: start;
     gap: 2px;
-    min-height: 6.25rem;
-    padding: 0.55rem 0.45rem;
-    background: var(--ground);
+    min-height: 7rem;
+    padding: 0.85rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--plate);
     border: 1px solid var(--rule-strong);
     text-align: center;
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease, border-color var(--t-ui) ease, opacity var(--t-ui) ease;
   }
-  /* Drop from the bus into each member */
-  .org__member::before { content: ''; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 1.75rem; margin-left: -0.5px; background: var(--rule-strong); }
+  .org__member::before { content: ''; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 1.75rem; margin-left: -1px; background: var(--rule-strong); }
   .org__member--bench { border-style: dashed; background: transparent; }
-  .org__member--bench::before { background: none; border-left: 1px dashed var(--rule-strong); }
-  .org__code { font-weight: 750; font-stretch: var(--wide); font-size: 0.875rem; letter-spacing: 0.02em; text-transform: uppercase; }
-  .org__member-name { font-size: 0.75rem; line-height: 1.25; color: var(--ink-2); }
-  .org__state { margin-top: auto; padding-top: 0.35rem; font-size: 0.6875rem; font-weight: 650; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-2); }
-  .org__pod-label { grid-column: 1 / -1; display: flex; justify-content: space-between; margin-top: var(--s-2); color: var(--ink-2); font-size: 0.6875rem; }
-  @media (max-width: 30rem) {
-    .org__member-name { display: none; }
-    .org__member { min-height: 4.25rem; }
-    .org__code { font-size: 0.6875rem; letter-spacing: 0; }
-    .org__link-label { font-size: 0.625rem; }
-  }
+  .org__member--bench::before { background: none; border-left: 2px dashed var(--rule-strong); }
+  .org__code { font-family: var(--font-display); font-weight: 700; font-size: 1rem; line-height: 1.15; }
+  .org__member-name { font-size: 0.8125rem; line-height: 1.3; color: var(--ink-2); }
+  .org__state { justify-self: center; margin-top: auto; padding: 0.1rem 0.6rem; border-radius: var(--radius-pill); background: var(--plate-2); font-size: 0.75rem; font-weight: 650; color: var(--ink-2); }
 
-  /* ---- Selection: the chosen node becomes a lime field; the rest dim ---- */
-  .org[data-selected] .org__node, .org[data-selected] .org__pod { opacity: 0.72; }
+  /* ---- Selection: the chosen node becomes a chartreuse field; the rest dim ---- */
+  .org[data-selected] .org__node, .org[data-selected] .org__member:not(.org__member--bench) { opacity: 0.7; }
   .org[data-selected='you'] [data-node='you'],
-  .org[data-selected='partner'] [data-node='partner'],
-  .org[data-selected='delivery'] [data-node='delivery'],
+  .org[data-selected='manager'] [data-node='manager'],
   .org[data-selected='lead'] [data-node='lead'],
-  .org[data-selected='pod'] [data-node='pod'] { opacity: 1; }
-  .org[data-selected='you'] [data-node='you'],
-  .org[data-selected='partner'] [data-node='partner'],
-  .org[data-selected='delivery'] [data-node='delivery'],
-  .org[data-selected='lead'] [data-node='lead'] { background: var(--field); color: var(--field-ink); border-color: var(--field); --ink-2: var(--field-ink-2); }
-  .org[data-selected='pod'] .org__member:not(.org__member--bench, .is-absent) { background: var(--field); color: var(--field-ink); border-color: var(--field); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-2); }
+  .org[data-selected='pro'] [data-node='pro'] { opacity: 1; background: var(--lime-400); color: var(--carbon-950); border-color: var(--lime-400); --ink-2: var(--field-ink-2); }
+  .org[data-selected='pro'] [data-node='pro'] .org__state { background: rgb(22 17 16 / 0.1); }
 
-  /* ---- Absence: one specialist out, the bench covers, the path draws in lime ---- */
-  .org.is-covering .org__pod { opacity: 1; }
+  /* ---- Absence: your professional out, the bench covers, the path draws in chartreuse ---- */
   .org.is-covering [data-node='lead'], .org.is-covering [data-node='you'] { opacity: 1; }
   .org.is-covering .org__cover { scale: 1 1; }
-  .org.is-covering .org__link--pod::before, .org.is-covering .org__link::before { width: 3px; margin-left: -1.5px; background: var(--lime-400); }
-  .org.is-covering .org__link-label { color: var(--ink-2); }
+  .org.is-covering .org__link::before { width: 4px; margin-left: -2px; background: var(--cover); }
   .org__member.is-absent {
-    background: repeating-linear-gradient(135deg, transparent 0 6px, var(--rule) 6px 7px), var(--ground);
+    background: repeating-linear-gradient(135deg, transparent 0 6px, var(--rule) 6px 7px), var(--plate);
     border-style: dashed;
-    color: var(--ink-3);
+    color: var(--ink-2);
+    opacity: 1;
   }
+  .org[data-selected='pro'] .org__member.is-absent { background: repeating-linear-gradient(135deg, transparent 0 6px, var(--rule) 6px 7px), var(--plate); color: var(--ink); border-color: var(--rule-strong); --ink-2: inherit; }
   .org__member.is-absent .org__code { text-decoration: line-through; text-decoration-thickness: 2px; }
   .org__member.is-absent .org__state { color: var(--danger); }
-  .org.is-covering .org__member--bench { background: var(--field); color: var(--field-ink); border: 1px solid var(--field); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-2); }
-  .org.is-covering .org__member--bench::before { border-left: 3px solid var(--lime-400); margin-left: -1.5px; }
-  .org.is-covering .org__member--bench .org__state { color: var(--field-ink); }
-  :global(:root:not([data-theme='dark'])) .org__cover,
-  :global(:root:not([data-theme='dark'])) .org.is-covering .org__link::before { background: var(--lime-600); }
-  :global(:root:not([data-theme='dark'])) .org.is-covering .org__member--bench::before { border-left-color: var(--lime-600); }
+  .org.is-covering .org__member--bench { background: var(--lime-400); color: var(--carbon-950); border: 1px solid var(--lime-400); --ink-2: var(--field-ink-2); }
+  .org.is-covering .org__member--bench::before { border-left: 4px solid var(--cover); margin-left: -2px; }
+  .org.is-covering .org__member--bench .org__state { background: rgb(22 17 16 / 0.1); color: var(--carbon-950); }
 
   /* ---- Readout ---- */
   .org__side { display: grid; gap: var(--s-4); align-content: start; }
-  .org__readout { grid-template-columns: 1fr; }
-  .org__readout .module { padding: var(--s-5); }
-  .org__readout-head { display: grid; gap: var(--s-2); }
-  .org__readout-name { font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem); font-weight: 750; font-stretch: var(--wide); line-height: 1.05; text-transform: uppercase; letter-spacing: -0.015em; }
-  .org__readout-body { display: grid; gap: var(--s-3); }
-  .org__readout-text { color: var(--ink-2); font-size: var(--t-small); }
-  .org__owns-key { color: var(--ink-2); padding-top: var(--s-3); border-top: 1px solid var(--rule); }
+  .org__readout { display: grid; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); }
+  .org__readout-head { display: grid; gap: var(--s-1); padding: var(--s-5); background: var(--lime-400); color: var(--carbon-950); }
+  .org__readout-head .small { color: var(--field-ink-2); }
+  .org__readout-name { font-family: var(--font-display); font-size: clamp(1.5rem, 1.2rem + 0.8vw, 1.9rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; }
+  .org__readout-body { display: grid; gap: var(--s-3); padding: var(--s-5); background: var(--plate); }
+  .org__readout-text { color: var(--ink-2); }
+  .org__owns-key { color: var(--ink-2); font-weight: 600; padding-top: var(--s-3); border-top: 1px solid var(--rule); }
   .org__owns { gap: var(--s-2); font-size: var(--t-small); font-weight: 550; }
 
-  .org__absence { grid-template-columns: 1fr; }
-  .org__absence-row { display: grid; gap: var(--s-3); padding: var(--s-4) var(--s-5); }
-  .org__switch { display: inline-flex; align-items: center; gap: var(--s-3); min-height: 44px; font-weight: 650; font-stretch: var(--semi-wide); text-align: left; }
-  .org__switch-track { position: relative; width: 3rem; height: 1.5rem; flex: none; border: 1px solid var(--rule-strong); background: var(--plate-2); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease; }
-  .org__switch-thumb { position: absolute; top: 3px; left: 3px; width: calc(1.5rem - 8px); height: calc(1.5rem - 8px); background: var(--ink-2); transition: transform var(--t-ui) var(--ease-out), background-color var(--t-ui) ease; }
+  .org__absence { display: grid; gap: var(--s-3); padding: var(--s-4) var(--s-5); border-radius: var(--radius); border: 1px solid var(--rule); background: var(--plate); }
+  .org__switch { display: inline-flex; align-items: center; gap: var(--s-3); min-height: 44px; font-weight: 650; text-align: left; }
+  .org__switch-track { position: relative; width: 3rem; height: 1.6rem; flex: none; border-radius: var(--radius-pill); border: 1px solid var(--rule-strong); background: var(--plate-2); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-press) var(--ease-out); }
+  .org__switch-thumb { position: absolute; top: 3px; left: 3px; width: calc(1.6rem - 8px); height: calc(1.6rem - 8px); border-radius: 50%; background: var(--ink-2); transition: transform var(--t-ui) var(--ease-out), background-color var(--t-ui) ease; }
   .org__switch[aria-checked='true'] .org__switch-track { background: var(--lime-400); border-color: var(--lime-400); }
-  .org__switch[aria-checked='true'] .org__switch-thumb { transform: translateX(1.5rem); background: var(--carbon-950); }
+  .org__switch[aria-checked='true'] .org__switch-thumb { transform: translateX(1.4rem); background: var(--carbon-950); }
   .org__switch:active .org__switch-track { transform: scale(0.97); }
   .org__cover-text { color: var(--ink-2); }
-  :global(html:not(.js)) .org__controls, :global(html:not(.js)) .org__absence { display: none; }
+  :global(html:not(.js)) .org__roles, :global(html:not(.js)) .org__absence { display: none; }
+  @media (max-width: 30rem) { .org__link-label { font-size: 0.6875rem; } .org__member { min-height: 6rem; } }
 </style>

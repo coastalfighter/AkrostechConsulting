@@ -33,7 +33,7 @@ export default function initOrg(root: HTMLElement): void {
   const absent = root.querySelector<HTMLElement>('[data-absent="candidate"]');
   const absentState = absent?.querySelector<HTMLElement>('[data-state]') ?? null;
   const benchState = root.querySelector<HTMLElement>('[data-bench-state]');
-  const absentName = (root.dataset.absentName ?? 'Accountant').toLowerCase();
+  const absentName = (root.dataset.absentName ?? 'dedicated professional').toLowerCase();
   if (!roles.length || !name || !where || !body || !owns) return;
 
   function select(key: string): void {
@@ -53,7 +53,7 @@ export default function initOrg(root: HTMLElement): void {
     );
   }
 
-  buttons.forEach((b) => b.addEventListener('click', () => select(b.dataset.role ?? 'partner')));
+  buttons.forEach((b) => b.addEventListener('click', () => select(b.dataset.role ?? 'manager')));
 
   // Arrow keys move between the role buttons, like a toolbar.
   buttons.forEach((b, i) =>
@@ -63,7 +63,7 @@ export default function initOrg(root: HTMLElement): void {
       e.preventDefault();
       const next = buttons[(i + step + buttons.length) % buttons.length];
       next?.focus();
-      if (next) select(next.dataset.role ?? 'partner');
+      if (next) select(next.dataset.role ?? 'manager');
     }),
   );
 
@@ -76,8 +76,8 @@ export default function initOrg(root: HTMLElement): void {
     if (benchState) benchState.textContent = on ? 'Covering' : 'Standby';
     if (cover) {
       cover.textContent = on
-        ? `The ${absentName} is out today. The team lead reassigns the queue to a vetted bench ${absentName} trained on your SOPs, then reviews the work as usual, so it still reaches you checked and on time.`
-        : 'Full pod in. Every piece of work goes from a specialist, through the team lead, to you.';
+        ? `Your ${absentName} is out today. The team lead hands the queue to a vetted bench professional trained on your SOPs, then reviews the work as usual, so it still reaches you checked and on time.`
+        : 'Everyone in. Work goes from your professional, through the team lead, to you.';
     }
   });
 }

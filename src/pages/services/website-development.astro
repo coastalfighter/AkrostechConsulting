@@ -1,18 +1,22 @@
 ---
+/**
+ * Website development, in the Sample-3 order: hero, why teams choose us, Core Web Vitals with
+ * the page builder instrument, what we build, the process, the stack, engagement models,
+ * guides, questions, the other teams, contact. The hero carries the wireframe field; the page
+ * builder (key `builder`) sits in the vitals panel in the body.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
+import FieldHero from '@/components/FieldHero.astro';
 import PageBuilder from '@/components/instruments/PageBuilder.astro';
 import Photo from '@/components/Photo.astro';
-import type { PhotoName } from '@/components/Photo.astro';
-import WorkCard from '@/components/WorkCard.astro';
+import PostCard from '@/components/PostCard.astro';
 import Faq from '@/components/Faq.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
-import { serviceBySlug, serviceHref, type Service } from '@/data/services';
-import { pricingTiers, techStack, webFaqs, webProcess, webSubServices, type WebSubService } from '@/data/webdev';
-import { work } from '@/data/work';
-import { locations } from '@/data/locations';
+import { serviceBySlug, serviceHref, services } from '@/data/services';
+import { servicePhoto } from '@/data/photos';
+import { getPosts } from '@/lib/blog';
 import { faqSchema, serviceSchema } from '@/lib/seo';
 
 const s = serviceBySlug('website-development')!;
@@ -22,276 +26,273 @@ const crumbs = [
   { name: 'Services', path: '/services' },
   { name: s.name, path },
 ];
-const builds = work.filter((w) => w.service === 'website-development');
-const related = s.related.map((r) => serviceBySlug(r)).filter((r): r is Service => Boolean(r));
-const usd = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+const faqs = s.faqs.map((f) => ({ q: f.q, a: f.a }));
+const models = s.engagementModels ?? [];
+const stack = s.techStack ?? [];
+const guides = (await getPosts()).filter((p) => p.data.service === 'website-development').slice(0, 3);
+const others = services.filter((x) => x.slug !== s.slug);
+const proposal = `/contact?service=${s.slug}`;
 
-const promises = [
-  { figure: '100%', title: 'You own the code', body: 'The repository, hosting and domain are in your name from day one.' },
-  { figure: 'Fixed', title: 'Fixed price after discovery', body: 'One week of discovery ends in a written scope and a price that does not move.' },
-  { figure: '2.5 s', title: 'Core Web Vitals checked', body: 'LCP, INP and CLS measured on key templates before launch, with the report handed over.' },
-  { figure: '301', title: 'Every URL accounted for', body: 'Redesigns ship with a tested redirect for every page that earns traffic or links.' },
-  { figure: 'Weekly', title: 'A staging link every week', body: 'Click through real progress every week instead of waiting for a big reveal.' },
-  { figure: '30 d', title: 'Thirty days of fixes', body: 'Anything that is not right after launch is fixed at no cost for thirty days.' },
+/** Google's published "good" thresholds for Core Web Vitals, which every build targets. */
+const vitals = [
+  { code: 'LCP', name: 'Largest Contentful Paint', target: '≤ 2.5 s', detail: 'Main content appears fast, even on mobile networks.', fill: 82 },
+  { code: 'INP', name: 'Interaction to Next Paint', target: '≤ 200 ms', detail: 'Every tap and click responds without lag.', fill: 90 },
+  { code: 'CLS', name: 'Cumulative Layout Shift', target: '≤ 0.1', detail: 'Nothing jumps while the page loads.', fill: 95 },
 ];
 
-const serviceNode = { ...serviceSchema(s, pricingTiers), hasOfferCatalog: {
-  '@type': 'OfferCatalog',
-  name: 'Website development services',
-  itemListElement: webSubServices.map((w) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: w.title, description: w.summary } })),
-} };
+const today = ['Homepage build deployed to preview', 'Core Web Vitals in the green', 'Accessibility checks passed', 'Content updates shipped'];
 
-/**
- * Sub-service mosaic: ten ruled modules and four photographs placed on the 12-column grid.
- * Performance optimisation is the lime field: it is the promise the hero instrument demonstrates.
- */
-type Cell = { kind: 'service'; item: WebSubService; span: number; lime?: boolean; lead?: boolean } | { kind: 'photo'; name: PhotoName; span: number; tall?: boolean; focal?: string };
-const sub = (id: string) => webSubServices.find((w) => w.id === id)!;
-const mosaic: Cell[] = [
-  { kind: 'service', item: sub('custom-web-design'), span: 7, lead: true },
-  { kind: 'photo', name: 'code-laptop', span: 5, focal: '50% 60%' },
-  { kind: 'service', item: sub('ecommerce'), span: 4 },
-  { kind: 'service', item: sub('cms-development'), span: 4 },
-  { kind: 'service', item: sub('web-applications'), span: 4 },
-  { kind: 'photo', name: 'developers', span: 4, tall: true, focal: '50% 40%' },
-  { kind: 'service', item: sub('landing-pages'), span: 4 },
-  { kind: 'service', item: sub('redesign-migration'), span: 4 },
-  { kind: 'service', item: sub('pwa'), span: 4 },
-  { kind: 'service', item: sub('maintenance-support'), span: 4 },
-  { kind: 'service', item: sub('performance-optimization'), span: 5, lime: true },
-  { kind: 'service', item: sub('api-integration'), span: 4 },
-  { kind: 'photo', name: 'sticky-notes', span: 3, focal: '40% 50%' },
-];
-
-/** Process on a week ruler: Weeks 1–8, launch week, then ongoing care. */
-const COLS = 10;
-const spanOf = (when: string): [number, number] => {
-  const m = when.match(/Weeks?\s+(\d+)(?:\s*[–-]\s*(\d+))?/);
-  if (m) return [Number(m[1]), Number(m[2] ?? m[1])];
-  if (/launch/i.test(when)) return [9, 9];
-  return [10, 10];
-};
-const ruler = [...Array.from({ length: 8 }, (_, i) => `W${i + 1}`), 'Launch', 'Ongoing'];
+const serviceNode = serviceSchema(s, {
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Website development services',
+    itemListElement: s.offerings.map((o) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: o.title, description: o.description } })),
+  },
+});
 ---
 
-<BaseLayout {...s.meta} path={path} image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(webFaqs)]}>
-  <Hero labelledby="wd-title" split="5-7" crumbs={crumbs}>
-    <h1 class="h1 hero__title" id="wd-title">{s.headline[0]} <span class="accent">{s.headline[1]}</span></h1>
-    <p class="hero__lead">
-      Custom websites, online stores and web applications, designed and built by a senior team in India that works your U.S. hours. Fast, accessible, built
-      to rank, and yours to keep.
-    </p>
+<BaseLayout {...s.meta} path={path} image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(faqs)]}>
+  <FieldHero scene="wireframe" labelledby="wd-title" crumbs={crumbs}>
+    <h1 class="fhero__title" id="wd-title">Websites that work <span class="quiet">as hard as your team.</span></h1>
+    <p class="fhero__lead">{s.intro}</p>
+    <ul class="wd-points" role="list" aria-label="Why teams choose this service">
+      {['Vetted and NDA-backed', 'Works your U.S. hours', `Starts with a ${s.facts.startsIn}`].map((p) => <li>{p}</li>)}
+    </ul>
     <div class="actions">
-      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
-        Start a project <Icon name="arrow-up-right" class="btn__arrow" />
-      </a>
-      <a class="btn btn--ghost" href="#pricing">See pricing <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--primary" href={proposal}>Get a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--ghost" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="calendar" class="btn__arrow" /></a>
     </div>
-    <PageBuilder slot="instrument" />
+    <dl slot="after" class="wd-facts">
+      <div><dt>Best for</dt><dd>{s.facts.bestFor}</dd></div>
+      <div><dt>Get started in</dt><dd>{s.facts.startsIn}</dd></div>
+      <div><dt>Cost savings</dt><dd>{s.facts.savings}</dd></div>
+      <div><dt>Ownership</dt><dd>Code, design and hosting in your name</dd></div>
+    </dl>
+  </FieldHero>
 
-    <div slot="strip" class="wd-strip ruled">
-      <div class="module module--flex lime wd-strip__lime">
-        <p class="label">From</p>
-        <p class="figure">{usd(pricingTiers[0]!.from)}</p>
-        <p class="wd-strip__text">A focused five-page site, fixed in writing after discovery.</p>
+  <!-- Why teams choose us: a photograph with the day's hand-offs, six benefits beside it -->
+  <section class="section" aria-labelledby="benefits-title">
+    <div class="wrap grid why">
+      <div class="why__media c-5">
+        <Photo name="people-developers" ratio="4 / 5" sizes="(min-width: 64rem) 36vw, 100vw" reveal="clip" />
+        <div class="why__card panel" data-reveal>
+          <p class="why__card-head small"><span>Today on shift</span><span class="muted">Illustrative</span></p>
+          <ul class="ticks small" role="list">{today.map((t) => <li>{t}</li>)}</ul>
+        </div>
       </div>
-      <div class="wd-strip__photo">
-        <Photo name="code-desk" alt="" fill sizes="(min-width: 64rem) 34vw, 100vw" focal="50% 55%" />
-      </div>
-      <dl class="module wd-strip__facts">
-        <div><dt class="label">Discovery</dt><dd>{s.startsIn}</dd></div>
-        <div><dt class="label">Typical saving</dt><dd>{s.saving}</dd></div>
-        <div><dt class="label">Ownership</dt><dd>100% yours: code, hosting, domain</dd></div>
-      </dl>
-    </div>
-  </Hero>
-
-  <!-- Intro: the two jobs of a business website -->
-  <section class="section wd-intro" aria-labelledby="wd-intro-title">
-    <div class="wrap grid wd-intro__grid">
-      <h2 class="wd-intro__title c-6" id="wd-intro-title" data-split>Found first. Chosen second.</h2>
-      <div class="wd-intro__copy c-5 s-8">
-        <p class="wd-intro__lede" data-reveal>{s.intro}</p>
-        <p class="muted" data-reveal>
-          Every build starts from your sales conversation: what buyers ask, what convinces them and what they need to see before they call. Then we engineer for
-          speed, accessibility and search from the first line of code, not as a clean-up before launch.
-        </p>
-        <dl class="spec" data-reveal>
-          <div><dt>Built for</dt><dd>{s.audience}</dd></div>
-          <div><dt>Starts with</dt><dd>{s.startsIn}, ending in a fixed price</dd></div>
-          <div><dt>Where</dt><dd>{s.geo}</dd></div>
-        </dl>
+      <div class="why__copy c-6 s-7">
+        <h2 class="h2" id="benefits-title" data-split>Why U.S. teams choose our web team.</h2>
+        <p class="why__lead" data-reveal>Agency-grade design and engineering, run by project leads who keep your hours and answer to you.</p>
+        <ul class="why__list" role="list" data-reveal-group>
+          {
+            s.benefits.map((b) => (
+              <li class="why__item" data-reveal>
+                <h3 class="why__title">{b.title}</h3>
+                <p class="muted">{b.description}</p>
+              </li>
+            ))
+          }
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- Sub-services: ten ruled modules and four photographs -->
-  <section class="section section--flush-top" aria-labelledby="wd-services-title">
+  <!-- Core Web Vitals, and the page builder instrument -->
+  <section class="section section--flush-top" aria-labelledby="vitals-title">
     <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="wd-services-title" data-split>Ten ways we build.</h2>
-        <p data-reveal>From a single landing page to a client portal. Each one ships with the same standards: accessible, measured, documented and yours.</p>
+      <div class="vitals ink-plate">
+        <div class="vitals__head">
+          <h2 class="h2" id="vitals-title" data-split>Built to pass Core Web Vitals.</h2>
+          <p class="vitals__lead">
+            Speed is a ranking factor and a conversion factor. Every site we build is measured against Google’s “good” thresholds before launch.
+          </p>
+        </div>
+        <ul class="vitals__list" role="list" data-reveal-group>
+          {
+            vitals.map((v) => (
+              <li class="vital" data-reveal>
+                <p class="vital__code">{v.code}</p>
+                <p class="vital__name small muted">{v.name}</p>
+                <p class="vital__target small">
+                  Target <strong>{v.target}</strong>
+                </p>
+                <span class="vital__bar" aria-hidden="true">
+                  {Array.from({ length: 20 }, (_, i) => (
+                    <i class:list={{ 'is-on': i < Math.round(v.fill / 5) }} />
+                  ))}
+                </span>
+                <p class="small muted">{v.detail}</p>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="vitals__builder">
+          <div class="vitals__builder-head">
+            <h3 class="h3" id="builder-title">Add a block. Watch the budget.</h3>
+            <p class="muted">
+              Every block on a page costs weight and time. Switch blocks on and off to see how a chat widget, a hero video or a stack of tracking
+              pixels moves the estimated LCP across Google’s thresholds.
+            </p>
+          </div>
+          <PageBuilder />
+        </div>
       </div>
-      <ul class="mosaic ruled" role="list">
+    </div>
+  </section>
+
+  <!-- Offerings: sticky intro with a photograph, ruled list beside it -->
+  <section class="section" aria-labelledby="offerings-title">
+    <div class="wrap grid offer">
+      <div class="offer__intro c-5">
+        <h2 class="h2" id="offerings-title" data-split>What our team can take on.</h2>
+        <p class="offer__lead" data-reveal>An extension of your in-house team that works in your tools, follows your SOPs and reports on your schedule.</p>
+        <div data-reveal><a class="btn btn--ghost" href={proposal}>Discuss your needs <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a></div>
+        <Photo name="svc-website-development-work" ratio="4 / 3" sizes="(min-width: 64rem) 36vw, 100vw" reveal="clip" class="offer__photo" />
+      </div>
+      <ul class="offer__list ruled c-7" role="list" data-reveal-group>
         {
-          mosaic.map((cell) =>
-            cell.kind === 'photo' ? (
-              <li class:list={['mosaic__photo', { 'mosaic__photo--tall': cell.tall }]} style={`--span:${cell.span}`} aria-hidden="true">
-                <Photo name={cell.name} alt="" fill sizes="(min-width: 64rem) 40vw, 100vw" focal={cell.focal} reveal="clip" />
-              </li>
-            ) : (
-              <li class:list={['module module--flex sub', { lime: cell.lime, 'sub--lead': cell.lead }]} style={`--span:${cell.span}`} id={cell.item.id}>
-                <h3 class="sub__title">{cell.item.title}</h3>
-                <p class="sub__summary">{cell.item.summary}</p>
-                <p class="sub__body">{cell.item.body}</p>
-                <div class="sub__foot">
-                  <p class="label sub__key">You get</p>
-                  <ul class="ticks sub__ticks" role="list">
-                    {cell.item.deliverables.map((d) => (
-                      <li>{d}</li>
-                    ))}
-                  </ul>
-                  <p class="sub__stack">
-                    <span class="label sub__key">Typical stack</span>
-                    {cell.item.stack.join(' · ')}
-                  </p>
-                </div>
-              </li>
-            ),
-          )
+          s.offerings.map((o) => (
+            <li class="module offer__item" data-reveal>
+              <span class="offer__rule" aria-hidden="true" />
+              <h3 class="offer__title">{o.title}</h3>
+              <p class="muted">{o.description}</p>
+            </li>
+          ))
         }
       </ul>
     </div>
   </section>
 
-  <!-- Tech stack -->
-  <section class="section plate" aria-labelledby="stack-title">
+  <!-- Process -->
+  <section class="section section--flush-top" aria-labelledby="process-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="stack-title" data-split>The stack, chosen per project.</h2>
-        <p data-reveal>No single platform is right for every business. We pick the one your team can run, then build it properly.</p>
+        <h2 class="h2" id="process-title" data-split>From discovery to launch, then growth.</h2>
+        <p data-reveal>A preview link every week, so you see the site take shape and can steer it while it is cheap to change.</p>
       </div>
-      <div class="stack ruled ruled--plate" data-reveal-group>
+      <ol class="trail" role="list" data-reveal-group>
         {
-          techStack.map((g) => (
-            <div class="module stack__group" data-reveal>
-              <h3 class="label stack__name">{g.group}</h3>
-              <ul class="stack__items" role="list">
-                {g.items.map((t) => (
-                  <li>{t}</li>
-                ))}
-              </ul>
-            </div>
+          s.process.map((p, i) => (
+            <li class:list={['trail__step', { 'trail__step--now': i === 2 }]} data-reveal>
+              <span class="trail__dot" aria-hidden="true" />
+              <span class="trail__dur tabular">{p.duration}</span>
+              <h3 class="trail__title">{p.title}</h3>
+              <p class="muted small">{p.detail}</p>
+            </li>
           ))
         }
-      </div>
+      </ol>
     </div>
   </section>
 
-  <!-- Process on a week ruler -->
-  <section class="section" aria-labelledby="wd-process-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="wd-process-title" data-split>Six steps, no surprises.</h2>
-        <p data-reveal>A staging link every week, so you see the site take shape and can steer it while it is cheap to change.</p>
-      </div>
-      <div class="gantt" style={`--cols:${COLS}`}>
-        <div class="gantt__ruler" aria-hidden="true">
-          <span class="gantt__corner label">Step</span>
-          <span class="gantt__weeks">{ruler.map((r) => <span class="label">{r}</span>)}</span>
+  <!-- Tech stack: a lavender field beside a photograph -->
+  <section class="section section--flush-top" aria-labelledby="stack-title">
+    <div class="wrap grid stackrow">
+      <div class="stack violet c-8">
+        <div class="stack__head">
+          <h2 class="h2" id="stack-title" data-split>Modern tools, chosen for your goals.</h2>
+          <p class="stack__lead">No single platform is right for every business. We pick the one your team can run, then build it properly.</p>
         </div>
-        <ol class="gantt__rows" role="list" data-reveal-group>
+        <dl class="stack__groups">
           {
-            webProcess.map((p) => {
-              const [a, b] = spanOf(p.when);
-              return (
-                <li class="gantt__row" data-reveal>
-                  <div class="gantt__step">
-                    <p class="label gantt__when">{p.when}</p>
-                    <h3 class="gantt__name">{p.title}</h3>
-                    <p class="gantt__body">{p.body}</p>
-                  </div>
-                  <div class="gantt__track" aria-hidden="true">
-                    <span class:list={['gantt__bar', { 'is-build': p.title === 'Build', 'is-open': b === COLS }]} style={`grid-column:${a} / ${b + 1}`} data-reveal="rule" />
-                  </div>
-                </li>
-              );
-            })
-          }
-        </ol>
-      </div>
-    </div>
-  </section>
-
-  <!-- Portfolio (blueprints) -->
-  <section class="section section--flush-top" aria-labelledby="wd-work-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="wd-work-title" data-split>Builds, planned in detail.</h2>
-        <p data-reveal>Engagement blueprints for web projects: how we would scope, staff and launch them. Plans, not invented case studies.</p>
-      </div>
-      <div class="cards grid" data-reveal-group>
-        {builds.map((w) => <div class="c-4" data-reveal><WorkCard item={w} /></div>)}
-      </div>
-      <a class="more section-more" href="/work?service=website-development">All web blueprints <Icon name="arrow-right" /></a>
-    </div>
-  </section>
-
-  <!-- Pricing -->
-  <section class="section plate" id="pricing" aria-labelledby="pricing-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="pricing-title" data-split>Clear starting prices.</h2>
-        <p data-reveal>Your fixed price is set at the end of discovery, in writing. Hosting, platform fees and third-party licences are billed at cost.</p>
-      </div>
-      <ul class="tiers ruled ruled--plate" role="list" data-reveal-group>
-        {
-          pricingTiers.map((t) => (
-            <li class:list={['module module--flex tier', { lime: t.featured }]} data-reveal>
-              <div class="tier__head">
-                <h3 class="tier__name">{t.name}</h3>
-                {t.featured && <span class="tier__flag">Most chosen scope</span>}
+            stack.map((g) => (
+              <div class="stack__group">
+                <dt class="stack__name">{g.category}</dt>
+                <dd>
+                  <ul class="chips" role="list">
+                    {g.items.map((t) => (
+                      <li class="chip">{t}</li>
+                    ))}
+                  </ul>
+                </dd>
               </div>
-              <p class="tier__price">
-                <span class="label tier__from">From</span>
-                <span class="figure tier__figure">{usd(t.from)}</span>
-              </p>
-              <dl class="tier__facts">
-                <div><dt class="label">Timeline</dt><dd>{t.timeline}</dd></div>
-                <div><dt class="label">Best for</dt><dd>{t.bestFor}</dd></div>
-              </dl>
-              <ul class="ticks tier__list" role="list">
-                {t.includes.map((inc) => (
+            ))
+          }
+        </dl>
+      </div>
+      <div class="stackrow__photo c-4">
+        <Photo name="svc-website-development" fill sizes="(min-width: 64rem) 30vw, 100vw" reveal="clip" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Engagement models -->
+  <section class="section section--flush-top" aria-labelledby="models-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="models-title" data-split>Pick the way you want to work.</h2>
+        <p data-reveal>Pricing depends on scope. We confirm it in writing after a one-week discovery, then it does not move.</p>
+      </div>
+      <ul class="models" role="list" data-reveal-group>
+        {
+          models.map((m) => (
+            <li class:list={['model', m.featured ? 'lime' : 'panel']} data-reveal>
+              <div class="model__head">
+                <h3 class="h3">{m.name}</h3>
+                {m.featured && <span class="badge model__badge">Most popular</span>}
+              </div>
+              <p class="model__best">{m.bestFor}</p>
+              <ul class="ticks model__list" role="list">
+                {m.includes.map((inc) => (
                   <li>{inc}</li>
                 ))}
               </ul>
-              <a class:list={['btn btn--block tier__cta', t.featured ? 'btn--primary' : 'btn--ghost']} href={site.calendly} target="_blank" rel="noopener">
-                Discuss {t.name} <Icon name="arrow-up-right" class="btn__arrow" />
+              <a
+                class:list={['btn btn--block model__cta', m.featured ? 'btn--primary' : 'btn--ghost']}
+                href={`${proposal}&model=${encodeURIComponent(m.name)}`}
+              >
+                Get a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" />
               </a>
             </li>
           ))
         }
       </ul>
-      <p class="tiers__care">
-        <strong>Care plans</strong> for updates, backups, monitoring and monthly change hours are quoted with your build.
-      </p>
     </div>
   </section>
 
-  <!-- What every build includes -->
-  <section class="section" aria-labelledby="wd-promises-title">
+  {
+    guides.length > 0 && (
+      <section class="section section--flush-top" aria-labelledby="guides-title">
+        <div class="wrap">
+          <div class="section-head grid">
+            <h2 class="h2" id="guides-title" data-split>
+              {s.name}, explained.
+            </h2>
+            <p data-reveal>
+              Plain guides on cost, speed and platforms. <a class="more guides__all" href="/blog">All guides <Icon name="arrow-right" /></a>
+            </p>
+          </div>
+          <ul class="guides grid" role="list" data-reveal-group>
+            {guides.map((p, i) => (
+              <li class:list={[i === 0 ? 'c-6' : 'c-3', 't-4']} data-reveal>
+                <PostCard post={p} large={i === 0} sizes={i === 0 ? '(min-width: 64rem) 46vw, 100vw' : '(min-width: 64rem) 22vw, (min-width: 40rem) 50vw, 100vw'} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <Faq faqs={faqs} name="web" heading="Questions, answered." intro={`Something else on your mind? Email ${site.email}.`} />
+
+  <!-- The other teams -->
+  <section class="section section--flush-top" aria-labelledby="related-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="wd-promises-title" data-split>What every build includes.</h2>
-        <p data-reveal>Six commitments in every website engagement letter, from a landing page to a portal.</p>
+        <h2 class="h2" id="related-title" data-split>Explore our other teams.</h2>
+        <p data-reveal>Many web clients add a virtual assistant to keep content and listings current after launch.</p>
       </div>
-      <ul class="promises ruled" role="list" data-reveal-group>
+      <ul class="others" role="list" data-reveal-group>
         {
-          promises.map((p) => (
-            <li class="module module--flex promise" data-reveal>
-              <p class="promise__figure">{p.figure}</p>
-              <h3 class="promise__title">{p.title}</h3>
-              <p class="promise__body">{p.body}</p>
+          others.map((o) => (
+            <li class="other" data-reveal>
+              <Photo name={servicePhoto[o.slug]} alt="" ratio="4 / 5" sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw" />
+              <h3 class="other__name">
+                <a class="stretch" href={serviceHref(o.slug)}>{o.name}</a>
+              </h3>
+              <p class="small muted">{o.summary}</p>
+              <span class="other__go" aria-hidden="true"><Icon name="arrow-up-right" /></span>
             </li>
           ))
         }
@@ -299,163 +300,126 @@ const ruler = [...Array.from({ length: 8 }, (_, i) => `W${i + 1}`), 'Launch', 'O
     </div>
   </section>
 
-  <Faq faqs={webFaqs} name="web" heading="Website questions" intro="Cost, timelines, platforms and SEO, answered plainly." />
-
-  <section class="section section--flush-top" aria-labelledby="wd-related-title">
-    <div class="wrap grid related">
-      <div class="related__copy c-6">
-        <h2 class="h2" id="wd-related-title" data-split>Pair it with a team.</h2>
-        <p class="related__text" data-reveal>
-          Many web clients add a <a class="link" href={serviceHref('virtual-assistance')}>virtual assistant</a> to keep content and listings current after launch.
-          {s.geo} See{' '}
-          {
-            locations.map((l, i) => (
-              <>
-                <a class="link" href={`/locations/${l.slug}`}>web design in {l.city}</a>{i < locations.length - 1 ? ', ' : '.'}
-              </>
-            ))
-          }
-        </p>
-      </div>
-      <ul class="related__list c-5 s-8" role="list">
-        {
-          related.map((r) => (
-            <li>
-              <a class="related__link" href={serviceHref(r.slug)}>
-                <span class="related__name">{r.name}</span>
-                <span class="related__summary">{r.summary}</span>
-                <Icon name="arrow-up-right" class="icon related__arrow" />
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
-
-  <CtaBand
-    heading="Scope your site in one week."
-    line="Thirty minutes to talk through your site. You leave knowing which tier fits and what discovery will cover."
-    photo="pair-at-laptop"
-  />
+  <CtaBand heading="Scope your site in one week." line="Thirty minutes to talk through your site. You leave knowing which model fits and what discovery will cover." photo="code-laptop" />
 </BaseLayout>
 
 <style>
-  /* ---- Hero strip ---- */
-  .wd-strip { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .wd-strip { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 64rem) { .wd-strip { grid-template-columns: 3fr 4fr 5fr; } }
-  .wd-strip__lime { gap: var(--s-3); min-height: 11rem; }
-  .wd-strip__lime .figure { font-size: clamp(2.75rem, 1.6rem + 2.4vw, 4rem); white-space: nowrap; }
-  .wd-strip__text { margin-top: auto; max-width: 28ch; font-weight: 550; }
-  .wd-strip__photo { min-height: 13rem; }
-  .wd-strip__facts { display: grid; align-content: center; }
-  .wd-strip__facts div { display: grid; grid-template-columns: 9rem 1fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
-  .wd-strip__facts div:last-child { border-bottom: 0; }
-  .wd-strip__facts dt { color: var(--ink-2); padding-top: 0.2rem; }
-  .wd-strip__facts dd { font-weight: 650; font-stretch: 112%; }
-  @media (min-width: 40rem) and (max-width: 63.99rem) { .wd-strip__facts { grid-column: 1 / -1; } }
-  @media (max-width: 30rem) { .wd-strip__facts div { grid-template-columns: 1fr; gap: var(--s-1); } }
+  /* ---- Hero ---- */
+  .wd-points { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); font-weight: 600; font-size: var(--t-small); }
+  .wd-points li { display: inline-flex; align-items: center; gap: var(--s-2); }
+  .wd-points li::before { content: ''; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--mark) no-repeat center / 0.6rem; flex: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.5 2.5L10 3.5' fill='none' stroke='%23161110' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  .wd-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5) var(--gutter); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
+  @media (min-width: 64rem) { .wd-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .wd-facts div { display: grid; gap: var(--s-1); align-content: start; }
+  .wd-facts dt { color: var(--ink-2); font-size: var(--t-small); }
+  .wd-facts dd { font-family: var(--font-display); font-weight: 650; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.4rem); line-height: 1.2; letter-spacing: -0.015em; }
 
-  /* ---- Intro ---- */
-  .wd-intro__grid { row-gap: var(--s-6); align-items: start; }
-  .wd-intro__title { font-size: var(--t-display); font-stretch: 125%; line-height: var(--lh-display); letter-spacing: var(--track-display); text-transform: uppercase; }
-  .wd-intro__copy { display: grid; gap: var(--s-5); }
-  .wd-intro__lede { font-size: var(--t-lead); line-height: 1.45; font-weight: 500; }
-
-  /* ---- Mosaic ---- */
-  .mosaic { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* ---- Why ---- */
+  .why { row-gap: var(--s-7); align-items: start; }
+  .why__media { position: relative; }
+  .why__card { display: grid; gap: var(--s-3); padding: var(--s-5); margin-top: var(--s-4); }
   @media (min-width: 64rem) {
-    .mosaic { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .mosaic > li { grid-column: span var(--span); }
-    .mosaic__photo--tall { grid-row: span 2; }
+    .why__media { position: sticky; top: calc(var(--header-h) + var(--s-5)); }
+    .why__card { position: absolute; right: calc(var(--gutter) * -1.5); bottom: var(--s-6); width: min(19rem, 80%); margin: 0; }
   }
-  .mosaic__photo { min-height: 16rem; }
-  @media (min-width: 40rem) and (max-width: 63.99rem) { .sub--lead { grid-column: 1 / -1; } }
-  .sub { gap: var(--s-3); }
-  @media (min-width: 64rem) { .sub { min-height: 26rem; } }
-  .sub__title { font-size: 1.3125rem; font-stretch: 112%; line-height: 1.2; letter-spacing: -0.01em; }
-  .sub--lead .sub__title { font-size: var(--t-h3); font-stretch: 125%; }
-  .sub__summary { font-weight: 600; line-height: 1.4; }
-  .sub--lead .sub__summary { font-size: var(--t-lead); }
-  .sub__body { color: var(--ink-2); font-size: var(--t-small); max-width: 62ch; }
-  .sub__foot { margin-top: auto; padding-top: var(--s-5); display: grid; gap: var(--s-3); }
-  .sub__key { color: var(--ink-2); }
-  .sub__ticks { font-size: var(--t-small); gap: var(--s-2); }
-  @media (min-width: 40rem) { .sub--lead .sub__ticks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .sub__stack { display: grid; gap: var(--s-1); padding-top: var(--s-3); border-top: 1px solid var(--rule); font-size: var(--t-small); font-weight: 600; }
+  .why__card-head { display: flex; justify-content: space-between; gap: var(--s-3); font-weight: 650; padding-bottom: var(--s-3); border-bottom: 1px solid var(--rule); }
+  .why__copy { display: grid; gap: var(--s-5); align-content: start; }
+  .why__lead { font-size: var(--t-lead); color: var(--ink-2); line-height: 1.45; max-width: 40ch; }
+  .why__list { display: grid; gap: 0 var(--gutter); margin-top: var(--s-4); border-top: 1px solid var(--rule-strong); }
+  @media (min-width: 40rem) { .why__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .why__item { display: grid; gap: var(--s-2); align-content: start; padding-block: var(--s-5); border-bottom: 1px solid var(--rule); }
+  .why__title { font-size: 1.25rem; line-height: 1.2; letter-spacing: -0.015em; font-weight: 650; }
+
+  /* ---- Vitals ---- */
+  .vitals { display: grid; gap: var(--s-7); padding: clamp(1.5rem, 1rem + 3vw, 4rem); border-radius: calc(var(--radius) * 1.6); }
+  .vitals__head { display: grid; gap: var(--s-4); max-width: 46rem; }
+  .vitals__lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; }
+  .vitals__list { display: grid; gap: var(--s-3); }
+  @media (min-width: 48rem) { .vitals__list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .vital { display: grid; gap: var(--s-2); align-content: start; padding: var(--s-5); border-radius: var(--radius); background: var(--plate); border: 1px solid var(--rule); }
+  .vital__code { font-family: var(--font-display); font-size: clamp(2.25rem, 1.6rem + 2vw, 3.25rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+  .vital__target { margin-top: var(--s-3); }
+  .vital__target strong { color: var(--accent-text); font-weight: 700; }
+  .vital__bar { display: flex; gap: 3px; height: 1.5rem; margin-bottom: var(--s-2); }
+  .vital__bar i { flex: 1; border-radius: 2px; background: var(--plate-3); }
+  .vital__bar i.is-on { background: var(--lime-400); }
+  .vitals__builder { display: grid; gap: var(--s-5); padding-top: var(--s-7); border-top: 1px solid var(--rule); }
+  .vitals__builder-head { display: grid; gap: var(--s-3); max-width: 52rem; }
+  @media (min-width: 64rem) { .vitals__builder-head { grid-template-columns: 1fr 1.2fr; gap: var(--gutter); align-items: end; max-width: none; } }
+
+  /* ---- Offerings ---- */
+  .offer { row-gap: var(--s-7); align-items: start; }
+  .offer__intro { display: grid; gap: var(--s-5); align-content: start; }
+  @media (min-width: 64rem) { .offer__intro { position: sticky; top: calc(var(--header-h) + var(--s-5)); } }
+  .offer__lead { font-size: var(--t-lead); color: var(--ink-2); line-height: 1.45; max-width: 40ch; }
+  .offer__intro :global(.offer__photo) { margin-top: var(--s-3); }
+  @media (max-width: 63.99rem) { .offer__intro :global(.offer__photo) { display: none; } }
+  .offer__list { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .offer__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .offer__item { display: grid; gap: var(--s-3); align-content: start; transition: background-color var(--t-ui) ease; }
+  @media (min-width: 64rem) { .offer__item { min-height: 15rem; } }
+  .offer__rule { display: block; width: 2rem; height: 4px; border-radius: 2px; background: var(--mark); transition: width 500ms var(--ease-out); }
+  .offer__title { font-size: var(--t-h3); line-height: 1.15; letter-spacing: -0.02em; font-weight: 650; margin-top: var(--s-4); }
+  @media (hover: hover) and (pointer: fine) {
+    .offer__item:hover { background: var(--plate); }
+    .offer__item:hover .offer__rule { width: 4rem; }
+  }
+
+  /* ---- Process ---- */
+  .trail { position: relative; display: grid; gap: var(--s-6) var(--gutter); }
+  @media (min-width: 40rem) { .trail { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) {
+    .trail { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .trail::before { content: ''; position: absolute; top: 0.6rem; left: 0; right: 0; height: 2px; background: var(--rule-strong); }
+  }
+  .trail__step { position: relative; display: grid; gap: var(--s-2); align-content: start; padding-left: 2.25rem; }
+  @media (min-width: 40rem) { .trail__step { padding-left: 0; padding-top: 2.75rem; } }
+  .trail__dot { position: absolute; left: 0; top: 0; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--ground); border: 2px solid var(--ink); }
+  .trail__step--now .trail__dot { background: var(--mark); }
+  .trail__dur { font-weight: 700; color: var(--ink-2); font-size: var(--t-small); }
+  .trail__title { font-size: 1.375rem; line-height: 1.15; letter-spacing: -0.02em; font-weight: 650; }
 
   /* ---- Stack ---- */
-  .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  @media (min-width: 40rem) { .stack { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 64rem) { .stack { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-  .stack__group { display: grid; gap: var(--s-4); align-content: start; }
-  .stack__name { color: var(--accent-text); }
-  .stack__items li { padding-block: var(--s-2); border-top: 1px solid var(--rule); font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); font-weight: 650; font-stretch: 112%; }
+  .stackrow { row-gap: var(--s-4); }
+  .stack { display: grid; gap: var(--s-7); padding: clamp(1.5rem, 1rem + 3vw, 3.5rem); border-radius: calc(var(--radius) * 1.6); }
+  .stack__head { display: grid; gap: var(--s-4); max-width: 40rem; }
+  .stack__lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.45; }
+  .stack__groups { display: grid; gap: var(--s-5) var(--gutter); }
+  @media (min-width: 40rem) { .stack__groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stack__group { display: grid; gap: var(--s-3); align-content: start; padding-top: var(--s-4); border-top: 1px solid var(--rule-strong); }
+  .stack__name { font-weight: 700; }
+  .stack .chip { background: color-mix(in srgb, var(--ground) 45%, transparent); }
+  .stackrow__photo { min-height: 20rem; }
 
-  /* ---- Gantt ---- */
-  .gantt { --label: 1fr; border-top: 1px solid var(--rule-strong); }
-  @media (min-width: 64rem) { .gantt { --label: minmax(0, 4fr); } }
-  .gantt__ruler, .gantt__row { display: grid; grid-template-columns: var(--label) minmax(0, 8fr); column-gap: var(--gutter); }
-  .gantt__ruler { padding-block: var(--s-3); border-bottom: 1px solid var(--rule); color: var(--ink-2); }
-  .gantt__weeks, .gantt__track { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
-  .gantt__weeks span { padding-left: 0.35rem; border-left: 1px solid var(--rule); font-size: 0.6875rem; white-space: nowrap; overflow: hidden; text-overflow: clip; }
-  .gantt__row { padding-block: var(--s-5); border-bottom: 1px solid var(--rule); align-items: center; }
-  .gantt__step { display: grid; gap: var(--s-1); }
-  .gantt__when { color: var(--accent-text); }
-  .gantt__name { font-size: 1.25rem; font-stretch: 112%; line-height: 1.2; }
-  .gantt__body { color: var(--ink-2); font-size: var(--t-small); max-width: 46ch; }
-  .gantt__track { position: relative; height: 2.25rem; background-image: linear-gradient(90deg, var(--rule) 1px, transparent 1px); background-size: calc(100% / var(--cols)) 100%; }
-  .gantt__bar { align-self: center; height: 1.25rem; background: var(--ink-2); }
-  .gantt__bar.is-build { background: var(--field); height: 2.25rem; }
-  .gantt__bar.is-open { background: repeating-linear-gradient(90deg, var(--ink-2) 0 8px, transparent 8px 12px); }
-  @media (max-width: 63.99rem) {
-    .gantt__ruler { display: none; }
-    .gantt__row { grid-template-columns: 1fr; row-gap: var(--s-3); }
+  /* ---- Models ---- */
+  .models { display: grid; gap: var(--s-4); }
+  @media (min-width: 64rem) { .models { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; } }
+  .model { display: flex; flex-direction: column; gap: var(--s-5); padding: var(--module-pad); border-radius: calc(var(--radius) * 1.3); }
+  .model.lime { border: 1px solid var(--field); }
+  .model__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
+  .model__badge { background: var(--carbon-950); color: var(--lime-400); }
+  .model__best { font-size: 1.125rem; line-height: 1.4; color: var(--ink-2); padding-bottom: var(--s-5); border-bottom: 1px solid var(--rule); }
+  .model__list { gap: var(--s-3); }
+  .model__cta { margin-top: auto; }
+
+  /* ---- Guides ---- */
+  .guides { row-gap: var(--s-7); }
+  .guides__all { margin-left: var(--s-2); }
+
+  /* ---- Other teams ---- */
+  .others { display: grid; gap: var(--s-6) var(--gutter); }
+  @media (min-width: 40rem) { .others { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) { .others { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .other { position: relative; display: grid; gap: var(--s-3); align-content: start; }
+  .other :global(.photo img) { transition: transform 700ms var(--ease-out); }
+  .other__name { font-size: 1.375rem; line-height: 1.15; letter-spacing: -0.02em; font-weight: 650; padding-right: 3rem; margin-top: var(--s-2); }
+  .other__name a { text-decoration: none; }
+  .other__go { position: absolute; top: var(--s-3); right: var(--s-3); display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--ground); color: var(--ink); transition: background-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .other:hover :global(.photo img) { transform: scale(1.04); }
+    .other:hover .other__go { background: var(--mark); color: var(--mark-ink); transform: rotate(45deg); }
   }
-
-  /* ---- Pricing ---- */
-  .tiers { grid-template-columns: 1fr; }
-  @media (min-width: 64rem) { .tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .tier { gap: var(--s-5); }
-  .tier__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
-  .tier__name { font-size: var(--t-h3); font-stretch: 125%; line-height: 1.1; text-transform: uppercase; }
-  .tier__flag { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.2rem 0.5rem; border: 1px solid currentColor; }
-  .tier__price { display: grid; gap: var(--s-2); }
-  .tier__from { color: var(--ink-2); }
-  .tier__figure { font-size: clamp(2.75rem, 1.8rem + 2.6vw, 4.25rem); }
-  .tier__facts { display: grid; border-top: 1px solid var(--rule); }
-  .tier__facts div { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--s-3); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
-  .tier__facts dt { color: var(--ink-2); padding-top: 0.15rem; }
-  .tier__facts dd { font-size: var(--t-small); font-weight: 550; }
-  .tier__list { font-size: var(--t-small); }
-  .tier__cta { margin-top: auto; }
-  .tiers__care { margin-top: var(--s-5); color: var(--ink-2); max-width: 60ch; }
-  .tiers__care strong { color: var(--ink); }
-
-  /* ---- Promises ---- */
-  .promises { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .promises { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64rem) { .promises { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .promise { gap: var(--s-3); }
-  @media (min-width: 64rem) { .promise { min-height: 15rem; } }
-  .promise__figure { font-size: clamp(2.25rem, 1.5rem + 2vw, 3.25rem); font-weight: 750; font-stretch: 125%; line-height: 1; letter-spacing: -0.02em; color: var(--accent-text); font-variant-numeric: tabular-nums; }
-  .promise__title { margin-top: auto; font-size: 1.1875rem; font-stretch: 112%; line-height: 1.2; }
-  .promise__body { color: var(--ink-2); font-size: var(--t-small); }
-
-  /* ---- Related ---- */
-  .related { row-gap: var(--s-6); align-items: start; border-top: 1px solid var(--rule-strong); padding-top: var(--s-5); }
-  .related__copy { display: grid; gap: var(--s-5); }
-  .related__text { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; max-width: 52ch; }
-  .related__text a { color: var(--ink); }
-  .related__list { border-top: 1px solid var(--rule-strong); }
-  .related__link { position: relative; display: grid; grid-template-columns: 1fr auto; gap: var(--s-1) var(--s-4); padding-block: var(--s-4); border-bottom: 1px solid var(--rule); text-decoration: none; }
-  .related__name { font-size: 1.25rem; font-weight: 700; font-stretch: 112%; }
-  .related__summary { grid-column: 1; color: var(--ink-2); font-size: var(--t-small); }
-  .related__arrow { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 1.5rem; height: 1.5rem; transition: transform var(--t-ui) var(--ease-out); }
-  @media (hover: hover) and (pointer: fine) { .related__link:hover .related__arrow { transform: translate(3px, -3px); color: var(--accent-text); } }
-
-  .cards { row-gap: var(--s-7); }
-  .section-more { margin-top: var(--s-6); }
+  .other:has(a:focus-visible) { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: var(--radius); }
+  .other a:focus-visible { outline: none; }
 </style>
