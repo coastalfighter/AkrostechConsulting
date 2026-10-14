@@ -2,10 +2,10 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
-import InboxTriage from '@/components/heroes/InboxTriage.astro';
-import HiringFunnel from '@/components/heroes/HiringFunnel.astro';
-import LedgerReconcile from '@/components/heroes/LedgerReconcile.astro';
-import ClauseAbstract from '@/components/heroes/ClauseAbstract.astro';
+import InboxTriage from '@/components/instruments/InboxTriage.astro';
+import HiringFunnel from '@/components/instruments/HiringFunnel.astro';
+import LedgerReconcile from '@/components/instruments/LedgerReconcile.astro';
+import ClauseAbstract from '@/components/instruments/ClauseAbstract.astro';
 import Photo from '@/components/Photo.astro';
 import Compare from '@/components/Compare.astro';
 import WorkCard from '@/components/WorkCard.astro';
@@ -42,9 +42,9 @@ const lowerShort = s.shortName.charAt(0).toLowerCase() + s.shortName.slice(1);
 /** Each practice gets its own working instrument in the hero. */
 const instruments = {
   'virtual-assistance': InboxTriage,
-  'recruitment-process-outsourcing': HiringFunnel,
-  'accounting-assistance': LedgerReconcile,
-  'legal-process-outsourcing': ClauseAbstract,
+  'recruitment': HiringFunnel,
+  'accounting': LedgerReconcile,
+  'legal': ClauseAbstract,
 } as const;
 const Instrument = instruments[s.slug as keyof typeof instruments];
 if (!Instrument) throw new Error(`No hero instrument for /services/${s.slug}`);

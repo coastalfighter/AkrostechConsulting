@@ -6,21 +6,156 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-src https://www.google.com https://calendly.com; base-uri 'self'; form-action 'self' mailto:; object-src 'none'; upgrade-insecure-requests" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-src https://www.google.com https://calendly.com; base-uri 'self'; form-action 'self' mailto:; object-src 'none'; upgrade-insecure-requests"
+        }
       ]
     },
     {
       "source": "/fonts/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/_astro/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/about-akrostech",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/contact-us",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/blog-akrostech",
+      "destination": "/blog",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/services/accounting-assistance",
+      "destination": "/services/accounting",
+      "permanent": true
+    },
+    {
+      "source": "/services/recruitment-process-outsourcing",
+      "destination": "/services/recruitment",
+      "permanent": true
+    },
+    {
+      "source": "/services/legal-process-outsourcing",
+      "destination": "/services/legal",
+      "permanent": true
+    },
+    {
+      "source": "/work",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/work/:slug*",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/locations",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/locations/:slug*",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/blog/business-website-cost",
+      "destination": "/blog/how-much-does-a-business-website-cost",
+      "permanent": true
+    },
+    {
+      "source": "/blog/core-web-vitals-for-business-owners",
+      "destination": "/blog/core-web-vitals-explained-for-business-owners",
+      "permanent": true
+    },
+    {
+      "source": "/blog/offshore-bookkeeping-checklist",
+      "destination": "/blog/offshore-bookkeeping-checklist-data-security",
+      "permanent": true
+    },
+    {
+      "source": "/blog/offshore-vs-onshore-hire-cost",
+      "destination": "/blog/offshore-vs-onshore-true-cost-of-a-remote-hire",
+      "permanent": true
+    },
+    {
+      "source": "/blog/onboard-virtual-assistant-48-hours",
+      "destination": "/blog/onboard-a-virtual-assistant-in-48-hours",
+      "permanent": true
+    },
+    {
+      "source": "/blog/virtual-assistant-tasks-to-delegate",
+      "destination": "/blog/virtual-assistant-tasks-small-business-can-delegate",
+      "permanent": true
+    },
+    {
+      "source": "/blog/what-is-legal-process-outsourcing",
+      "destination": "/blog/what-is-legal-process-outsourcing-tasks-law-firms-can-outsource",
+      "permanent": true
+    },
+    {
+      "source": "/blog/what-is-recruitment-process-outsourcing",
+      "destination": "/blog/what-is-recruitment-process-outsourcing-rpo-vs-staffing-agency",
+      "permanent": true
     }
   ]
 }

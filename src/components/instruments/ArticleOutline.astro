@@ -1,0 +1,137 @@
+---
+/**
+ * Article hero instrument: the reading outline. The article's sections as a ruled list on a
+ * hairline track; a lime rule fills down the track as the reader moves through the text, the
+ * section in view is marked, every entry carries its own reading time, and a readout counts
+ * the minutes left. Rendered once: beside the title and sticky beside the body on desktop,
+ * a compact bar that opens the list on phones.
+ */
+interface Section {
+  slug: string;
+  text: string;
+  words: number;
+}
+interface Props {
+  sections: Section[];
+  /** Words before the first section heading. */
+  introWords: number;
+  totalMinutes: number;
+  wpm: number;
+}
+const { sections, introWords, totalMinutes, wpm } = Astro.props;
+const totalWords = introWords + sections.reduce((n, s) => n + s.words, 0);
+/** Under a minute in 10-second steps, then to the half minute: "40 sec", "1.5 min". */
+const timeFor = (words: number) => {
+  const m = words / wpm;
+  if (m < 0.92) return `${Math.max(10, Math.round((m * 60) / 10) * 10)} sec`;
+  return `${Math.round(m * 2) / 2} min`;
+};
+const startsAt = (i: number) => introWords + sections.slice(0, i).reduce((n, s) => n + s.words, 0);
+---
+
+<aside class="ol" data-instrument="toc" aria-labelledby="outline-title" data-words={totalWords} data-intro={introWords} data-wpm={wpm}>
+  <div class="ol__head">
+    <h2 class="ol__title label" id="outline-title">On this page</h2>
+    <button class="ol__toggle" type="button" aria-expanded="true" aria-controls="outline-list" hidden data-toggle>
+      <span class="ol__toggle-text" data-current-name>{sections.length} sections</span>
+      <span class="ol__toggle-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div class="ol__readout" aria-live="off">
+    <p class="ol__left">
+      <span class="ol__figure" data-left>{totalMinutes}</span>
+      <span class="ol__unit">min left<br /><span class="ol__of">of {totalMinutes} min</span></span>
+    </p>
+    <p class="ol__pos label">
+      Section <span class="tabular" data-pos>01</span> / <span class="tabular">{String(sections.length).padStart(2, '0')}</span>
+    </p>
+    <div class="ol__bar" aria-hidden="true"><span data-bar></span></div>
+  </div>
+
+  <nav class="ol__nav" aria-label="Article outline" id="outline-list">
+    <ol class="ol__list" role="list">
+      {
+        sections.map((s, i) => (
+          <li class="ol__item" data-section={s.slug} data-words={s.words} data-start={startsAt(i)}>
+            <a class="ol__link" href={`#${s.slug}`}>
+              <span class="ol__node" aria-hidden="true" />
+              <span class="ol__text">{s.text}</span>
+              <span class="ol__min">{timeFor(s.words)}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="ol__track" aria-hidden="true"><span class="ol__fill" data-fill></span></div>
+  </nav>
+  <p class="ol__foot">{totalWords.toLocaleString('en-US')} words, timed at {wpm} words a minute</p>
+</aside>
+
+<style>
+  .ol { --p: 0; display: grid; gap: var(--s-4); background: var(--plate); border: 1px solid var(--rule-strong); padding: var(--s-5); }
+  .ol__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
+  .ol__title { color: var(--ink-2); font-size: var(--t-label); }
+
+  .ol__readout { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: var(--s-3) var(--s-4); padding-bottom: var(--s-4); border-bottom: 1px solid var(--rule); }
+  .ol__left { display: flex; align-items: end; gap: var(--s-3); }
+  .ol__figure { font-size: clamp(3rem, 2.2rem + 2vw, 4.25rem); font-weight: 750; font-stretch: 125%; line-height: 0.82; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .ol__unit { font-size: 0.8125rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.25; }
+  .ol__of { color: var(--ink-2); }
+  .ol__pos { color: var(--ink-2); }
+  .ol__bar { grid-column: 1 / -1; height: 6px; background: var(--plate-3); overflow: hidden; }
+  .ol__bar span { display: block; height: 100%; background: var(--field); transform-origin: 0 50%; transform: scaleX(var(--p)); }
+
+  .ol__nav { position: relative; }
+  .ol__list { display: grid; }
+  .ol__item + .ol__item .ol__link { border-top: 1px solid var(--rule); }
+  .ol__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+    gap: var(--s-3);
+    align-items: baseline;
+    min-height: 44px;
+    padding: 0.6rem 0;
+    text-decoration: none;
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    transition: color var(--t-ui) ease;
+  }
+  .ol__node { position: relative; z-index: 1; width: 0.6rem; height: 0.6rem; margin-left: calc(0.3rem - 0.5px); translate: 0 0.05rem; background: var(--plate); border: 1px solid var(--ink-3); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out); }
+  .ol__min { font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-3); white-space: nowrap; }
+  .ol__item.is-read .ol__node { background: var(--field); border-color: var(--field); }
+  .ol__item.is-current .ol__link { color: var(--ink); font-weight: 650; }
+  .ol__item.is-current .ol__node { background: var(--field); border-color: var(--field); transform: scale(1.5); }
+  .ol__item.is-current .ol__min { color: var(--accent-text); }
+  /* Progress through the section in view, as a lime rule under its entry. */
+  .ol__link::after { content: ''; position: absolute; left: calc(1.25rem + var(--s-3)); right: 0; bottom: -1px; height: 2px; background: var(--field); transform-origin: 0 50%; transform: scaleX(0); }
+  .ol__item.is-current .ol__link::after { transform: scaleX(var(--sp, 0)); }
+  .ol__foot { font-size: 0.75rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  @media (hover: hover) and (pointer: fine) { .ol__link:hover { color: var(--ink); } .ol__link:hover .ol__node { border-color: var(--ink); } }
+  /* The track: a hairline down the nodes, filled in lime as the reader progresses. */
+  .ol__track { position: absolute; left: calc(0.6rem - 0.5px); top: 1.1rem; bottom: 1.1rem; width: 1px; background: var(--rule-strong); }
+  .ol__fill { position: absolute; inset: 0 -1px; background: var(--field); transform-origin: 50% 0; transform: scaleY(var(--p)); }
+
+  .ol__toggle { display: inline-flex; align-items: center; gap: var(--s-3); min-height: 44px; padding-inline: var(--s-3); border: 1px solid var(--rule-strong); font-size: 0.875rem; font-weight: 600; text-align: left; transition: transform var(--t-press) var(--ease-out); }
+  .ol__toggle:active { transform: scale(0.97); }
+  .ol__toggle-text { max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ol__toggle-icon { position: relative; width: 0.75rem; height: 0.75rem; flex: none; }
+  .ol__toggle-icon::before, .ol__toggle-icon::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: currentColor; transition: rotate var(--t-ui) var(--ease-out); }
+  .ol__toggle-icon::after { rotate: 90deg; }
+  .ol__toggle[aria-expanded='true'] .ol__toggle-icon::after { rotate: 0deg; }
+
+  /* Phones and tablets: a compact sticky bar; the list opens on demand. */
+  @media (max-width: 63.99rem) {
+    :global(html.js) .ol { position: sticky; top: var(--s-2); z-index: 5; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3) var(--s-4); padding: var(--s-3) var(--s-4); }
+    :global(html.js) .ol__head { grid-column: 2; grid-row: 1; }
+    :global(html.js) .ol__readout { grid-column: 1; grid-row: 1; grid-template-columns: 1fr; gap: var(--s-2); padding-bottom: 0; border-bottom: 0; }
+    :global(html.js) .ol__nav { grid-column: 1 / -1; }
+    :global(html.js) .ol__figure { font-size: 1.75rem; }
+    :global(html.js) .ol__unit br, :global(html.js) .ol__of, :global(html.js) .ol__pos, :global(html.js) .ol__title, :global(html.js) .ol__foot { display: none; }
+    :global(html.js) .ol__unit { align-self: center; }
+    :global(html.js) .ol[data-collapsed] .ol__nav { display: none; }
+    :global(html.js) .ol__nav { max-height: 55svh; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--rule); }
+  }
+</style>

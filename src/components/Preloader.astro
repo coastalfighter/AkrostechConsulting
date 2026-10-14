@@ -10,8 +10,8 @@ import Logo from './Logo.astro';
 <div class="preloader" aria-hidden="true">
   <div class="preloader__inner">
     <Logo wordmark={false} draw class="preloader__mark" />
-    <p class="preloader__line"><span>Offshore talent.</span></p>
-    <p class="preloader__line preloader__line--lime"><span>Onshore quality.</span></p>
+    <p class="preloader__line"><span>Your team in India.</span></p>
+    <p class="preloader__line preloader__line--lime"><span>Working your U.S. hours.</span></p>
   </div>
   <span class="preloader__rule"></span>
 </div>
@@ -22,8 +22,8 @@ import Logo from './Logo.astro';
     position: fixed;
     inset: 0;
     z-index: var(--z-preloader);
-    background: var(--carbon-950);
-    color: var(--carbon-50);
+    background: var(--ground);
+    color: var(--ink);
     pointer-events: none;
   }
   :global(html.is-preloading) .preloader {
@@ -33,24 +33,23 @@ import Logo from './Logo.astro';
   /* Fixed coordinates so font loading can never shift it. */
   .preloader__inner { position: absolute; left: var(--margin); bottom: 18svh; display: grid; gap: 0.1em; }
   .preloader :global(.preloader__mark) { font-size: clamp(2.25rem, 6vw, 4rem); margin-bottom: 0.35em; }
-  .preloader :global(.preloader__mark .logo__mark) { color: var(--lime-400); }
+  .preloader :global(.preloader__mark .logo__mark) { color: var(--ink); }
   .preloader__line {
     overflow: clip;
     font-size: clamp(2.25rem, 1rem + 5vw, 6rem);
-    font-weight: 750;
-    font-stretch: 125%;
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-    text-transform: uppercase;
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
   }
   .preloader__line span { display: block; animation: rise 700ms var(--ease-out) 450ms both; }
-  .preloader__line--lime { color: var(--lime-400); }
+  .preloader__line--lime { color: var(--ink-3); }
   .preloader__line--lime span { animation-delay: 540ms; }
   .preloader__rule {
     position: absolute;
     left: 0; right: 0; bottom: 0;
     height: 6px;
-    background: var(--lime-400);
+    background: var(--mark);
     transform-origin: 0 50%;
     animation: grow 1200ms var(--ease-in-out) both;
   }

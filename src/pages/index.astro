@@ -1,157 +1,162 @@
 ---
+/**
+ * Homepage, in the Sample-3 order (one idea per section): the promise, proof, what we do,
+ * how the hours work, how we start, what is included, who it is for, how we compare,
+ * questions, contact. The hero carries the generative field; the interactive instruments
+ * (service index, live shift dial, comparison divider, audience tabs) sit in the body.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
-import ShiftDial from '@/components/heroes/ShiftDial.astro';
+import FieldHero from '@/components/FieldHero.astro';
+import ShiftDial from '@/components/instruments/ShiftDial.astro';
 import Photo from '@/components/Photo.astro';
 import Compare from '@/components/Compare.astro';
-import WorkCard from '@/components/WorkCard.astro';
-import PostCard from '@/components/PostCard.astro';
 import Faq from '@/components/Faq.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
 import { pages } from '@/data/pages';
-import { services, serviceHref } from '@/data/services';
+import { services, serviceHref, serviceBySlug } from '@/data/services';
 import { servicePhoto } from '@/data/photos';
-import { work } from '@/data/work';
-import { commitments, teamRoles, vetting, generalFaqs } from '@/data/company';
-import { getPosts } from '@/lib/blog';
+import { audiences, comparison, features, homeFaqs, processSteps, sharedDay, tools } from '@/data/home';
 import { faqSchema } from '@/lib/seo';
 
-const posts = (await getPosts()).slice(0, 3);
-const featuredWork = [work[0], work[3], work[4]].filter((w): w is (typeof work)[number] => Boolean(w));
 const f = site.figures;
-
-const steps = [
-  { when: 'Day 0', title: 'A 30-minute call', body: 'You list the work, the tools and the hours. We listen for what a good week looks like.' },
-  { when: 'Day 1', title: 'A shortlist', body: 'Two or three vetted professionals who have done this exact work, with samples you can review.' },
-  { when: 'Day 2', title: 'Work starts', body: 'Access set up, procedures drafted, first tasks closed on day one in your tools.' },
-  { when: 'Every Friday', title: 'A written report', body: 'What was done, what is waiting on you, what changes next. Written by their team lead.' },
+const stats = [
+  { value: f.professionals, suffix: '+', label: 'Vetted professionals' },
+  { value: f.projects, suffix: '+', label: 'Projects running' },
+  { value: f.accuracy, suffix: '%', label: 'Task accuracy rate' },
+  { value: f.onboardingHours, suffix: 'h', label: 'Onboarding time' },
 ];
-
-const compareRows = [
-  { label: 'Time to a shortlist', a: 'Weeks of job posts, screening and interviews', b: `${f.matchHours} hours, vetted and with work samples` },
-  { label: 'Time to start', a: 'Notice periods, then onboarding', b: `Working in your tools within ${f.onboardingHours} hours` },
-  { label: 'Quality review', a: 'You check the work yourself', b: 'A team lead checks it before it reaches you' },
-  { label: 'When someone leaves', a: 'Start hiring again from zero', b: 'A vetted replacement, trained on your written SOPs' },
-  { label: 'Know-how', a: 'In one person’s head', b: 'Written procedures your company owns' },
-  { label: 'Cost', a: 'Salary, benefits, payroll taxes, equipment, desk', b: 'One monthly fee, no placement fee' },
-];
+// The new service first, as on the Sample-3 index.
+const ordered = [...services].sort((a, b) => Number(Boolean(b.isNew)) - Number(Boolean(a.isNew)));
+const faqs = homeFaqs.map((x) => ({ q: x.q, a: x.a }));
+const clock = (hoursAfterNine: number) => {
+  const m = 9 * 60 + Math.round(hoursAfterNine * 60);
+  const h = Math.floor(m / 60);
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(m % 60).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'}`;
+};
 ---
 
-<BaseLayout {...pages.home} image="/og/home.png" schema={[faqSchema(generalFaqs)]}>
-  <Hero labelledby="home-title" split="5-7">
-    <h1 class="h1 hero__title" id="home-title">
-      Offshore talent. <span class="accent">Onshore quality.</span>
-    </h1>
-    <p class="hero__lead">
-      Vetted virtual assistants, recruiters, accountants, legal assistants and web developers in India, working your U.S. business day. Shortlisted
-      in {f.matchHours} hours, onboarded in {f.onboardingHours}.
-    </p>
+<BaseLayout {...pages.home} image="/og/home.png" schema={[faqSchema(faqs)]}>
+  <FieldHero scene="wave" labelledby="home-title">
+    <h1 class="fhero__title" id="home-title">Your team in India. <span class="quiet">Working your U.S. hours.</span></h1>
+    <p class="fhero__lead">Vetted specialists for admin, hiring, accounting, legal and web. Live on your calls and ready in 48 hours.</p>
     <div class="actions">
-      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
-        Book a discovery call <Icon name="arrow-up-right" class="btn__arrow" />
-      </a>
-      <a class="btn btn--ghost" href="/services">Explore services <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></a>
+      <a class="btn btn--ghost" href="/contact">Get a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
     </div>
-    <ShiftDial slot="instrument" />
+    <p class="hero-note small muted">Built for startups, scaled by enterprises, trusted by leaders.</p>
+  </FieldHero>
 
-    <div slot="strip" class="strip ruled">
-      <div class="module module--flex lime strip__lime">
-        <p class="figure">{f.onboardingHours}h</p>
-        <p class="strip__text">From the first call to a specialist working inside your tools.</p>
-      </div>
-      <div class="strip__photo">
-        <Photo name="team-laptops" priority={false} fill sizes="(min-width: 64rem) 40vw, 100vw" focal="50% 40%" />
-      </div>
-      <div class="module module--flex">
-        <p class="figure"><span data-count>{f.professionals}</span>+</p>
-        <p class="strip__text">Vetted professionals across five practices.</p>
-      </div>
-      <div class="module module--flex">
-        <p class="figure"><span data-count>{f.accuracy}</span>%</p>
-        <p class="strip__text">Task accuracy, checked by a team lead before work reaches you.</p>
-      </div>
+  <!-- Proof -->
+  <section class="proof" aria-labelledby="proof-title">
+    <div class="wrap">
+      <h2 class="sr-only" id="proof-title">Akrostech by the numbers</h2>
+      <dl class="proof__list" data-reveal-group>
+        {
+          stats.map((s) => (
+            <div class="proof__item" data-reveal>
+              <dt>{s.label}</dt>
+              <dd class="figure"><span data-count>{s.value}</span>{s.suffix}</dd>
+            </div>
+          ))
+        }
+      </dl>
     </div>
-  </Hero>
+  </section>
 
-  <!-- Practices: hover a row to isolate it; the photo module follows -->
-  <section class="section practices" aria-labelledby="practices-title">
+  <!-- Services index: hover or focus a row; the photo follows -->
+  <section class="section" aria-labelledby="services-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="practices-title" data-split>Five practices. One standard.</h2>
-        <p data-reveal>
-          Every practice runs the same way: vetted people, a team lead on every pod, written procedures and a weekly report. Hire one specialist or
-          build a team across all five.
-        </p>
+        <h2 class="h2" id="services-title" data-split>Five services. One accountable partner.</h2>
+        <p data-reveal>A dedicated specialist for each function, on your hours, with a team lead behind every one.</p>
       </div>
-      <div class="practices__grid grid">
-        <ul class="practices__list c-7" role="list">
+      <div class="sindex grid">
+        <ul class="sindex__list c-7" role="list">
           {
-            services.map((s, i) => (
-              <li class="practice" style={`--i:${i}`} data-practice={i}>
-                <a class="practice__link" href={serviceHref(s.slug)}>
-                  <span class="practice__name">
+            ordered.map((s, i) => (
+              <li class="sindex__row" data-row={i}>
+                <a class="sindex__link" href={serviceHref(s.slug)}>
+                  <span class="sindex__name">
                     {s.name}
-                    {s.isNew && <span class="practice__new">New</span>}
+                    {s.isNew && <span class="badge">New</span>}
                   </span>
-                  <span class="practice__summary">{s.summary}</span>
-                  <span class="practice__meta">{s.startsIn}</span>
-                  <Icon name="arrow-up-right" class="icon practice__arrow" />
+                  <span class="sindex__sum">{s.summary}</span>
+                  <span class="sindex__facts small">
+                    <span>
+                      <span class="muted">Starts in </span>
+                      {s.facts.startsIn}
+                    </span>
+                    <span>
+                      <span class="muted">Saves </span>
+                      {s.facts.savings}
+                    </span>
+                  </span>
+                  <span class="sindex__go" aria-hidden="true">
+                    <Icon name="arrow-up-right" />
+                  </span>
                 </a>
               </li>
             ))
           }
         </ul>
-        <div class="practices__frame c-5" aria-hidden="true">
-          {services.map((s, i) => <Photo name={servicePhoto[s.slug]} alt="" fill class={`practices__photo practices__photo--${i}`} sizes="(min-width: 64rem) 36vw, 1px" />)}
+        <div class="sindex__frame c-5" aria-hidden="true">
+          {ordered.map((s, i) => <Photo name={servicePhoto[s.slug]} alt="" fill class={`sindex__photo sindex__photo--${i}`} sizes="(min-width: 64rem) 34vw, 1px" />)}
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Photograph and headline across a seam -->
-  <section class="seam" aria-labelledby="seam-title">
-    <div class="wrap grid seam__grid">
-      <div class="seam__photo c-8">
-        <Photo name="open-office" alt="A large open-plan office with rows of desks" ratio="16 / 10" sizes="(min-width: 64rem) 66vw, 100vw" reveal="clip" />
-      </div>
-      <div class="seam__copy c-6 s-7">
-        <h2 class="seam__title" id="seam-title" data-split>Most companies run out of hours before they run out of work.</h2>
-        <p class="seam__text" data-reveal>
-          We give you the hours back: trained people in India who work your day, use your tools, follow your playbook and report to you every week.
-          You manage outcomes. Their team lead manages the rest.
-        </p>
-        <a class="more" href="/about" data-reveal>How we work <Icon name="arrow-right" /></a>
+  <!-- Same hours, different sky: the live shift dial -->
+  <section class="section section--flush-top" aria-labelledby="sky-title">
+    <div class="wrap">
+      <div class="sky ink-plate">
+        <div class="sky__head">
+          <h2 class="h2" id="sky-title" data-split>Same hours. Different sky.</h2>
+          <p class="sky__lead">
+            When New York starts work, the sun is setting in India and your team is starting its shift. Drag the handles to set your day and see
+            theirs, live.
+          </p>
+        </div>
+        <div class="sky__body">
+          <div class="sky__dial"><ShiftDial /></div>
+          <div class="sky__day">
+            <p class="sky__day-head small"><span>A shared day, ET</span><span class="muted">Illustrative</span></p>
+            <ol class="sky__list" role="list">
+              {
+                sharedDay.map((t) => (
+                  <li class="sky__item">
+                    <span class="sky__time tabular">{clock(t.at)}</span>
+                    <span class="sky__what">
+                      <strong>{t.title}</strong>
+                      <span class="muted">{t.detail}</span>
+                    </span>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Local hire vs Akrostech: drag the seam -->
-  <section class="section" aria-labelledby="compare-title">
+  <!-- How it works -->
+  <section class="section section--flush-top" aria-labelledby="how-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="compare-title" data-split>The same role, two ways to fill it.</h2>
-        <p data-reveal>Drag the divider to compare what changes when the role is filled by an Akrostech specialist instead of a local hire.</p>
+        <h2 class="h2" id="how-title" data-split>From first call to a working team in 48 hours.</h2>
+        <p data-reveal>The same four steps on every engagement, so you always know what happens next.</p>
       </div>
-      <Compare id="compare-home" aTitle="A local hire" bTitle="Akrostech" rows={compareRows} />
-    </div>
-  </section>
-
-  <!-- How it starts -->
-  <section class="section section--flush-top" aria-labelledby="steps-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="steps-title" data-split>From first call to first report in a week.</h2>
-        <p data-reveal>No recruitment cycle, no notice period. Most roles are working in your tools two days after the call.</p>
-      </div>
-      <ol class="steps ruled" role="list" data-reveal-group>
+      <ol class="steps" role="list" data-reveal-group>
         {
-          steps.map((s, i) => (
-            <li class:list={['module module--flex step', { lime: i === 2 }]} data-reveal>
-              <p class="label step__when">{s.when}</p>
+          processSteps.map((s, i) => (
+            <li class:list={['step', { 'step--now': i === 2 }]} data-reveal>
+              <span class="step__dot" aria-hidden="true" />
+              <span class="step__dur tabular">{s.duration}</span>
               <h3 class="h3">{s.title}</h3>
-              <p class="step__body">{s.body}</p>
+              <p class="muted">{s.detail}</p>
             </li>
           ))
         }
@@ -159,207 +164,232 @@ const compareRows = [
     </div>
   </section>
 
-  <!-- Commitments and vetting: the controls, shown not asserted -->
-  <section class="section plate" aria-labelledby="controls-title">
+  <!-- What every engagement includes -->
+  <section class="section section--flush-top" aria-labelledby="features-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="controls-title" data-split>The controls behind every engagement.</h2>
-        <p data-reveal>Six commitments written into every engagement letter, whether you hire one assistant or a team of ten.</p>
+        <h2 class="h2" id="features-title" data-split>Your tools. Our team. Everything built in.</h2>
+        <p data-reveal>No new software, contracts or management overhead. It comes with every engagement.</p>
       </div>
-      <div class="controls grid">
-        <ul class="controls__list ruled ruled--plate c-8" role="list" data-reveal-group>
+      <div class="bento" data-reveal-group>
+        <div class="bento__stack panel" data-reveal>
+          <div class="bento__stack-copy">
+            <h3 class="h3">Works inside your stack</h3>
+            <p class="muted">Your CRM, books and storefront, with your logins, permissions and SOPs.</p>
+          </div>
+          <ul class="bento__tools" role="list">{tools.map((t) => <li class="chip">{t}</li>)}</ul>
+        </div>
+        {
+          features.map((ft, i) => (
+            <div class:list={['bento__cell', `bento__cell--${i}`, i === 0 ? 'violet' : 'panel']} data-reveal>
+              <h3 class="h3">{ft.title}</h3>
+              <p class={i === 0 ? undefined : 'muted'}>{ft.description}</p>
+            </div>
+          ))
+        }
+        <div class="bento__photo" data-reveal>
+          <Photo name="svc-accounting-work" alt="Quality dashboards on a laptop screen" fill sizes="(min-width: 64rem) 22vw, 100vw" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who we serve: tabs -->
+  <section class="section section--flush-top" aria-labelledby="audiences-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="audiences-title" data-split>Built for the teams that run your business.</h2>
+        <p data-reveal>Pick the team you lead and see what you could hand off this week.</p>
+      </div>
+      <div class="tabs" data-tabs>
+        <div class="tabs__list" role="tablist" aria-label="Who we work with">
           {
-            commitments.map((c) => (
-              <li class="module module--flex control" data-reveal>
-                <p class="control__figure">{c.figure}</p>
-                <h3 class="control__title">{c.title}</h3>
-                <p class="control__body">{c.body}</p>
-              </li>
+            audiences.map((a, i) => (
+              <button class="tabs__tab" role="tab" type="button" id={`aud-tab-${i}`} aria-controls={`aud-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+                {a.title}
+              </button>
             ))
           }
-        </ul>
-        <div class="controls__vetting c-4">
-          <Photo name="pair-at-laptop" ratio="4 / 3" sizes="(min-width: 64rem) 30vw, 100vw" reveal="clip" />
-          <h3 class="h3 vetting__title">Five stages before you meet anyone</h3>
-          <ol class="vetting" role="list">
-            {
-              vetting.map((v) => (
-                <li class="vetting__item">
-                  <span class="vetting__name">{v.title}</span>
-                  <span class="vetting__body">{v.body}</span>
-                </li>
-              ))
-            }
-          </ol>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- The chain of people -->
-  <section class="section" aria-labelledby="chain-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="chain-title" data-split>Who you work with, by name.</h2>
-        <p data-reveal>
-          A U.S. client partner owns the engagement, a delivery lead owns quality, a team lead reviews the work, and the specialists do it. One
-          chain, every name known.
-        </p>
-      </div>
-      <ol class="chain" role="list" data-reveal-group>
         {
-          teamRoles.map((r) => (
-            <li class="chain__item" data-reveal>
-              <span class="chain__node" aria-hidden="true" />
-              <h3 class="h3">{r.role}</h3>
-              <p class="label chain__where">{r.practice}</p>
-              <p class="chain__body">{r.body}</p>
-            </li>
-          ))
+          audiences.map((a, i) => {
+            const svc = serviceBySlug(a.service);
+            return (
+              <div class="tabs__panel panel" role="tabpanel" id={`aud-panel-${i}`} aria-labelledby={`aud-tab-${i}`} hidden={i !== 0} tabindex="0">
+                <div class="tabs__copy">
+                  <p class="tabs__summary">{a.summary}</p>
+                  <ul class="ticks" role="list">
+                    {a.tasks.map((t) => (
+                      <li>{t}</li>
+                    ))}
+                  </ul>
+                  <a class="more" href={serviceHref(a.service)}>
+                    See {svc?.name ?? 'the service'} <Icon name="arrow-right" />
+                  </a>
+                </div>
+                <div class="tabs__photo">
+                  <Photo name={servicePhoto[a.service]} fill sizes="(min-width: 64rem) 30vw, 100vw" />
+                </div>
+              </div>
+            );
+          })
         }
-      </ol>
+      </div>
     </div>
   </section>
 
-  <!-- Work -->
-  <section class="section section--flush-top" aria-labelledby="work-title">
+  <!-- Comparison -->
+  <section class="section section--flush-top" aria-labelledby="compare-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="work-title" data-split>Work, planned in the open.</h2>
-        <p data-reveal>Engagement blueprints: how we staff, start and measure each kind of engagement. Plans, not invented case studies.</p>
+        <h2 class="h2" id="compare-title" data-split>Three ways to add capacity. One clear choice.</h2>
+        <p data-reveal>The same seat filled three ways. Switch the option on the left and drag the divider to compare speed, coverage, quality and risk.</p>
       </div>
-      <div class="cards grid" data-reveal-group>
-        {featuredWork.map((w) => <div class="c-4" data-reveal><WorkCard item={w} /></div>)}
+      <Compare id="compare-home" columns={comparison.columns} rows={comparison.rows.map((r) => ({ label: r.label, values: r.values }))} />
+      <div class="compare-foot">
+        <a class="btn btn--primary" href="/contact">Get a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+        <p class="small muted">Pricing depends on role, seniority and scope. We confirm it after a 30-minute discovery call.</p>
       </div>
-      <a class="more section-more" href="/work">All eight blueprints <Icon name="arrow-right" /></a>
     </div>
   </section>
 
-  <!-- Insights -->
-  <section class="section section--flush-top" aria-labelledby="posts-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="posts-title" data-split>Field notes.</h2>
-        <p data-reveal>Practical guides on delegating, hiring, offshore bookkeeping, legal process outsourcing and fast websites.</p>
-      </div>
-      <div class="cards grid" data-reveal-group>
-        {posts.map((p) => <div class="c-4" data-reveal><PostCard post={p} /></div>)}
-      </div>
-      <a class="more section-more" href="/blog">All articles <Icon name="arrow-right" /></a>
-    </div>
-  </section>
-
-  <Faq faqs={generalFaqs} name="home" heading="Questions buyers ask first" intro="Straight answers on cost, security, hours and what happens if someone leaves." />
+  <Faq faqs={faqs} name="home" heading="Questions we hear every week." intro="Straight answers about offshore teams, U.S. hours, security and cost." />
 
   <CtaBand />
 </BaseLayout>
 
+<script>
+  /** Accessible tabs: arrow keys move between tabs, Home/End jump, selection follows focus. */
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement, focus = true) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute('aria-controls') ?? '');
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tab.focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab, false));
+      tab.addEventListener('keydown', (e) => {
+        const map: Record<string, number> = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: tabs.length - 1 };
+        const next = map[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        select(tabs[(next + tabs.length) % tabs.length]!);
+      });
+    });
+  });
+</script>
+
 <style>
-  /* ---- Hero strip ---- */
-  .strip { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .strip { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 64rem) { .strip { grid-template-columns: 3fr 4fr 2.5fr 2.5fr; } }
-  .strip .module { min-height: 9rem; gap: var(--s-4); justify-content: space-between; }
-  @media (min-width: 64rem) { .strip .module { min-height: 13rem; } }
-  .strip__lime .figure { font-size: clamp(3.5rem, 2rem + 5vw, 6rem); }
-  .strip .figure { font-size: clamp(2.5rem, 1.6rem + 2vw, 3.5rem); white-space: nowrap; }
-  .strip__text { max-width: 28ch; font-size: var(--t-small); color: var(--ink-2); }
-  .strip__lime .strip__text { font-size: 1.0625rem; font-weight: 550; }
-  .strip__photo { min-height: 14rem; }
-  @media (min-width: 40rem) and (max-width: 63.99rem) { .strip__photo { order: 4; } }
+  .hero-note { max-width: 36ch; }
 
-  /* ---- Practices ---- */
-  .practices__grid { row-gap: var(--s-6); }
-  .practices__list { border-top: 1px solid var(--rule-strong); }
-  .practice { border-bottom: 1px solid var(--rule); transition: opacity var(--t-ui) ease; }
-  .practice__link {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: var(--s-2) var(--s-5);
-    padding: var(--s-5) 0;
-    text-decoration: none;
-  }
-  .practice__name { font-size: clamp(1.5rem, 1rem + 1.8vw, 2.5rem); font-weight: 750; font-stretch: 125%; letter-spacing: -0.02em; line-height: 1.02; text-transform: uppercase; transition: color var(--t-ui) ease; }
-  .practice__new { display: inline-block; margin-left: 0.5em; padding: 0.15em 0.45em; vertical-align: middle; background: var(--accent); color: var(--accent-ink); font-size: 0.75rem; letter-spacing: 0.06em; font-stretch: 112%; }
-  .practice__summary { grid-column: 1; color: var(--ink-2); max-width: 54ch; }
-  .practice__meta { grid-column: 1; font-size: 0.875rem; font-weight: 650; color: var(--accent-text); }
-  .practice__arrow { grid-column: 2; grid-row: 1; width: 2rem; height: 2rem; transition: transform var(--t-ui) var(--ease-out), color var(--t-ui) ease; }
+  /* ---- Proof ---- */
+  .proof { padding-block: var(--s-6) var(--s-8); }
+  .proof__list { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-6) var(--gutter); padding-top: var(--s-6); border-top: 1px solid var(--rule); }
+  @media (min-width: 64rem) { .proof__list { grid-template-columns: repeat(4, 1fr); } }
+  .proof__item { display: flex; flex-direction: column-reverse; gap: var(--s-2); }
+  .proof__item dt { color: var(--ink-2); font-weight: 500; }
+  .proof__item .figure { font-size: clamp(2.6rem, 1.6rem + 3.4vw, 4.25rem); }
+
+  /* ---- Services index ---- */
+  .sindex { row-gap: var(--s-6); }
+  .sindex__list { border-top: 1px solid var(--rule); }
+  .sindex__row { border-bottom: 1px solid var(--rule); transition: opacity var(--t-ui) ease; }
+  .sindex__link { position: relative; display: grid; grid-template-columns: 1fr auto; gap: var(--s-2) var(--s-5); padding: var(--s-5) 0; text-decoration: none; }
+  .sindex__name { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); font-family: var(--font-display); font-size: clamp(1.6rem, 1.15rem + 1.5vw, 2.4rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; transition: transform 500ms var(--ease-out); }
+  .sindex__sum { grid-column: 1; color: var(--ink-2); max-width: 52ch; }
+  .sindex__facts { grid-column: 1; display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-6); font-weight: 600; }
+  .sindex__go { grid-column: 2; grid-row: 1; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 1px solid var(--rule-strong); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out); }
   @media (hover: hover) and (pointer: fine) {
-    .practices__list:has(.practice:hover) .practice:not(:hover) { opacity: 0.35; }
-    .practice:hover .practice__arrow { transform: translate(4px, -4px); color: var(--accent-text); }
+    .sindex__list:has(.sindex__row:hover) .sindex__row:not(:hover) { opacity: 0.4; }
+    .sindex__row:hover .sindex__name { transform: translateX(6px); }
+    .sindex__row:hover .sindex__go { background: var(--mark); border-color: var(--mark); color: var(--mark-ink); transform: rotate(45deg); }
   }
-  .practices__list:has(.practice__link:focus-visible) .practice:not(:has(:focus-visible)) { opacity: 0.35; }
-  .practices__frame { display: none; }
+  .sindex__list:has(.sindex__link:focus-visible) .sindex__row:not(:has(:focus-visible)) { opacity: 0.4; }
+  .sindex__frame { display: none; }
   @media (min-width: 64rem) {
-    .practices__frame { display: grid; position: sticky; top: calc(var(--header-h) + var(--s-5)); align-self: start; aspect-ratio: 4 / 5; }
-    .practices__frame > :global(.photo) { grid-area: 1 / 1; clip-path: inset(100% 0 0 0); transition: clip-path 560ms var(--ease-in-out); }
-    .practices__frame > :global(.practices__photo--0) { clip-path: inset(0); }
-    .practices__grid:has(.practice:hover) :global(.practices__photo--0) { clip-path: inset(100% 0 0 0); }
-    .practices__grid:has([data-practice='0']:is(:hover, :focus-within)) :global(.practices__photo--0),
-    .practices__grid:has([data-practice='1']:is(:hover, :focus-within)) :global(.practices__photo--1),
-    .practices__grid:has([data-practice='2']:is(:hover, :focus-within)) :global(.practices__photo--2),
-    .practices__grid:has([data-practice='3']:is(:hover, :focus-within)) :global(.practices__photo--3),
-    .practices__grid:has([data-practice='4']:is(:hover, :focus-within)) :global(.practices__photo--4) { clip-path: inset(0); }
+    .sindex__frame { display: grid; position: sticky; top: calc(var(--header-h) + var(--s-5)); align-self: start; aspect-ratio: 4 / 5; }
+    .sindex__frame > :global(.photo) { grid-area: 1 / 1; clip-path: inset(100% 0 0 0 round var(--radius)); transition: clip-path 560ms var(--ease-in-out); }
+    .sindex__frame > :global(.sindex__photo--0) { clip-path: inset(0 round var(--radius)); }
+    .sindex:has(.sindex__row:hover) :global(.sindex__photo--0) { clip-path: inset(100% 0 0 0 round var(--radius)); }
+    .sindex:has([data-row='0']:is(:hover, :focus-within)) :global(.sindex__photo--0),
+    .sindex:has([data-row='1']:is(:hover, :focus-within)) :global(.sindex__photo--1),
+    .sindex:has([data-row='2']:is(:hover, :focus-within)) :global(.sindex__photo--2),
+    .sindex:has([data-row='3']:is(:hover, :focus-within)) :global(.sindex__photo--3),
+    .sindex:has([data-row='4']:is(:hover, :focus-within)) :global(.sindex__photo--4) { clip-path: inset(0 round var(--radius)); }
   }
 
-  /* ---- Seam: photo and headline across the join ---- */
-  .seam { padding-block: var(--s-6) var(--s-9); }
-  .seam__grid { row-gap: 0; }
-  .seam__photo { grid-row: 1; }
-  @media (min-width: 64rem) { .seam__photo { grid-column: 1 / span 8; } .seam__copy { grid-column: 7 / span 6; } }
-  .seam__copy {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    gap: var(--s-5);
-    align-content: start;
-    padding: var(--s-6) var(--module-pad) 0 0;
-    background: var(--ground);
-  }
-  @media (min-width: 64rem) {
-    .seam__copy { grid-row: 1; align-self: end; margin-bottom: calc(var(--s-8) * -1); padding: var(--module-pad); border-top: 6px solid var(--accent); }
-  }
-  .seam__title { font-size: clamp(1.875rem, 1rem + 2.4vw, 3rem); font-stretch: 125%; line-height: 1; letter-spacing: -0.025em; text-transform: uppercase; }
-  .seam__text { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.45; max-width: 44ch; }
+  /* ---- Same hours, different sky ---- */
+  .sky { display: grid; gap: var(--s-7); padding: clamp(1.5rem, 1rem + 3vw, 4rem); border-radius: calc(var(--radius) * 1.6); }
+  .sky__head { display: grid; gap: var(--s-4); max-width: 46rem; }
+  .sky__lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; }
+  .sky__body { display: grid; gap: var(--s-7); }
+  @media (min-width: 64rem) { .sky__body { grid-template-columns: 1.35fr 1fr; align-items: start; } }
+  .sky__day { display: grid; gap: var(--s-4); }
+  .sky__day-head { display: flex; justify-content: space-between; font-weight: 600; padding-bottom: var(--s-3); border-bottom: 1px solid var(--rule); }
+  .sky__list { display: grid; }
+  .sky__item { display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--s-4); padding-block: var(--s-4); border-bottom: 1px solid var(--rule); }
+  .sky__time { font-weight: 700; color: var(--accent-text); }
+  .sky__what { display: grid; gap: 0.1rem; }
 
   /* ---- Steps ---- */
-  .steps { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .steps { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 64rem) { .steps { grid-template-columns: repeat(4, 1fr); } }
-  .step { gap: var(--s-4); }
-  @media (min-width: 64rem) { .step { min-height: 16rem; } }
-  .step__when { color: var(--ink-2); }
-  .step__body { color: var(--ink-2); margin-top: auto; }
-
-  /* ---- Controls ---- */
-  .controls { row-gap: var(--s-7); }
-  .controls__list { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .controls__list { grid-template-columns: repeat(2, 1fr); } }
-  .control { gap: var(--s-3); }
-  @media (min-width: 64rem) { .control { min-height: 15rem; } }
-  .control__figure { font-size: clamp(2.25rem, 1.5rem + 2vw, 3.25rem); font-weight: 750; font-stretch: 125%; line-height: 1; color: var(--accent-text); letter-spacing: -0.02em; }
-  .control__title { font-size: 1.1875rem; font-stretch: 112%; line-height: 1.2; margin-top: auto; }
-  .control__body { color: var(--ink-2); font-size: var(--t-small); }
-  .controls__vetting { display: grid; gap: var(--s-5); align-content: start; }
-  .vetting { display: grid; border-top: 1px solid var(--rule-strong); }
-  .vetting__item { display: grid; gap: var(--s-1); padding-block: var(--s-4); border-bottom: 1px solid var(--rule); }
-  .vetting__name { font-weight: 700; font-stretch: 112%; }
-  .vetting__body { color: var(--ink-2); font-size: var(--t-small); }
-
-  /* ---- Chain ---- */
-  .chain { display: grid; gap: var(--s-7) var(--gutter); position: relative; }
+  .steps { position: relative; display: grid; gap: var(--s-6) var(--gutter); }
   @media (min-width: 64rem) {
-    .chain { grid-template-columns: repeat(4, 1fr); }
-    .chain::before { content: ''; position: absolute; top: 0.75rem; left: 0.75rem; right: 0; height: 2px; background: var(--accent); }
+    .steps { grid-template-columns: repeat(4, 1fr); }
+    .steps::before { content: ''; position: absolute; top: 0.6rem; left: 0; right: 0; height: 2px; background: var(--rule-strong); }
   }
-  .chain__item { position: relative; display: grid; gap: var(--s-3); align-content: start; padding-left: 2.5rem; }
-  @media (min-width: 64rem) { .chain__item { padding-left: 0; padding-top: 3rem; } }
-  .chain__node { position: absolute; left: 0; top: 0; width: 1.5rem; height: 1.5rem; background: var(--ground); border: 2px solid var(--accent); }
-  .chain__item:first-child .chain__node { background: var(--accent); }
-  .chain__where { color: var(--accent-text); }
-  .chain__body { color: var(--ink-2); }
+  .step { position: relative; display: grid; gap: var(--s-3); align-content: start; padding-left: 2.25rem; }
+  @media (min-width: 64rem) { .step { padding-left: 0; padding-top: 2.75rem; } }
+  .step__dot { position: absolute; left: 0; top: 0; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--ground); border: 2px solid var(--ink); }
+  .step--now .step__dot { background: var(--mark); border-color: var(--ink); }
+  .step__dur { font-weight: 700; color: var(--ink-2); }
 
-  .cards { row-gap: var(--s-7); }
-  .section-more { margin-top: var(--s-6); }
+  /* ---- Bento ---- */
+  .bento { display: grid; gap: var(--s-4); }
+  @media (min-width: 48rem) { .bento { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .bento { grid-template-columns: repeat(4, 1fr); } }
+  .bento > * { min-width: 0; }
+  .bento__stack, .bento__cell { display: grid; gap: var(--s-3); align-content: start; padding: var(--module-pad); border-radius: var(--radius); }
+  .bento__stack-copy { display: grid; gap: var(--s-3); }
+  .bento__photo { min-height: 14rem; }
+  /* Four columns: the stack fills a 2×2 block; six guarantees and a photo fill the rest exactly. */
+  @media (min-width: 64rem) {
+    .bento__stack { grid-column: 1 / span 2; grid-row: 1 / span 2; align-content: space-between; }
+    .bento__cell--0 { grid-column: 3 / span 2; grid-row: 1; }
+    .bento__cell--1 { grid-column: 3; grid-row: 2; }
+    .bento__cell--2 { grid-column: 4; grid-row: 2; }
+    .bento__cell--3 { grid-column: 1 / span 2; grid-row: 3; }
+    .bento__cell--4 { grid-column: 3; grid-row: 3; }
+    .bento__cell--5 { grid-column: 1 / span 3; grid-row: 4; }
+    .bento__photo { grid-column: 4; grid-row: 3 / span 2; }
+  }
+  .bento__tools { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-5); }
+
+  /* ---- Tabs ---- */
+  .tabs { display: grid; gap: var(--s-5); }
+  .tabs__list { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .tabs__tab {
+    min-height: 44px;
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--rule-strong);
+    font-weight: 600;
+    transition: background-color var(--t-ui) ease, color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
+  }
+  .tabs__tab:active { transform: scale(0.97); }
+  .tabs__tab[aria-selected='true'] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  @media (hover: hover) and (pointer: fine) { .tabs__tab:hover:not([aria-selected='true']) { border-color: var(--ink); } }
+  .tabs__panel { display: grid; gap: var(--s-6); padding: var(--module-pad); }
+  .tabs__panel[hidden] { display: none; }
+  @media (min-width: 48rem) { .tabs__panel { grid-template-columns: 1.1fr 0.9fr; } }
+  .tabs__copy { display: grid; gap: var(--s-5); align-content: start; }
+  .tabs__summary { font-family: var(--font-display); font-size: clamp(1.4rem, 1.1rem + 1vw, 2rem); line-height: 1.15; letter-spacing: -0.025em; }
+  .tabs__photo { min-height: 16rem; }
+
+  .compare-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4) var(--s-6); margin-top: var(--s-6); }
 </style>

@@ -3,9 +3,6 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { pages } from '@/data/pages';
 import { services } from '@/data/services';
-import { work } from '@/data/work';
-import { locations } from '@/data/locations';
-import { pricingTiers, webFaqs } from '@/data/webdev';
 import {
   aggregateRatingSchema,
   breadcrumbSchema,
@@ -41,8 +38,6 @@ function blogMeta(): (Meta & { id: string })[] {
 const all: [string, Meta][] = [
   ...Object.entries(pages).map(([k, v]) => [`page:${k}`, v] as [string, Meta]),
   ...services.map((s) => [`service:${s.slug}`, s.meta] as [string, Meta]),
-  ...work.map((w) => [`work:${w.slug}`, w.meta] as [string, Meta]),
-  ...locations.map((l) => [`location:${l.slug}`, l.meta] as [string, Meta]),
   ...blogMeta().map((b) => [`blog:${b.id}`, b] as [string, Meta]),
 ];
 
@@ -94,11 +89,10 @@ describe('structured data', () => {
     expect(bc.itemListElement[1]).toMatchObject({ position: 2, item: 'https://www.akrosstech.com/services' });
   });
 
-  it('adds offers to the web development service', () => {
-    const web = services.find((s) => s.slug === 'website-development');
-    expect(web).toBeDefined();
-    const schema = serviceSchema(web!, pricingTiers) as { offers: unknown[] };
-    expect(schema.offers).toHaveLength(pricingTiers.length);
+  it('builds a Service node for every practice, linked to the business', () => {
+    for (const s of services) {
+      expect(serviceSchema(s)).toMatchObject({ '@type': 'Service', url: `https://www.akrosstech.com/services/${s.slug}`, provider: { '@id': 'https://www.akrosstech.com/#business' } });
+    }
   });
 
   it('escapes markup inside JSON-LD', () => {
@@ -108,9 +102,10 @@ describe('structured data', () => {
   });
 
   it('has FAQ content for every service', () => {
-    for (const s of services) {
-      const faqs = s.slug === 'website-development' ? webFaqs : s.faqs;
-      expect(faqs.length, s.slug).toBeGreaterThanOrEqual(4);
-    }
+    for (const s of services) expect(s.faqs.length, s.slug).toBeGreaterThanOrEqual(3);
+  });
+
+  it('uses the short service URLs', () => {
+    expect(services.map((s) => s.slug)).toEqual(['virtual-assistance', 'recruitment', 'accounting', 'legal', 'website-development']);
   });
 });

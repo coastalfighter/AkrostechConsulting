@@ -1,27 +1,42 @@
 /* ==========================================================================
-   Akrostech standards manual: global layer
-   Reset · type · the 12-column grid and ruled modules · lime fields · buttons ·
+   Akrostech: global layer
+   Reset · type · grid and modules · chartreuse and violet fields · buttons ·
    links · forms · photo modules · reveal states. Components add scoped styles.
    ========================================================================== */
 
-/* ---- Type: Archivo variable (wght 100–900, wdth 62–125) ---- */
+/* ---- Type: Bricolage Grotesque (display, wght 200–800 + optical size) and Figtree (text) ---- */
 @font-face {
-  font-family: 'Archivo';
+  font-family: 'Bricolage Grotesque';
   font-style: normal;
   font-display: swap;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url('/fonts/archivo-latin-wdth.woff2') format('woff2-variations'), url('/fonts/archivo-latin-wdth.woff2') format('woff2');
+  font-weight: 200 800;
+  src: url('/fonts/bricolage-grotesque-latin.woff2') format('woff2-variations'), url('/fonts/bricolage-grotesque-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-/* Metric-matched fallback so the swap does not move the layout. */
 @font-face {
-  font-family: 'Archivo Fallback';
+  font-family: 'Figtree';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 900;
+  src: url('/fonts/figtree-latin.woff2') format('woff2-variations'), url('/fonts/figtree-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Metric-matched fallbacks so the swap does not move the layout. */
+@font-face {
+  font-family: 'Bricolage Fallback';
   src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans');
-  ascent-override: 87.8%;
-  descent-override: 21%;
+  ascent-override: 92%;
+  descent-override: 24%;
   line-gap-override: 0%;
-  size-adjust: 101.5%;
+  size-adjust: 102%;
+}
+@font-face {
+  font-family: 'Figtree Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans');
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  size-adjust: 99%;
 }
 
 /* ---- Reset ---- */
@@ -62,7 +77,7 @@ input, button, textarea, select { font: inherit; color: inherit; letter-spacing:
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 :where(ul, ol)[role='list'] { list-style: none; padding: 0; }
 p, li, figcaption, dd { text-wrap: pretty; overflow-wrap: break-word; }
-h1, h2, h3, h4 { text-wrap: balance; font-weight: 700; }
+h1, h2, h3, h4 { text-wrap: balance; font-weight: 700; font-family: var(--font-display); }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 table { border-collapse: collapse; width: 100%; }
 address { font-style: normal; }
@@ -73,11 +88,11 @@ address { font-style: normal; }
 ::selection { background: var(--selection-bg); color: var(--selection-ink); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 :focus:not(:focus-visible) { outline: none; }
-html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; }
-:root[data-theme='light'] { scrollbar-color: var(--carbon-400) var(--ground); }
+html { scrollbar-color: var(--carbon-400) var(--ground); scrollbar-width: thin; }
+:root[data-theme='dark'] { scrollbar-color: var(--carbon-600) var(--ground); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--ground); }
-::-webkit-scrollbar-thumb { background: var(--carbon-600); border: 2px solid var(--ground); }
+::-webkit-scrollbar-thumb { background: var(--carbon-400); border: 2px solid var(--ground); border-radius: 99px; }
 
 .sr-only {
   position: absolute !important;
@@ -94,6 +109,7 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
   background: var(--accent);
   color: var(--accent-ink);
   font-weight: 700;
+  border-radius: var(--radius-pill);
   text-decoration: none;
   transform: translateY(-160%);
   transition: transform var(--t-ui) var(--ease-out);
@@ -104,33 +120,38 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
    Typography
    ========================================================================== */
 .display, .h1, .h2, .h3, .figure, .wide {
-  font-stretch: var(--wide);
+  font-family: var(--font-display);
   font-weight: 700;
+  font-optical-sizing: auto;
 }
-.display {
-  font-size: var(--t-display);
-  line-height: var(--lh-display);
-  letter-spacing: var(--track-display);
-  text-transform: uppercase;
-}
-.h1 { font-size: var(--t-h1); line-height: var(--lh-display); letter-spacing: var(--track-display); text-transform: uppercase; }
+.display { font-size: var(--t-display); line-height: var(--lh-display); letter-spacing: var(--track-display); }
+.h1 { font-size: var(--t-h1); line-height: var(--lh-display); letter-spacing: var(--track-display); }
 .h2 { font-size: var(--t-h2); line-height: var(--lh-heading); letter-spacing: var(--track-heading); }
-.h3 { font-size: var(--t-h3); line-height: var(--lh-snug); letter-spacing: -0.01em; font-stretch: var(--semi-wide); }
-.lead { font-size: var(--t-lead); line-height: 1.45; color: var(--ink-2); max-width: 46ch; }
+.h3 { font-size: var(--t-h3); line-height: var(--lh-snug); letter-spacing: -0.015em; font-weight: 650; }
+.lead { font-size: var(--t-lead); line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
 .body-l { font-size: 1.1875rem; line-height: 1.55; }
 .small { font-size: var(--t-small); line-height: 1.5; }
 .muted { color: var(--ink-2); }
 .figure {
   font-size: var(--t-figure);
   line-height: 0.9;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums lining-nums;
+}
+/* Second phrase of a two-part headline: same face, steps back in tone. */
+.quiet { color: var(--ink-3); }
+/* The chartreuse marker: a highlighter stroke behind a word or two. */
+.mark {
+  background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%);
+  color: inherit;
+  padding-inline: 0.06em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 /* Specification label: captions, legends and data keys inside modules (never above a heading). */
 .label {
   font-size: var(--t-label);
   font-weight: 600;
-  font-stretch: var(--semi-wide);
   letter-spacing: var(--track-label);
   text-transform: uppercase;
   line-height: 1.3;
@@ -142,21 +163,21 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
 /* Long-form prose (articles, legal, location copy) */
 .prose { max-width: var(--measure); font-size: 1.125rem; line-height: 1.7; }
 .prose > * + * { margin-top: 1.1em; }
-.prose h2 { font-stretch: var(--wide); font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); line-height: 1.1; letter-spacing: -0.02em; margin-top: 2.2em; }
-.prose h3 { font-stretch: var(--semi-wide); font-size: 1.3125rem; line-height: 1.25; margin-top: 1.8em; }
+.prose h2 { font-size: clamp(1.6rem, 1.15rem + 1.4vw, 2.35rem); line-height: 1.1; letter-spacing: -0.025em; margin-top: 2.2em; }
+.prose h3 { font-size: 1.375rem; line-height: 1.25; letter-spacing: -0.015em; margin-top: 1.8em; }
 .prose h2 + *, .prose h3 + * { margin-top: 0.6em; }
-.prose a { color: var(--ink); text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+.prose a { color: var(--ink); text-decoration-color: var(--second-strong); text-decoration-thickness: 2px; }
 .prose a:hover { text-decoration-color: currentColor; }
 .prose ul, .prose ol { padding-left: 1.2em; }
 .prose li + li { margin-top: 0.4em; }
-.prose li::marker { color: var(--accent-text); }
+.prose li::marker { color: var(--ink-3); }
 .prose strong { font-weight: 650; color: var(--ink); }
-.prose blockquote { border-top: 2px solid var(--accent); padding-top: var(--s-4); font-size: 1.25rem; font-stretch: var(--semi-wide); }
+.prose blockquote { padding: var(--s-5) var(--s-6); border-radius: var(--radius); background: var(--second); color: var(--second-ink); font-family: var(--font-display); font-size: 1.3rem; line-height: 1.35; }
 .prose table { font-size: 0.9375rem; margin-block: 1.6em; display: block; overflow-x: auto; }
 .prose th, .prose td { text-align: left; padding: 0.7em 1em 0.7em 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .prose th { font-weight: 650; border-bottom-color: var(--rule-strong); white-space: nowrap; }
 .prose hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2.5em; }
-.prose code { font-size: 0.9em; background: var(--plate-2); padding: 0.1em 0.35em; }
+.prose code { font-size: 0.9em; background: var(--plate-2); padding: 0.1em 0.35em; border-radius: 0.3em; }
 
 /* ==========================================================================
    Grid: 4 columns on phones, 8 on tablets, 12 from 64rem.
@@ -199,85 +220,89 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
   .grid > .s-9 { grid-column: 9 / span var(--span, 1); }
 }
 
-/* Visible grid: a faint 12-column underlay that shows the manual's construction. */
-.gridlines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-.gridlines > div {
-  height: 100%;
-  max-width: var(--page-max);
-  margin-inline: auto;
-  padding-inline: var(--margin);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  column-gap: var(--gutter);
-}
-.gridlines span { border-inline: 1px solid rgb(244 245 239 / 0.045); }
-:root[data-theme='light'] .gridlines span { border-color: rgb(11 12 10 / 0.05); }
-.gridlines span:nth-child(n + 5) { display: none; }
-@media (min-width: 40rem) {
-  .gridlines > div { grid-template-columns: repeat(8, 1fr); }
-  .gridlines span:nth-child(n + 5) { display: block; }
-  .gridlines span:nth-child(n + 9) { display: none; }
-}
-@media (min-width: 64rem) {
-  .gridlines > div { grid-template-columns: repeat(12, 1fr); }
-  .gridlines span:nth-child(n + 9) { display: block; }
-}
-
-/* Ruled module sets: 1px gaps over a rule-coloured ground draw every hairline exactly once. */
+/* Ruled module sets: 1px gaps over a rule-coloured ground draw every hairline once,
+   inside one rounded frame. */
 .ruled {
   display: grid;
   gap: var(--rule-w);
   background: var(--rule);
   border: var(--rule-w) solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 .ruled > * { background: var(--ground); min-width: 0; }
 .ruled--plate > * { background: var(--plate); }
 .module { padding: var(--module-pad); position: relative; }
 .module__foot { margin-top: auto; padding-top: var(--s-5); }
 .module--flex { display: flex; flex-direction: column; }
+/* A standalone rounded panel. */
+.panel { background: var(--plate); border: 1px solid var(--rule); border-radius: var(--radius); }
 .plate { background: var(--plate); }
 .plate-2 { background: var(--plate-2); }
 
-/* Lime field: a whole plate of brand colour. Ink inverts to carbon. */
-.lime {
+/* Chartreuse field (class kept as .lime for older components). Ink stays ink in both themes. */
+.lime, .field-mark {
   background: var(--field);
   color: var(--field-ink);
   --ink: var(--field-ink);
   --ink-2: var(--field-ink-2);
   --ink-3: var(--field-ink-2);
   --rule: var(--field-rule);
-  --rule-strong: rgb(11 12 10 / 0.4);
+  --rule-strong: rgb(22 17 16 / 0.42);
   --accent: var(--carbon-950);
   --accent-hover: var(--carbon-800);
   --accent-ink: var(--lime-400);
   --accent-text: var(--carbon-950);
+  --mark: var(--carbon-50);
+  --second-strong: var(--carbon-950);
   --focus: var(--carbon-950);
   --selection-bg: var(--carbon-950);
   --selection-ink: var(--lime-400);
 }
-.ruled > .lime { background: var(--field); }
-/* Inverse plate (carbon) inside the light theme, so black plates stay black. */
+.ruled > .lime, .ruled > .field-mark { background: var(--field); }
+/* Secondary field: lavender in light, violet in dark. */
+.violet, .field-second {
+  background: var(--second);
+  color: var(--second-ink);
+  --ink: var(--second-ink);
+  --ink-2: var(--second-ink-2);
+  --ink-3: var(--second-ink-2);
+  --rule: var(--second-rule);
+  --rule-strong: color-mix(in srgb, var(--second-ink) 40%, transparent);
+  --plate: color-mix(in srgb, var(--second) 82%, var(--second-ink));
+  --focus: var(--second-ink);
+}
+:root[data-theme='dark'] :is(.violet, .field-second) {
+  --accent: var(--lime-400);
+  --accent-ink: var(--carbon-950);
+  --accent-text: var(--lime-400);
+}
+.ruled > .violet, .ruled > .field-second { background: var(--second); }
+/* Ink panel: stays ink in both themes (instrument consoles, footer). */
 .ink-plate {
   background: var(--carbon-950);
   color: var(--carbon-50);
+  --ground: var(--carbon-950);
   --ink: var(--carbon-50);
   --ink-2: var(--carbon-300);
   --ink-3: var(--carbon-400);
-  --rule: rgb(244 245 239 / 0.14);
-  --rule-strong: rgb(244 245 239 / 0.32);
+  --rule: rgb(243 242 238 / 0.14);
+  --rule-strong: rgb(243 242 238 / 0.32);
   --accent: var(--lime-400);
   --accent-hover: var(--lime-300);
   --accent-ink: var(--carbon-950);
   --accent-text: var(--lime-400);
+  --second: var(--violet-600);
+  --second-ink: var(--carbon-50);
+  --second-strong: var(--violet-300);
   --focus: var(--lime-400);
   --plate: var(--carbon-900);
   --plate-2: var(--carbon-850);
+  --plate-3: var(--carbon-800);
 }
+
+/* In the dark theme the ink panel lifts one step so it still reads as a panel. */
+:root[data-theme='dark'] .ink-plate { background: var(--carbon-900); box-shadow: inset 0 0 0 1px var(--rule); }
 
 /* ---- Sections ---- */
 .section { padding-block: var(--s-9); position: relative; }
@@ -285,8 +310,6 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
 .section--flush-top { padding-top: 0; }
 /* Section head: heading on a strong rule, supporting copy on the right columns. */
 .section-head {
-  border-top: 1px solid var(--rule-strong);
-  padding-top: var(--s-5);
   margin-bottom: var(--s-8);
   row-gap: var(--s-5);
   align-items: end;
@@ -311,13 +334,13 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
   justify-content: space-between;
   gap: var(--s-5);
   min-height: 3.25rem;
-  padding: 0.85rem 1.15rem 0.85rem 1.35rem;
+  padding: 0.85rem 1.25rem 0.85rem 1.5rem;
   border: 1px solid var(--btn-line);
+  border-radius: var(--radius-pill);
   background: var(--btn-bg);
   color: var(--btn-ink);
   font-size: 1rem;
   font-weight: 650;
-  font-stretch: var(--semi-wide);
   letter-spacing: -0.005em;
   line-height: 1.1;
   text-decoration: none;
@@ -341,7 +364,9 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
 .btn--small { min-height: 2.75rem; padding: 0.6rem 0.9rem 0.6rem 1rem; font-size: 0.9375rem; gap: var(--s-4); }
 .btn--block { width: 100%; }
 @media (hover: hover) and (pointer: fine) {
-  .btn--primary:hover { --btn-bg: var(--accent-hover); --btn-line: var(--accent-hover); }
+  .btn--primary:hover { --btn-bg: var(--mark); --btn-ink: var(--mark-ink); --btn-line: var(--mark); }
+  :root[data-theme='dark'] .btn--primary:hover { --btn-bg: var(--accent-hover); --btn-line: var(--accent-hover); }
+  .lime .btn--primary:hover, .field-mark .btn--primary:hover { --btn-bg: var(--carbon-800); --btn-ink: var(--lime-400); --btn-line: var(--carbon-800); }
   .btn--ghost:hover { --btn-line: var(--ink); }
   .btn:hover .btn__arrow { transform: translate(3px, -3px); }
   .btn:hover .btn__arrow--right { transform: translateX(4px); }
@@ -381,7 +406,6 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
   gap: var(--s-2);
   min-height: 44px;
   font-weight: 650;
-  font-stretch: var(--semi-wide);
   text-decoration: none;
   color: var(--ink);
 }
@@ -402,6 +426,7 @@ html { scrollbar-color: var(--carbon-600) var(--ground); scrollbar-width: thin; 
   min-height: 2rem;
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 550;
   line-height: 1.2;
@@ -423,7 +448,7 @@ button.chip[aria-pressed='true'], button.chip[aria-selected='true'] { background
   position: absolute;
   left: 0; top: 0.55em;
   width: 0.7rem; height: 0.7rem;
-  background: var(--accent);
+  background: var(--ink);
   clip-path: polygon(0 50%, 35% 85%, 100% 10%, 100% 30%, 35% 100%, 0 68%);
 }
 /* Data list: key/value rows on rules */
@@ -435,7 +460,7 @@ button.chip[aria-pressed='true'], button.chip[aria-selected='true'] { background
 
 /* Live dot */
 .live { display: inline-flex; align-items: center; gap: var(--s-2); }
-.live::before { content: ''; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); }
+.live::before { content: ''; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--second-strong); box-shadow: 0 0 0 0 var(--second-strong); }
 .live.is-off::before { background: var(--ink-3); }
 @media (prefers-reduced-motion: no-preference) {
   .live:not(.is-off)::before { animation: pulse 2s var(--ease-out) infinite; }
@@ -445,7 +470,7 @@ button.chip[aria-pressed='true'], button.chip[aria-selected='true'] { background
 /* ==========================================================================
    Photo module
    ========================================================================== */
-.photo { position: relative; overflow: hidden; background: var(--plate-2); margin: 0; isolation: isolate; }
+.photo { position: relative; overflow: hidden; background: var(--plate-2); margin: 0; isolation: isolate; border-radius: var(--radius); }
 .photo picture, .photo img { width: 100%; height: 100%; }
 .photo img { object-fit: cover; object-position: var(--focal, 50% 50%); }
 .photo::after { content: ''; position: absolute; inset: 0; background: var(--photo-tint); pointer-events: none; }
@@ -454,14 +479,15 @@ button.chip[aria-pressed='true'], button.chip[aria-selected='true'] { background
   position: absolute;
   left: 0; bottom: 0;
   z-index: 1;
-  padding: var(--s-2) var(--s-3);
+  margin: var(--s-3);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
   background: var(--ground);
-  color: var(--ink-2);
+  color: var(--ink);
   font-size: 0.75rem;
-  font-weight: 550;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-stretch: var(--semi-wide);
 }
 
 /* ==========================================================================
@@ -476,7 +502,7 @@ button.chip[aria-pressed='true'], button.chip[aria-selected='true'] { background
   padding: 0.8rem 0.9rem;
   background: var(--plate);
   border: 1px solid var(--rule-strong);
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   color: var(--ink);
   font-size: 1rem;
   line-height: 1.4;
@@ -498,7 +524,7 @@ select.input__control {
 .input__error { font-size: 0.875rem; color: var(--danger); font-weight: 550; }
 .input__error:empty { display: none; }
 .check { display: flex; gap: var(--s-3); align-items: flex-start; font-size: var(--t-small); }
-.check input { width: 1.25rem; height: 1.25rem; margin-top: 0.15rem; accent-color: var(--lime-400); flex: none; }
+.check input { width: 1.25rem; height: 1.25rem; margin-top: 0.15rem; accent-color: var(--violet-600); flex: none; }
 
 /* ==========================================================================
    Motion states (only when the motion layer is present; reduced motion keeps everything visible)
@@ -547,4 +573,21 @@ html.motion-ready [data-split].is-in .line-mask > span { translate: none; }
 @media print {
   .header, .footer, .preloader, .progress, [data-no-print] { display: none !important; }
   body { background: #fff; color: #000; }
+}
+
+/* "New" and status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--mark);
+  color: var(--mark-ink);
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  vertical-align: middle;
 }

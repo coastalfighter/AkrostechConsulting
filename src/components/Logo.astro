@@ -1,6 +1,6 @@
 ---
 /**
- * The Akrostech identity: the lime M-wave mark (traced from the akrosstech.com logo) and the
+ * The Akrostech identity: the M-wave mark (traced from the akrosstech.com logo) and the
  * "Akrostech / CONSULTING" wordmark set in Archivo. The mark's stroke can be drawn on
  * (preloader, 404) through the `draw` prop.
  */
@@ -40,11 +40,12 @@ const { wordmark = true, class: className, draw = false, label } = Astro.props;
 <style>
   .logo { display: inline-flex; align-items: center; gap: 0.6em; color: var(--ink); line-height: 1; }
   .logo__mark { width: 2.35em; height: auto; aspect-ratio: 1270 / 800; color: var(--lime-400); flex: none; }
-  :global(:root[data-theme='light']) .logo__mark { color: var(--carbon-950); }
+  .logo__mark { color: var(--ink); }
+  :global(:root[data-theme='dark']) .logo__mark, :global(.ink-plate) .logo__mark { color: var(--lime-400); }
   :global(.lime) .logo__mark { color: var(--carbon-950); }
   .logo__type { display: grid; gap: 0.28em; }
-  .logo__name { font-size: 1.18em; font-weight: 750; font-stretch: 112%; letter-spacing: -0.02em; }
-  .logo__sub { font-size: max(0.56em, 0.6875rem); font-weight: 600; font-stretch: 112%; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-2); }
+  .logo__name { font-family: var(--font-display); font-size: 1.2em; font-weight: 700; letter-spacing: -0.03em; }
+  .logo__sub { font-size: max(0.56em, 0.6875rem); font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-2); }
 
   .logo--draw .logo__wave, .logo--draw .logo__dash { stroke-dasharray: 1; stroke-dashoffset: 1; }
   @media (prefers-reduced-motion: no-preference) {

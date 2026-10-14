@@ -3,26 +3,27 @@
  * never presented as Akrostech staff or clients. Licences: src/assets/photos/credits.json.
  */
 import type { PhotoName } from '@/components/Photo.astro';
-import type { ArtKey, ServiceSlug } from './services';
+import type { ArtKey } from './legacy';
+import type { ServiceSlug } from './services';
 
 export const servicePhoto: Record<ServiceSlug, PhotoName> = {
-  'virtual-assistance': 'phone-laptop',
-  'recruitment-process-outsourcing': 'talking-hands',
-  'accounting-assistance': 'tax-forms',
-  'legal-process-outsourcing': 'contract-signing',
-  'website-development': 'code-laptop',
+  'virtual-assistance': 'svc-virtual-assistance',
+  recruitment: 'svc-recruitment',
+  accounting: 'svc-accounting',
+  legal: 'svc-legal',
+  'website-development': 'svc-website-development',
 };
 
-/** A second photograph per practice, for page bodies. */
+/** A second photograph per practice, for "what we handle" sections. */
 export const serviceSecondPhoto: Record<ServiceSlug, PhotoName> = {
-  'virtual-assistance': 'two-women-laptop',
-  'recruitment-process-outsourcing': 'meeting-room',
-  'accounting-assistance': 'desk-overhead',
-  'legal-process-outsourcing': 'lady-justice',
-  'website-development': 'developers',
+  'virtual-assistance': 'svc-virtual-assistance-work',
+  recruitment: 'svc-recruitment-work',
+  accounting: 'svc-accounting-work',
+  legal: 'svc-legal-work',
+  'website-development': 'svc-website-development-work',
 };
 
-/** Pools used for articles and blueprints, picked by their art key and variant. */
+/** Pools used for article covers, picked by their art key and variant. */
 const pools: Record<ArtKey, PhotoName[]> = {
   va: ['phone-laptop', 'two-women-laptop', 'desk-window', 'pair-at-laptop'],
   rpo: ['talking-hands', 'meeting-room', 'team-table', 'standup'],

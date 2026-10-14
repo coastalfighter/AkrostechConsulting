@@ -142,5 +142,83 @@
     "file": "https://images.unsplash.com/photo-1557804506-669a67965ba0",
     "licence": "Unsplash License (https://unsplash.com/license)",
     "description": "A team gathered round a whiteboard in a loft office"
+  },
+  "svc-virtual-assistance": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-virtual-assistance.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A professional assistant smiling beside a laptop in a bright office"
+  },
+  "svc-virtual-assistance-work": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-virtual-assistance-work.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "Two colleagues guiding a teammate through work on her laptop"
+  },
+  "svc-recruitment": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-recruitment.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A recruiter interviewing a candidate across a table"
+  },
+  "svc-recruitment-work": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-recruitment-work.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A hiring manager and a colleague celebrating a successful hire at a meeting table"
+  },
+  "svc-accounting": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-accounting.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "Tax forms, a calculator and a pen laid out on a desk"
+  },
+  "svc-accounting-work": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-accounting-work.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A laptop showing financial charts and dashboards"
+  },
+  "svc-legal": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-legal.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A bronze statue of Lady Justice holding scales"
+  },
+  "svc-legal-work": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-legal-work.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A hand signing a contract with a fountain pen"
+  },
+  "svc-website-development": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-website-development.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A laptop showing code beside a desktop monitor on a clean desk"
+  },
+  "svc-website-development-work": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/svc-website-development-work.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A designer reviewing website layouts on a large monitor"
+  },
+  "people-virtual-assistants": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/people-virtual-assistants.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A professional smiling while she takes notes beside her laptop"
+  },
+  "people-developers": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/people-developers.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "Developers working together at a shared table"
+  },
+  "people-recruiters": {
+    "source": "Representative Unsplash stock photography carried over from the Akrostech Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3, public/images)",
+    "file": "src/assets/photos/people-recruiters.jpg",
+    "licence": "Unsplash License (https://unsplash.com/license)",
+    "description": "A team lead and a colleague guiding a colleague through her work on a laptop"
   }
 }

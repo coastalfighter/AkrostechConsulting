@@ -1,29 +1,30 @@
 /**
- * Theme switch. The brand world is dark (black ground, lime mark); the light theme is the
- * "printed manual" variant. The inline head script applies a stored choice before first paint;
- * this module wires the toggle and keeps tabs in sync.
+ * Theme switch. Light (paper #f3f2ee) is the default; dark (ink #161110) is opt-in and
+ * remembered. The inline head script applies a stored choice before first paint; this module
+ * wires the toggle and keeps tabs in sync.
  */
 export type Theme = 'dark' | 'light';
 const KEY = 'ak-theme';
 
-export const currentTheme = (): Theme => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+export const currentTheme = (): Theme => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
 
 function label(button: HTMLButtonElement, theme: Theme): void {
   button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  button.setAttribute('aria-pressed', String(theme === 'dark'));
 }
 
 function apply(theme: Theme): void {
   const root = document.documentElement;
-  if (theme === 'light') root.dataset.theme = 'light';
+  if (theme === 'dark') root.dataset.theme = 'dark';
   else delete root.dataset.theme;
-  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f4f5ef' : '#0b0c0a');
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#161110' : '#f3f2ee');
   document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((b) => label(b, theme));
   document.dispatchEvent(new CustomEvent<Theme>('themechange', { detail: theme }));
 }
 
 function store(theme: Theme): void {
   try {
-    if (theme === 'dark') localStorage.removeItem(KEY);
+    if (theme === 'light') localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, theme);
   } catch {
     /* storage blocked: the switch still applies to this page */
@@ -31,8 +32,7 @@ function store(theme: Theme): void {
 }
 
 export function initTheme(): void {
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
-  buttons.forEach((button) => {
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
     label(button, currentTheme());
     button.addEventListener('click', () => {
       const next: Theme = currentTheme() === 'dark' ? 'light' : 'dark';
@@ -43,6 +43,6 @@ export function initTheme(): void {
     });
   });
   window.addEventListener('storage', (e) => {
-    if (e.key === KEY) apply(e.newValue === 'light' ? 'light' : 'dark');
+    if (e.key === KEY) apply(e.newValue === 'dark' ? 'dark' : 'light');
   });
 }

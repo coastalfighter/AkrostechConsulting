@@ -1,65 +1,88 @@
 ---
 /**
- * Side-by-side comparison with a draggable divider: the visitor pulls the seam to give either
- * side more room. Rows stay aligned (one grid); the divider is a keyboard slider too.
+ * Comparison with a draggable divider: the visitor pulls the seam to give either side more
+ * room, and (with several alternatives) switches which option sits on the left. Rows stay
+ * aligned (one grid); the divider is a keyboard slider too.
  */
 import Icon from './Icon.astro';
 
 interface Row {
   label: string;
-  a: string;
-  b: string;
+  /** One value per column, the last column being Akrostech. */
+  values: readonly string[];
 }
 interface Props {
   id: string;
-  aTitle: string;
-  bTitle: string;
-  rows: Row[];
+  /** Column titles; the last is the highlighted (Akrostech) column. */
+  columns: readonly string[];
+  rows: readonly Row[];
 }
-const { id, aTitle, bTitle, rows } = Astro.props;
+const { id, columns, rows } = Astro.props;
+const ours = columns.length - 1;
+const alternatives = columns.slice(0, ours);
 ---
 
 <div class="compare" style="--split:50%" data-compare id={id}>
-  <div class="compare__grid" role="table" aria-label={`${aTitle} compared with ${bTitle}`}>
-    <div role="row" class="compare__row compare__row--head">
-      <span role="columnheader" class="compare__cell compare__cell--a compare__title">{aTitle}</span>
-      <span role="columnheader" class="compare__cell compare__cell--b compare__title">{bTitle}</span>
+  {
+    alternatives.length > 1 && (
+      <div class="compare__switch" role="group" aria-label="Compare Akrostech with">
+        {alternatives.map((c, i) => (
+          <button type="button" class="chip" aria-pressed={i === 0 ? 'true' : 'false'} data-compare-option={i}>
+            {c}
+          </button>
+        ))}
+      </div>
+    )
+  }
+  <div class="compare__frame">
+    <div class="compare__grid" role="table" aria-label={`${alternatives.join(' or ')} compared with ${columns[ours]}`}>
+      <div role="row" class="compare__row compare__row--head">
+        <span role="columnheader" class="compare__cell compare__cell--a compare__title">
+          {alternatives.map((c, i) => <span data-alt={i} hidden={i !== 0}>{c}</span>)}
+        </span>
+        <span role="columnheader" class="compare__cell compare__cell--b compare__title">{columns[ours]}</span>
+      </div>
+      {
+        rows.map((r) => (
+          <div role="row" class="compare__row">
+            <div role="cell" class="compare__cell compare__cell--a">
+              <span class="label compare__label">{r.label}</span>
+              {alternatives.map((_, i) => (
+                <span class="compare__value" data-alt={i} hidden={i !== 0}>
+                  {r.values[i]}
+                </span>
+              ))}
+            </div>
+            <div role="cell" class="compare__cell compare__cell--b">
+              <span class="label compare__label">{r.label}</span>
+              <span class="compare__value">{r.values[ours]}</span>
+            </div>
+          </div>
+        ))
+      }
     </div>
-    {
-      rows.map((r) => (
-        <div role="row" class="compare__row">
-          <div role="cell" class="compare__cell compare__cell--a">
-            <span class="label compare__label">{r.label}</span>
-            <span class="compare__value">{r.a}</span>
-          </div>
-          <div role="cell" class="compare__cell compare__cell--b">
-            <span class="label compare__label">{r.label}</span>
-            <span class="compare__value">{r.b}</span>
-          </div>
-        </div>
-      ))
-    }
-  </div>
-  <div
-    class="compare__seam"
-    role="slider"
-    tabindex="0"
-    aria-label="Divider between the two columns"
-    aria-valuemin="25"
-    aria-valuemax="75"
-    aria-valuenow="50"
-    aria-valuetext="Even split"
-    aria-controls={id}
-    data-compare-seam
-  >
-    <span class="compare__grip"><Icon name="arrow-left" /><Icon name="arrow-right" /></span>
+    <div
+      class="compare__seam"
+      role="slider"
+      tabindex="0"
+      aria-label="Divider between the two columns"
+      aria-valuemin="25"
+      aria-valuemax="75"
+      aria-valuenow="50"
+      aria-valuetext="Even split"
+      aria-controls={id}
+      data-compare-seam
+    >
+      <span class="compare__grip"><Icon name="arrow-left" /><Icon name="arrow-right" /></span>
+    </div>
   </div>
 </div>
 
 <script>
   function initCompare(root: HTMLElement): void {
     const seam = root.querySelector<HTMLElement>('[data-compare-seam]');
-    if (!seam) return;
+    const frame = root.querySelector<HTMLElement>('.compare__frame');
+    if (!seam || !frame) return;
     let split = 50;
     const set = (v: number) => {
       split = Math.min(75, Math.max(25, v));
@@ -76,7 +99,7 @@ const { id, aTitle, bTitle, rows } = Astro.props;
     });
     seam.addEventListener('pointermove', (e) => {
       if (e.pointerId !== active) return;
-      const r = root.getBoundingClientRect();
+      const r = frame.getBoundingClientRect();
       set(((e.clientX - r.left) / r.width) * 100);
     });
     const end = (e: PointerEvent) => {
@@ -94,12 +117,22 @@ const { id, aTitle, bTitle, rows } = Astro.props;
       else return;
       e.preventDefault();
     });
+    const options = root.querySelectorAll<HTMLButtonElement>('[data-compare-option]');
+    options.forEach((button) =>
+      button.addEventListener('click', () => {
+        const index = button.dataset.compareOption ?? '0';
+        options.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+        root.querySelectorAll<HTMLElement>('[data-alt]').forEach((el) => (el.hidden = el.dataset.alt !== index));
+      }),
+    );
   }
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
 </script>
 
 <style>
-  .compare { position: relative; border: 1px solid var(--rule); container-type: inline-size; }
+  .compare { display: grid; gap: var(--s-4); }
+  .compare__switch { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .compare__frame { position: relative; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; container-type: inline-size; }
   .compare__grid { display: grid; grid-template-columns: var(--split) 1fr; }
   .compare__row { display: contents; }
   .compare__cell { display: grid; gap: var(--s-2); align-content: start; padding: var(--s-5) var(--module-pad); border-top: 1px solid var(--rule); min-width: 0; }
@@ -107,9 +140,9 @@ const { id, aTitle, bTitle, rows } = Astro.props;
   .compare__cell--b { background: var(--field); color: var(--field-ink); --rule: var(--field-rule); }
   .compare__cell--b .compare__label { color: var(--field-ink-2); }
   .compare__row--head .compare__cell { border-top: 0; padding-block: var(--s-6) var(--s-5); }
-  .compare__title { font-size: clamp(1.25rem, 0.9rem + 1.4vw, 2rem); font-weight: 750; font-stretch: 125%; line-height: 1; text-transform: uppercase; letter-spacing: -0.01em; }
+  .compare__title { font-family: var(--font-display); font-size: clamp(1.3rem, 0.9rem + 1.4vw, 2rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; }
   .compare__label { color: var(--ink-2); }
-  .compare__value { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem); font-weight: 550; line-height: 1.35; }
+  .compare__value { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem); font-weight: 500; line-height: 1.4; }
   .compare__cell--b .compare__value { font-weight: 650; }
   .compare__seam {
     position: absolute;
@@ -128,17 +161,18 @@ const { id, aTitle, bTitle, rows } = Astro.props;
     position: relative;
     display: flex;
     gap: 2px;
-    padding: 0.55rem 0.5rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: var(--radius-pill);
     background: var(--carbon-950);
     color: var(--lime-400);
     transition: transform var(--t-press) var(--ease-out);
   }
   .compare__grip :global(.icon) { width: 1rem; height: 1rem; }
   .compare.is-dragging .compare__grip { transform: scale(1.08); }
-  .compare__seam:focus-visible .compare__grip { outline: 2px solid var(--lime-400); outline-offset: 2px; }
+  .compare__seam:focus-visible .compare__grip { outline: 2px solid var(--violet-600); outline-offset: 2px; }
   @container (max-width: 36rem) {
     .compare__cell { padding-inline: var(--s-4); }
-    .compare__title { font-size: 1rem; }
+    .compare__title { font-size: 1.05rem; }
     .compare__value { font-size: 0.9375rem; }
   }
 </style>

@@ -4,7 +4,6 @@
  */
 import { absoluteUrl, fullAddress, site } from '@/config/site';
 import type { Faq, Service } from '@/data/services';
-import type { PricingTier } from '@/data/webdev';
 
 export type JsonLd = Record<string, unknown>;
 
@@ -181,9 +180,9 @@ export function faqSchema(faqs: Faq[]): JsonLd | null {
   };
 }
 
-export function serviceSchema(service: Pick<Service, 'name' | 'slug' | 'summary' | 'meta'>, tiers: PricingTier[] = []): JsonLd {
+export function serviceSchema(service: Pick<Service, 'name' | 'slug' | 'summary' | 'meta'>, extra: JsonLd = {}): JsonLd {
   const url = canonical(`/services/${service.slug}`);
-  const schema: JsonLd = {
+  return {
     '@type': 'Service',
     '@id': `${url}#service`,
     name: service.name,
@@ -197,21 +196,8 @@ export function serviceSchema(service: Pick<Service, 'name' | 'slug' | 'summary'
       serviceUrl: canonical('/contact'),
       servicePhone: site.phoneE164,
     },
+    ...extra,
   };
-  if (tiers.length) {
-    schema.offers = tiers.map((t) => ({
-      '@type': 'Offer',
-      name: t.name,
-      description: t.bestFor,
-      priceSpecification: {
-        '@type': 'PriceSpecification',
-        minPrice: t.from,
-        priceCurrency: t.currency,
-      },
-      url: `${url}#pricing`,
-    }));
-  }
-  return schema;
 }
 
 export interface ArticleInput {

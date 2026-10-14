@@ -33,7 +33,7 @@ describe('page-builder estimate', () => {
 
 describe('fuzzy page finder', () => {
   const entries: SearchEntry[] = [
-    { title: 'Accounting Assistance', path: '/services/accounting-assistance', group: 'Practices', keywords: 'bookkeeping QuickBooks' },
+    { title: 'Accounting Assistance', path: '/services/accounting', group: 'Practices', keywords: 'bookkeeping QuickBooks' },
     { title: 'Website Development', path: '/services/website-development', group: 'Practices', keywords: 'Shopify WordPress' },
     { title: 'Contact', path: '/contact', group: 'Company' },
     { title: 'New York, NY', path: '/locations/new-york-ny', group: 'Locations' },
@@ -52,7 +52,7 @@ describe('fuzzy page finder', () => {
   it('finds pages by prefix, keyword and typo', () => {
     expect(search('web', entries)[0]?.path).toBe('/services/website-development');
     expect(search('shopify', entries)[0]?.path).toBe('/services/website-development');
-    expect(search('acounting', entries)[0]?.path).toBe('/services/accounting-assistance');
+    expect(search('acounting', entries)[0]?.path).toBe('/services/accounting');
     expect(search('conatct', entries)[0]?.path).toBe('/contact');
     expect(search('new york', entries)[0]?.path).toBe('/locations/new-york-ny');
   });

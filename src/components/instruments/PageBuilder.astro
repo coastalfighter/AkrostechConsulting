@@ -1,0 +1,396 @@
+---
+/**
+ * Website-development hero instrument: the page builder. A wireframe browser assembles a page
+ * from blocks the visitor switches on and off; a performance budget beside it shows the page
+ * weight, request count and an estimated LCP band against Google's 2.5 s / 4 s thresholds.
+ * Server-rendered with a lean five-block page so it reads correctly without JavaScript.
+ * The model lives in lib/pagebuilder (shared with the script) and is labelled as illustrative.
+ */
+import { BASE, DEFAULT_ON, KB_SCALE, LCP_SCALE, THRESHOLDS, bandLabel, blocks, estimate, formatKb, layout } from '@/lib/pagebuilder';
+import { site } from '@/config/site';
+
+const on = new Set(DEFAULT_ON);
+const est = estimate(on);
+const lay = layout(on);
+const f = site.figures;
+
+/** Weight bar segments: the base page first, then each block in order. */
+let offset = BASE.kb;
+const segments = blocks.map((b) => {
+  const seg = { id: b.id, x: offset / KB_SCALE, w: b.kb / KB_SCALE, heavy: b.kind !== 'flow' };
+  if (on.has(b.id)) offset += b.kb;
+  return seg;
+});
+const lcpTicks = Array.from({ length: LCP_SCALE + 1 }, (_, i) => i);
+const kbTicks = [0, 1000, 2000, 3000, 4000];
+const summary = `Page weight ${formatKb(est.kb)}, ${est.requests} requests, estimated LCP ${est.lcp.toFixed(1)} seconds: ${bandLabel[est.band]}.`;
+---
+
+<div
+  class="pb"
+  data-instrument="builder"
+  data-on={DEFAULT_ON.join(' ')}
+  data-tracking={on.has('tracking') ? 'on' : 'off'}
+  data-chat={on.has('chat') ? 'on' : 'off'}
+  data-video={on.has('video') ? 'on' : 'off'}
+  style={`--h:${lay.height}`}
+>
+  <div class="pb__toggles" role="group" aria-label="Blocks on the page">
+    {
+      blocks.map((b) => (
+        <button type="button" class="pb__toggle" aria-pressed={on.has(b.id) ? 'true' : 'false'} data-block={b.id}>
+          <span class="pb__switch" aria-hidden="true" />
+          <span class="pb__toggle-name">{b.name}</span>
+          <span class="pb__toggle-kb">{formatKb(b.kb)}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="pb__body">
+    <!-- The wireframe: decorative; the readout carries the same information as text. -->
+    <div class="pb__frame" aria-hidden="true">
+      <div class="pb__chrome">
+        <span class="pb__dots"><i></i><i></i><i></i></span>
+        <span class="pb__url">yourcompany.com</span>
+        <span class="pb__pixels">
+          <i>tag manager</i><i>pixel</i><i>analytics</i>
+        </span>
+      </div>
+      <div class="pb__viewport">
+        <span class="pb__busy"></span>
+        <div class="pb__page">
+          <div class="pb__blk pb__blk--nav is-on" style="--y:0;--bh:30">
+            <span class="w w--logo"></span><span class="w" style="width:16%"></span>
+            <span class="pb__navlinks"><span class="w"></span><span class="w"></span><span class="w"></span><span class="w w--cta"></span></span>
+          </div>
+
+          <div class:list={['pb__blk pb__blk--hero', { 'is-on': on.has('hero') }]} data-blk="hero" style={`--y:${lay.y.hero};--bh:140`}>
+            <span class="pb__tag">Hero · 140 KB</span>
+            <div class="pb__hero-copy">
+              <span class="w w--h" style="width:92%"></span>
+              <span class="w w--h" style="width:70%"></span>
+              <span class="w" style="width:84%"></span>
+              <span class="w" style="width:60%"></span>
+              <span class="w w--btn"></span>
+            </div>
+            <span class="pb__img"><svg viewBox="0 0 10 10" preserveAspectRatio="none"><path d="M0 0L10 10M10 0L0 10" /></svg></span>
+            <span class="pb__video">
+              <span class="pb__play"></span>
+              <span class="pb__video-label">Video · 2.60 MB</span>
+              <span class="pb__video-bar"><span></span></span>
+            </span>
+          </div>
+
+          <div class:list={['pb__blk pb__blk--services', { 'is-on': on.has('services') }]} data-blk="services" style={`--y:${lay.y.services};--bh:92`}>
+            <span class="pb__tag">Services · 30 KB</span>
+            {
+              [0, 1, 2].map(() => (
+                <span class="pb__col">
+                  <span class="w w--sq" />
+                  <span class="w" style="width:80%" />
+                  <span class="w w--thin" />
+                  <span class="w w--thin" style="width:70%" />
+                </span>
+              ))
+            }
+          </div>
+
+          <div class:list={['pb__blk pb__blk--proof', { 'is-on': on.has('proof') }]} data-blk="proof" style={`--y:${lay.y.proof};--bh:58`}>
+            <span class="pb__tag">Proof · 25 KB</span>
+            <span class="pb__fig"><b>{f.professionals}+</b><span class="w w--thin"></span></span>
+            <span class="pb__fig"><b>{f.accuracy}%</b><span class="w w--thin"></span></span>
+            <span class="pb__fig"><b>{f.onboardingHours}h</b><span class="w w--thin"></span></span>
+          </div>
+
+          <div class:list={['pb__blk pb__blk--pricing', { 'is-on': on.has('pricing') }]} data-blk="pricing" style={`--y:${lay.y.pricing};--bh:104`}>
+            <span class="pb__tag">Pricing · 15 KB</span>
+            {
+              [0, 1, 2].map((i) => (
+                <span class:list={['pb__tier', { 'is-featured': i === 1 }]}>
+                  <span class="w" style="width:50%" />
+                  <span class="w w--h" style="width:70%" />
+                  <span class="w w--thin" />
+                  <span class="w w--thin" style="width:80%" />
+                  <span class="w w--thin" style="width:60%" />
+                </span>
+              ))
+            }
+          </div>
+
+          <div class:list={['pb__blk pb__blk--blog', { 'is-on': on.has('blog') }]} data-blk="blog" style={`--y:${lay.y.blog};--bh:92`}>
+            <span class="pb__tag">Blog · 120 KB</span>
+            {
+              [0, 1, 2].map(() => (
+                <span class="pb__col">
+                  <span class="pb__thumb" />
+                  <span class="w" style="width:86%" />
+                  <span class="w w--thin" style="width:60%" />
+                </span>
+              ))
+            }
+          </div>
+
+          <div class:list={['pb__blk pb__blk--contact', { 'is-on': on.has('contact') }]} data-blk="contact" style={`--y:${lay.y.contact};--bh:100`}>
+            <span class="pb__tag">Contact form · 30 KB</span>
+            <span class="pb__form">
+              <span class="pb__field"></span><span class="pb__field"></span>
+              <span class="pb__field pb__field--area"></span>
+              <span class="w w--btn"></span>
+            </span>
+          </div>
+
+          <div class="pb__blk pb__blk--footer is-on" data-blk="footer" style={`--y:${lay.y.footer};--bh:40`}>
+            <span class="w" style="width:18%"></span><span class="w w--thin" style="width:30%"></span>
+          </div>
+        </div>
+
+        <span class="pb__chat">
+          <span class="pb__chat-panel"><span class="w"></span><span class="w w--thin"></span><span class="w w--thin" style="width:60%"></span></span>
+          <span class="pb__chat-btn"></span>
+          <span class="pb__tag pb__tag--chat">Chat · 420 KB</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="pb__meter">
+      <div class="pb__module">
+        <p class="label pb__key">Page weight</p>
+        <p class="pb__figure"><span data-out="kb">{formatKb(est.kb)}</span></p>
+        <div class="pb__weight">
+          <span class="pb__seg pb__seg--base" style={`--x:0;--w:${BASE.kb / KB_SCALE}`}></span>
+          {
+            segments.map((s) => (
+              <span
+                class:list={['pb__seg', { 'pb__seg--heavy': s.heavy, 'is-on': on.has(s.id) }]}
+                data-seg={s.id}
+                style={`--x:${s.x.toFixed(4)};--w:${s.w.toFixed(4)}`}
+              />
+            ))
+          }
+        </div>
+        <div class="pb__scale pb__scale--kb">
+          {kbTicks.map((t) => <span style={`--p:${t / KB_SCALE}`}>{t === 0 ? '0' : `${t / 1000} MB`}</span>)}
+        </div>
+        <dl class="pb__mini">
+          <div><dt>Requests</dt><dd data-out="requests">{est.requests}</dd></div>
+          <div><dt>Blocks on</dt><dd data-out="count">{on.size}</dd></div>
+        </dl>
+      </div>
+
+      <div class="pb__module">
+        <p class="label pb__key">Estimated LCP</p>
+        <p class="pb__figure"><span data-out="lcp">{est.lcp.toFixed(1)}</span> s</p>
+        <div class="pb__gauge">
+          <span class="pb__zone pb__zone--good" style={`--a:0;--b:${THRESHOLDS.good / LCP_SCALE}`}></span>
+          <span class="pb__zone pb__zone--ni" style={`--a:${THRESHOLDS.good / LCP_SCALE};--b:${THRESHOLDS.poor / LCP_SCALE}`}></span>
+          <span class="pb__zone pb__zone--poor" style={`--a:${THRESHOLDS.poor / LCP_SCALE};--b:1`}></span>
+          <span class="pb__needle" style={`--p:${Math.min(1, est.lcp / LCP_SCALE).toFixed(4)}`} data-needle><i></i></span>
+        </div>
+        <div class="pb__scale">
+          {lcpTicks.map((t) => <span style={`--p:${t / LCP_SCALE}`}>{t} s</span>)}
+        </div>
+      </div>
+
+      <div class:list={['pb__module pb__band', `is-${est.band}`, { lime: est.band === 'good' }]} data-band>
+        <p class="label pb__key">LCP band</p>
+        <p class="pb__band-name" data-out="band">{bandLabel[est.band]}</p>
+        <p class="pb__band-note small" data-out="note">{est.heaviest?.note}</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="sr-only" aria-live="polite" data-out="summary">{summary}</p>
+  <p class="pb__foot small">
+    <span class="pb__flag">Illustrative estimate</span>
+    Modelled for a mid-range phone on 4G. Bands follow Google’s Core Web Vitals: LCP good at 2.5 s or less, poor above 4 s. We measure your real templates before
+    launch.
+  </p>
+</div>
+
+<style>
+  .pb { display: grid; gap: var(--s-4); --vh: 420; }
+  @media (max-width: 39.99rem) { .pb { --vh: 320; } }
+
+  /* ---- Toggles ---- */
+  .pb__toggles { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .pb__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-2);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.15;
+    transition: transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease, color var(--t-ui) ease, background-color var(--t-ui) ease;
+  }
+  .pb__toggle:active { transform: scale(0.97); }
+  .pb__toggle[aria-pressed='true'] { color: var(--ink); border-color: var(--ink); background: var(--plate); }
+  .pb__switch { position: relative; width: 1.6rem; height: 0.9rem; border: 1px solid currentColor; flex: none; }
+  .pb__switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: calc(0.9rem - 6px); height: calc(0.9rem - 6px); background: currentColor; transition: transform var(--t-ui) var(--ease-out), background-color var(--t-ui) ease; }
+  .pb__toggle[aria-pressed='true'] .pb__switch { background: var(--field); border-color: var(--field); }
+  .pb__toggle[aria-pressed='true'] .pb__switch::after { background: var(--field-ink); transform: translateX(0.7rem); }
+  .pb__toggle-kb { font-size: 0.75rem; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .pb__toggle[aria-pressed='true'] .pb__toggle-kb { color: var(--ink-2); }
+  @media (hover: hover) and (pointer: fine) { .pb__toggle:hover { border-color: var(--ink); color: var(--ink); } }
+
+  .pb__body { display: grid; gap: var(--s-4); }
+  @media (min-width: 40rem) { .pb__body { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); align-items: start; } }
+
+  /* ---- Browser frame ---- */
+  .pb__frame { border: 1px solid var(--rule-strong); background: var(--plate); min-width: 0; }
+  .pb__chrome { position: relative; display: flex; align-items: center; gap: 0.6rem; height: 2.25rem; padding: 0 0.7rem; border-bottom: 1px solid var(--rule); }
+  .pb__dots { display: flex; gap: 4px; }
+  .pb__dots i { width: 7px; height: 7px; border: 1px solid var(--ink-3); }
+  .pb__url { flex: 1; min-width: 0; padding: 0.15rem 0.5rem; border: 1px solid var(--rule); font-size: 0.6875rem; color: var(--ink-2); font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .pb__pixels { display: flex; gap: 3px; }
+  .pb__pixels i { font-style: normal; font-size: 0.5625rem; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.1rem 0.3rem; border: 1px solid var(--danger); color: var(--danger); white-space: nowrap; opacity: 0; transform: translateY(-4px); transition: opacity var(--t-ui) ease, transform var(--t-ui) var(--ease-out); }
+  .pb__pixels i:nth-child(2) { transition-delay: 40ms; }
+  .pb__pixels i:nth-child(3) { transition-delay: 80ms; }
+  .pb[data-tracking='on'] .pb__pixels i { opacity: 1; transform: none; }
+  @media (max-width: 30rem) { .pb__pixels i:nth-child(n + 2) { display: none; } }
+
+  .pb__viewport { position: relative; height: calc(var(--vh) * 1px); overflow: hidden; background: var(--ground); }
+  .pb__busy { position: absolute; inset: 0 0 auto; z-index: 3; height: 3px; background: repeating-linear-gradient(90deg, var(--danger) 0 6px, transparent 6px 10px); transform-origin: 0 50%; transform: scaleX(0); transition: transform 280ms var(--ease-out); }
+  .pb[data-tracking='on'] .pb__busy { transform: scaleX(1); }
+  .pb__page {
+    --s: min(1, calc(var(--vh) / var(--h)));
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(var(--h) * 1px);
+    transform: scale(var(--s));
+    transform-origin: 50% 0;
+    transition: transform 280ms var(--ease-out);
+  }
+
+  /* Blocks sit at their y offset; inserting one slides the rest down (transform only). */
+  .pb__blk {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 0;
+    height: calc(var(--bh) * 1px);
+    transform: translateY(calc(var(--y) * 1px));
+    transition: transform 280ms var(--ease-out), opacity 200ms ease, clip-path 280ms var(--ease-out);
+    border: 1px solid var(--rule);
+    padding: 10px;
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  .pb__blk.is-on { opacity: 1; clip-path: inset(0); }
+  .pb__blk.is-new { animation: pb-flash 700ms var(--ease-out); }
+  @keyframes pb-flash { 0% { border-color: var(--field); } 100% { border-color: var(--rule); } }
+
+  .w { display: block; height: 5px; width: 100%; background: var(--rule-strong); }
+  .w--thin { height: 3px; background: var(--rule); }
+  .w--h { height: 10px; background: var(--ink-2); }
+  .w--btn { width: 54px; height: 14px; background: var(--field); }
+  .w--sq { width: 14px; height: 14px; border: 1px solid var(--ink-3); background: none; }
+  .w--logo { width: 10px; height: 10px; background: var(--field); flex: none; }
+  .w--cta { width: 30px !important; height: 11px; background: var(--field); }
+
+  .pb__tag { position: absolute; top: -1px; right: -1px; z-index: 2; padding: 2px 5px; background: var(--plate-2); color: var(--ink-2); font-size: 9px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; font-variant-numeric: tabular-nums; line-height: 1.2; }
+
+  .pb__blk--nav { display: flex; align-items: center; gap: 8px; border-color: transparent; border-bottom-color: var(--rule); padding-block: 0; left: 0; right: 0; padding-inline: 14px; }
+  .pb__navlinks { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .pb__navlinks .w { width: 22px; }
+
+  .pb__blk--hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; align-items: center; overflow: hidden; }
+  .pb__hero-copy { display: grid; gap: 7px; align-content: center; }
+  .pb__hero-copy .w--btn { margin-top: 6px; }
+  .pb__img { display: block; height: 100%; border: 1px solid var(--rule-strong); }
+  .pb__img svg { width: 100%; height: 100%; }
+  .pb__img path { stroke: var(--rule-strong); stroke-width: 1; vector-effect: non-scaling-stroke; fill: none; }
+  .pb__video {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: repeating-linear-gradient(135deg, var(--plate-3) 0 6px, var(--plate) 6px 12px);
+    opacity: 0;
+    transition: opacity 260ms ease;
+  }
+  .pb[data-video='on'] .pb__video { opacity: 0.94; }
+  .pb__play { width: 0; height: 0; border-left: 18px solid var(--ink); border-block: 11px solid transparent; }
+  .pb__video-label { position: absolute; left: 8px; top: 6px; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--danger); }
+  .pb__video-bar { position: absolute; left: 8px; right: 8px; bottom: 8px; height: 3px; background: var(--rule); overflow: hidden; }
+  .pb__video-bar span { display: block; height: 100%; background: var(--danger); transform-origin: 0 50%; transform: scaleX(0.35); }
+  @media (prefers-reduced-motion: no-preference) {
+    .pb[data-video='on'] .pb__video-bar span { animation: pb-play 6s linear infinite; }
+  }
+  @keyframes pb-play { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  .pb__blk--services, .pb__blk--blog { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .pb__col { display: grid; gap: 6px; align-content: start; }
+  .pb__thumb { display: block; height: 34px; background: repeating-linear-gradient(135deg, var(--rule) 0 2px, transparent 2px 7px); border: 1px solid var(--rule); }
+
+  .pb__blk--proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: center; }
+  .pb__fig { display: grid; gap: 4px; }
+  .pb__fig b { font-size: 17px; font-weight: 750; font-stretch: 125%; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .pb__fig .w { width: 70%; }
+
+  .pb__blk--pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pb__tier { display: grid; gap: 6px; align-content: start; padding: 8px; border: 1px solid var(--rule); }
+  .pb__tier.is-featured { background: var(--field); border-color: var(--field); }
+  .pb__tier.is-featured .w { background: rgb(11 12 10 / 0.35); }
+  .pb__tier.is-featured .w--h { background: var(--field-ink); }
+
+  .pb__form { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; height: 100%; align-content: start; }
+  .pb__field { display: block; height: 18px; border: 1px solid var(--rule-strong); }
+  .pb__field--area { grid-column: 1 / -1; height: 30px; }
+  .pb__form .w--btn { grid-column: 1; }
+
+  .pb__blk--footer { left: 0; right: 0; display: flex; align-items: center; gap: 10px; background: var(--plate-2); border-color: transparent; }
+
+  .pb__chat { position: absolute; right: 12px; bottom: 12px; z-index: 2; display: grid; justify-items: end; gap: 6px; opacity: 0; transform: translateY(8px) scale(0.96); transform-origin: 100% 100%; transition: opacity 200ms ease, transform 260ms var(--ease-out); }
+  .pb[data-chat='on'] .pb__chat { opacity: 1; transform: none; }
+  .pb__chat-panel { display: grid; gap: 5px; width: 104px; padding: 8px; background: var(--plate-2); border: 1px solid var(--rule-strong); }
+  .pb__chat-btn { width: 30px; height: 30px; background: var(--ink); clip-path: polygon(0 0, 100% 0, 100% 75%, 40% 75%, 15% 100%, 15% 75%, 0 75%); }
+  .pb__tag--chat { position: static; border: 1px solid var(--danger); color: var(--danger); background: var(--ground); }
+
+  /* ---- Meter ---- */
+  .pb__meter { display: grid; border: 1px solid var(--rule); background: var(--rule); gap: 1px; min-width: 0; }
+  .pb__module { padding: var(--s-4); background: var(--ground); display: grid; gap: var(--s-2); }
+  .pb__key { color: var(--ink-2); }
+  .pb__figure { font-size: clamp(1.75rem, 1.2rem + 1.4vw, 2.5rem); font-weight: 750; font-stretch: 125%; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+  .pb__weight { position: relative; height: 12px; margin-top: var(--s-2); background: var(--plate-2); overflow: hidden; }
+  .pb__seg { position: absolute; inset: 0; transform-origin: 0 50%; transform: translateX(calc(var(--x) * 100%)) scaleX(0); background: var(--ink-2); box-shadow: inset -1px 0 0 var(--ground); transition: transform 280ms var(--ease-out); }
+  .pb__seg.is-on, .pb__seg--base { transform: translateX(calc(var(--x) * 100%)) scaleX(var(--w)); }
+  .pb__seg--base { background: var(--ink-3); }
+  .pb__seg--heavy { background: var(--danger); }
+
+  .pb__scale { position: relative; height: 1.1rem; font-size: 0.6875rem; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .pb__scale span { position: absolute; top: 0; left: calc(var(--p) * 100%); transform: translateX(-50%); white-space: nowrap; }
+  .pb__scale span:first-child { transform: none; }
+  .pb__scale span:last-child { transform: translateX(-100%); }
+  @media (max-width: 30rem) { .pb__scale span:nth-child(even):not(:last-child) { display: none; } }
+
+  .pb__mini { display: flex; gap: var(--s-5); padding-top: var(--s-2); border-top: 1px solid var(--rule); font-size: 0.8125rem; }
+  .pb__mini div { display: flex; gap: 0.4rem; align-items: baseline; }
+  .pb__mini dt { color: var(--ink-2); }
+  .pb__mini dd { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .pb__gauge { position: relative; height: 26px; margin-top: var(--s-3); overflow: clip; overflow-clip-margin: 6px; }
+  .pb__zone { position: absolute; left: calc(var(--a) * 100%); width: calc((var(--b) - var(--a)) * 100% - 2px); bottom: 0; height: 10px; }
+  .pb__zone--good { background: var(--field); }
+  .pb__zone--ni { background: repeating-linear-gradient(135deg, var(--ink-2) 0 2px, transparent 2px 6px); }
+  .pb__zone--poor { background: var(--danger); width: calc((var(--b) - var(--a)) * 100%); }
+  .pb__needle { position: absolute; inset: 0; transform: translateX(calc(var(--p) * 100%)); transition: transform 320ms var(--ease-out); pointer-events: none; }
+  .pb__needle i { position: absolute; left: -1px; top: 0; bottom: -4px; width: 3px; background: var(--ink); box-shadow: 0 0 0 2px var(--ground); }
+
+  .pb__band { transition: background-color var(--t-ui) ease, color var(--t-ui) ease; }
+  .pb__band.lime { background: var(--field); }
+  .pb__band-name { font-size: 1.375rem; font-weight: 750; font-stretch: 125%; line-height: 1.1; letter-spacing: -0.01em; }
+  .pb__band.is-poor .pb__band-name { color: var(--danger); }
+  .pb__band.is-poor { box-shadow: inset 0 0 0 1px var(--danger); }
+  .pb__band-note { color: var(--ink-2); max-width: 36ch; }
+
+  .pb__foot { color: var(--ink-2); max-width: 62ch; }
+  .pb__flag { display: inline-block; margin-right: 0.5rem; padding: 0.05rem 0.4rem; border: 1px solid var(--rule-strong); color: var(--ink); font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; vertical-align: 0.1em; }
+
+  :global(html:not(.js)) .pb__toggles { pointer-events: none; }
+</style>

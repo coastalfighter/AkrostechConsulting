@@ -1,7 +1,7 @@
 ---
 /**
- * Closing chapter: a whole lime field. Headline across the left columns, the two contact
- * routes on the right, and a photograph module across the seam.
+ * Closing call to action (Sample-3 copy): the page's one deliberate chartreuse block, with
+ * the two routes (book a call, or email) and a photograph module.
  */
 import { site } from '@/config/site';
 import Icon from './Icon.astro';
@@ -16,52 +16,46 @@ interface Props {
 }
 
 const {
-  heading = 'Your team can start in 48 hours.',
-  line = 'Thirty minutes with a client partner. You leave with a role plan, a shortlist date and a monthly price.',
-  photo = 'handshake',
+  heading = 'Build your offshore team in 48 hours.',
+  line = 'Tell us what you need. We will match vetted talent to your workflow and time zone.',
+  photo = 'people-developers',
   photoAlt,
 } = Astro.props;
+const mailto = `mailto:${site.email}?subject=${encodeURIComponent('Interested in your services')}`;
 ---
 
-<section class="cta lime" aria-labelledby="cta-heading">
-  <div class="wrap cta__grid grid">
-    <div class="cta__copy c-7">
-      <h2 class="cta__heading" id="cta-heading" data-split>{heading}</h2>
-      <p class="cta__line" data-reveal>{line}</p>
-      <div class="actions" data-reveal>
-        <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
-          Book a 30-minute call <Icon name="arrow-up-right" class="btn__arrow" />
-        </a>
-        <a class="btn btn--ghost" href="/contact">Send a brief <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+<section class="cta section" aria-labelledby="cta-heading">
+  <div class="wrap">
+    <div class="cta__panel lime">
+      <div class="cta__copy">
+        <h2 class="cta__heading" id="cta-heading" data-split>{heading}</h2>
+        <p class="cta__line" data-reveal>{line}</p>
+        <div class="actions" data-reveal>
+          <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
+            Book a call <Icon name="arrow-up-right" class="btn__arrow" />
+          </a>
+          <a class="more" href={mailto}>Email {site.email}</a>
+        </div>
       </div>
-      <dl class="cta__routes">
-        <div><dt class="label">Phone</dt><dd><a class="link" href={`tel:${site.phoneE164}`}>{site.phone}</a></dd></div>
-        <div><dt class="label">Email</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
-      </dl>
-    </div>
-    <div class="cta__photo c-5">
-      <Photo name={photo} alt={photoAlt} ratio="4 / 5" sizes="(min-width: 64rem) 40vw, 100vw" reveal="clip" />
+      <div class="cta__photo">
+        <Photo name={photo} alt={photoAlt} fill sizes="(min-width: 64rem) 36vw, 100vw" reveal="clip" />
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .cta { padding-block: var(--s-9); overflow: hidden; }
-  .cta__grid { row-gap: var(--s-7); align-items: end; }
-  .cta__copy { display: grid; gap: var(--s-6); align-content: start; }
-  .cta__heading {
-    font-size: clamp(2.5rem, 1rem + 5vw, 6rem);
-    font-stretch: 125%;
-    font-weight: 750;
-    line-height: 0.92;
-    letter-spacing: -0.03em;
-    text-transform: uppercase;
-    max-width: 12ch;
+  .cta__panel {
+    display: grid;
+    gap: var(--s-6);
+    padding: clamp(1.5rem, 1rem + 3vw, 4rem);
+    border-radius: calc(var(--radius) * 1.6);
+    overflow: hidden;
   }
-  .cta__line { font-size: var(--t-lead); line-height: 1.45; max-width: 40ch; color: var(--field-ink-2); }
-  .cta__routes { display: flex; flex-wrap: wrap; gap: var(--s-6); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
-  .cta__routes dd { font-size: 1.125rem; font-weight: 650; margin-top: var(--s-1); }
-  .cta__routes a { display: inline-flex; min-height: 44px; align-items: center; }
-  .cta__photo { align-self: stretch; }
-  @media (min-width: 64rem) { .cta__photo { margin-bottom: calc(var(--s-9) * -1 - 1px); } }
+  @media (min-width: 64rem) { .cta__panel { grid-template-columns: 1.3fr 1fr; align-items: stretch; } }
+  .cta__copy { display: grid; gap: var(--s-6); align-content: center; }
+  .cta__heading { font-size: var(--t-h1); line-height: var(--lh-display); letter-spacing: var(--track-display); max-width: 13ch; }
+  .cta__line { font-size: var(--t-lead); line-height: 1.5; max-width: 40ch; color: var(--field-ink-2); }
+  .cta__photo { min-height: 18rem; }
+  .cta__photo :global(.photo) { border-radius: var(--radius); }
 </style>

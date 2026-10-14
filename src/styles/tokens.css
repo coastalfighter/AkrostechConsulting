@@ -1,98 +1,127 @@
 /* ==========================================================================
-   Akrostech standards manual: design tokens
-   Brand: near-black ground, lime #C9FF4A (the M-wave mark), white ink.
-   Primitive scales → semantic roles (dark is the brand default; light is the
-   "printed manual" variant) → component tokens.
+   Akrostech design tokens
+   Brand palette (client-supplied):
+     light: paper #f3f2ee · chartreuse #dbde2e · ink #161110 · lavender #c5baea
+     dark:  ink #161110   · chartreuse #dbde2e · paper #f3f2ee · violet #6327c5
+   Primitive scales → semantic roles. Light is the default; dark is opt-in.
+   Scale names are kept from the previous system (lime = chartreuse, carbon = ink)
+   so every component and instrument maps onto the new palette.
    ========================================================================== */
 
 :root {
-  /* ---- Primitive: lime (brand) ---- */
-  --lime-50: #f8ffe6;
-  --lime-100: #effec9;
-  --lime-200: #e1fd99;
-  --lime-300: #d4fe6e;
-  --lime-400: #c9ff4a; /* brand */
-  --lime-500: #b2ec2b;
-  --lime-600: #8fc416;
-  --lime-700: #6a9410;
-  --lime-800: #4b6a0d;
-  --lime-900: #344a0b;
-  --lime-950: #1b2806;
+  /* ---- Primitive: chartreuse (brand highlight, both themes) ---- */
+  --lime-50: #fbfbe6;
+  --lime-100: #f6f7c6;
+  --lime-200: #eef093;
+  --lime-300: #e5e862;
+  --lime-400: #dbde2e; /* brand */
+  --lime-500: #c4c71c;
+  --lime-600: #9b9d15;
+  --lime-700: #737512;
+  --lime-800: #4f510f;
+  --lime-900: #35360b;
+  --lime-950: #1d1e06;
 
-  /* ---- Primitive: carbon (neutral, faintly green-warm) ---- */
-  --carbon-0: #ffffff;
-  --carbon-50: #f4f5ef;
-  --carbon-100: #e8eae2;
-  --carbon-200: #d3d6cb;
-  --carbon-300: #b5b9ab;
-  --carbon-400: #929787;
-  --carbon-500: #727767;
-  --carbon-600: #555a4c;
-  --carbon-700: #3a3e34;
-  --carbon-800: #24271f;
-  --carbon-850: #1b1e17;
-  --carbon-900: #13150f;
-  --carbon-950: #0b0c0a;
+  /* ---- Primitive: ink / paper (warm neutral) ---- */
+  --carbon-0: #fbfaf8;
+  --carbon-50: #f3f2ee; /* brand paper */
+  --carbon-100: #e9e7e1;
+  --carbon-200: #dcd8d0;
+  --carbon-300: #bfb8b1;
+  --carbon-400: #9c938d;
+  --carbon-500: #736963;
+  --carbon-600: #5c524d;
+  --carbon-700: #443b37;
+  --carbon-800: #2f2725;
+  --carbon-850: #241d1b;
+  --carbon-900: #1c1615;
+  --carbon-950: #161110; /* brand ink */
 
-  /* ---- Primitive: signal (errors, live dots) ---- */
-  --signal-red: #ff5c45;
-  --signal-red-deep: #b5321f;
+  /* ---- Primitive: violet (lavender in light, violet in dark) ---- */
+  --violet-50: #f5f2fc;
+  --violet-100: #ebe5f8;
+  --violet-200: #dad1f3;
+  --violet-300: #c5baea; /* brand, light theme */
+  --violet-400: #a48fdd;
+  --violet-500: #8462d2;
+  --violet-600: #6327c5; /* brand, dark theme */
+  --violet-700: #4f1f9e;
+  --violet-800: #3b1777;
+  --violet-900: #281050;
+  --violet-950: #190a33;
 
-  /* ---- Semantic roles: dark (brand default) ---- */
-  color-scheme: dark;
-  --ground: var(--carbon-950);
-  --plate: var(--carbon-900);
-  --plate-2: var(--carbon-850);
-  --plate-3: var(--carbon-800);
-  --ink: var(--carbon-50);
-  --ink-2: var(--carbon-300);
-  --ink-3: var(--carbon-400);
-  --rule: rgb(244 245 239 / 0.14);
-  --rule-strong: rgb(244 245 239 / 0.32);
-  --accent: var(--lime-400);
-  --accent-hover: var(--lime-300);
-  --accent-ink: var(--carbon-950);
-  --accent-text: var(--lime-400);
+  /* ---- Primitive: signal ---- */
+  --signal-red: #c2361f;
+  --signal-red-bright: #ff7a5c;
+
+  /* ---- Semantic roles: light (default) ---- */
+  color-scheme: light;
+  --ground: var(--carbon-50);
+  --plate: var(--carbon-0);
+  --plate-2: var(--carbon-100);
+  --plate-3: var(--carbon-200);
+  --ink: var(--carbon-950);
+  --ink-2: var(--carbon-600);
+  --ink-3: var(--carbon-500);
+  --rule: rgb(22 17 16 / 0.13);
+  --rule-strong: rgb(22 17 16 / 0.3);
+  /* Action: ink buttons that flip to chartreuse on hover */
+  --accent: var(--carbon-950);
+  --accent-hover: var(--carbon-800);
+  --accent-ink: var(--carbon-50);
+  --accent-text: var(--lime-800);
+  /* Highlight: the chartreuse marker (fills only, never text on paper) */
+  --mark: var(--lime-400);
+  --mark-ink: var(--carbon-950);
+  /* Chartreuse field */
   --field: var(--lime-400);
   --field-ink: var(--carbon-950);
-  --field-ink-2: #2c3a12;
-  --field-rule: rgb(11 12 10 / 0.18);
+  --field-ink-2: #3a3b10;
+  --field-rule: rgb(22 17 16 / 0.2);
+  /* Secondary field: lavender (light) / violet (dark) */
+  --second: var(--violet-300);
+  --second-ink: var(--carbon-950);
+  --second-ink-2: #3d3352;
+  --second-rule: rgb(22 17 16 / 0.18);
+  --second-strong: var(--violet-600);
   --danger: var(--signal-red);
-  --focus: var(--lime-400);
+  --focus: var(--violet-600);
   --selection-bg: var(--lime-400);
   --selection-ink: var(--carbon-950);
-  --scrim: rgb(11 12 10 / 0.72);
-  --photo-tint: rgb(11 12 10 / 0.18);
+  --scrim: rgb(22 17 16 / 0.5);
+  --photo-tint: rgb(22 17 16 / 0);
 
-  /* ---- Typography: one grotesk, two widths ---- */
-  --font: 'Archivo', 'Archivo Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --wide: 125%;
-  --semi-wide: 112%;
+  /* ---- Typography ---- */
+  --font-display: 'Bricolage Grotesque', 'Bricolage Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --font: 'Figtree', 'Figtree Fallback', 'Helvetica Neue', Arial, sans-serif;
+  /* Kept for older components: the display stretch maps to the normal width. */
+  --wide: 100%;
+  --semi-wide: 100%;
   --normal: 100%;
 
-  --t-display: clamp(2.75rem, 1.25rem + 5vw, 6rem);
-  --t-h1: clamp(2.5rem, 1.1rem + 4.2vw, 5.25rem);
-  --t-h2: clamp(1.875rem, 1.1rem + 2.6vw, 3.5rem);
-  --t-h3: clamp(1.25rem, 1.02rem + 0.75vw, 1.75rem);
-  --t-lead: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);
+  --t-display: clamp(3rem, 1.4rem + 5.6vw, 6rem);
+  --t-h1: clamp(2.6rem, 1.3rem + 4.4vw, 5.25rem);
+  --t-h2: clamp(2rem, 1.2rem + 2.6vw, 3.5rem);
+  --t-h3: clamp(1.3rem, 1.1rem + 0.7vw, 1.75rem);
+  --t-lead: clamp(1.125rem, 1.03rem + 0.4vw, 1.375rem);
   --t-body: 1.0625rem;
   --t-small: 0.9375rem;
   --t-label: 0.8125rem;
-  --t-figure: clamp(3rem, 1.5rem + 5vw, 6rem);
+  --t-figure: clamp(3rem, 1.6rem + 4.6vw, 5.5rem);
 
-  --lh-display: 0.94;
-  --lh-heading: 1.02;
+  --lh-display: 0.96;
+  --lh-heading: 1.04;
   --lh-snug: 1.25;
   --lh-text: 1.6;
-  --track-display: -0.025em;
-  --track-heading: -0.02em;
-  --track-label: 0.08em;
-  --measure: 60ch; /* Archivo is wide: 60ch is about 75 characters a line */
+  --track-display: -0.035em;
+  --track-heading: -0.025em;
+  --track-label: 0.06em;
+  --measure: 64ch;
 
-  /* ---- Grid & space (8px base) ---- */
+  /* ---- Grid & space ---- */
   --margin: clamp(1.25rem, 0.6rem + 3vw, 4rem);
   --gutter: clamp(1rem, 0.6rem + 1.4vw, 2rem);
-  --page-max: 1680px;
+  --page-max: 1600px;
   --header-h: 4.5rem;
   --s-1: 0.25rem;
   --s-2: 0.5rem;
@@ -102,16 +131,18 @@
   --s-6: 2rem;
   --s-7: 3rem;
   --s-8: clamp(3rem, 2rem + 3vw, 4.5rem);
-  --s-9: clamp(4rem, 2.5rem + 5vw, 7rem);
+  --s-9: clamp(4.5rem, 2.8rem + 5vw, 7.5rem);
   --s-10: clamp(5.5rem, 3rem + 8vw, 10rem);
-  --module-pad: clamp(1.25rem, 0.8rem + 1.6vw, 2.5rem);
+  --module-pad: clamp(1.25rem, 0.8rem + 1.6vw, 2.25rem);
 
   /* ---- Shape & depth ---- */
-  --radius: 0;
+  --radius: 1.25rem;
+  --radius-sm: 0.75rem;
+  --radius-xs: 0.5rem;
   --radius-pill: 999px;
   --rule-w: 1px;
-  --shadow-float: 0 24px 64px -24px rgb(0 0 0 / 0.6), 0 2px 8px rgb(0 0 0 / 0.3);
-  --shadow-lift: 0 18px 40px -20px rgb(0 0 0 / 0.55);
+  --shadow-float: 0 24px 60px -28px rgb(22 17 16 / 0.35), 0 2px 8px rgb(22 17 16 / 0.08);
+  --shadow-lift: 0 16px 40px -24px rgb(22 17 16 / 0.35);
 
   /* ---- Motion (Emil Kowalski curves) ---- */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -131,29 +162,35 @@
   --z-preloader: 500;
 }
 
-/* "Printed manual" light variant: white paper, black ink, lime as fields only. */
-:root[data-theme='light'] {
-  color-scheme: light;
-  --ground: var(--carbon-50);
-  --plate: #ffffff;
-  --plate-2: var(--carbon-100);
-  --plate-3: var(--carbon-200);
-  --ink: var(--carbon-950);
-  --ink-2: var(--carbon-600);
-  --ink-3: var(--carbon-500);
-  --rule: rgb(11 12 10 / 0.14);
-  --rule-strong: rgb(11 12 10 / 0.34);
-  --accent: var(--carbon-950);
-  --accent-hover: var(--carbon-800);
-  --accent-ink: var(--lime-400);
-  --accent-text: var(--lime-800);
-  --danger: var(--signal-red-deep);
-  --focus: var(--carbon-950);
-  --scrim: rgb(244 245 239 / 0.78);
-  --photo-tint: rgb(244 245 239 / 0);
+/* Dark theme: ink ground, paper type, chartreuse actions, violet fields. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: var(--carbon-950);
+  --plate: var(--carbon-900);
+  --plate-2: var(--carbon-850);
+  --plate-3: var(--carbon-800);
+  --ink: var(--carbon-50);
+  --ink-2: var(--carbon-300);
+  --ink-3: var(--carbon-400);
+  --rule: rgb(243 242 238 / 0.13);
+  --rule-strong: rgb(243 242 238 / 0.3);
+  --accent: var(--lime-400);
+  --accent-hover: var(--lime-300);
+  --accent-ink: var(--carbon-950);
+  --accent-text: var(--lime-400);
+  --second: var(--violet-600);
+  --second-ink: var(--carbon-50);
+  --second-ink-2: #ddd3f5;
+  --second-rule: rgb(243 242 238 / 0.22);
+  --second-strong: var(--violet-300);
+  --danger: var(--signal-red-bright);
+  --focus: var(--lime-400);
+  --scrim: rgb(22 17 16 / 0.72);
+  --shadow-float: 0 24px 60px -24px rgb(0 0 0 / 0.6), 0 2px 8px rgb(0 0 0 / 0.3);
+  --shadow-lift: 0 18px 40px -20px rgb(0 0 0 / 0.55);
 }
 
 @media (prefers-contrast: more) {
-  :root { --ink-2: var(--carbon-200); --rule: rgb(244 245 239 / 0.4); }
-  :root[data-theme='light'] { --ink-2: var(--carbon-800); --rule: rgb(11 12 10 / 0.45); }
+  :root { --ink-2: var(--carbon-800); --rule: rgb(22 17 16 / 0.4); }
+  :root[data-theme='dark'] { --ink-2: var(--carbon-100); --rule: rgb(243 242 238 / 0.4); }
 }

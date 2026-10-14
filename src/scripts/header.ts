@@ -61,3 +61,29 @@ export function initHeader(): void {
   update();
   initClock();
 }
+
+/** Services disclosure menu in the desktop header: click to open, Esc or outside click to close. */
+export function initServicesMenu(): void {
+  const trigger = document.querySelector<HTMLButtonElement>('[data-services-trigger]');
+  const panel = document.querySelector<HTMLElement>('[data-services-panel]');
+  if (!trigger || !panel) return;
+  const set = (open: boolean) => {
+    trigger.setAttribute('aria-expanded', String(open));
+    panel.hidden = !open;
+  };
+  trigger.addEventListener('click', () => set(trigger.getAttribute('aria-expanded') !== 'true'));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hidden) {
+      set(false);
+      trigger.focus();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    const t = e.target as Node | null;
+    if (!panel.hidden && t && !panel.contains(t) && !trigger.contains(t)) set(false);
+  });
+  panel.addEventListener('focusout', (e) => {
+    const next = e.relatedTarget as Node | null;
+    if (next && !panel.contains(next) && next !== trigger) set(false);
+  });
+}

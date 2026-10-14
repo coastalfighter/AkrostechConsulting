@@ -13,15 +13,15 @@ describe('services matrix', () => {
   it('suggests a two-practice pod for the default selection', () => {
     const plan = planMatrix(DEFAULT_SELECTION);
     expect(plan.shape).toBe('pod');
-    expect(plan.team).toEqual(['virtual-assistance', 'accounting-assistance']);
-    const rpo = plan.rows.find((r) => r.slug === 'recruitment-process-outsourcing');
+    expect(plan.team).toEqual(['virtual-assistance', 'accounting']);
+    const rpo = plan.rows.find((r) => r.slug === 'recruitment');
     expect(rpo?.covered).toEqual(['interviews']);
     expect(rpo?.inTeam).toBe(false);
   });
 
   it('prefers the specialist practice on a tie', () => {
-    expect(planMatrix(['interviews']).team).toEqual(['recruitment-process-outsourcing']);
-    expect(planMatrix(['invoices']).team).toEqual(['accounting-assistance']);
+    expect(planMatrix(['interviews']).team).toEqual(['recruitment']);
+    expect(planMatrix(['invoices']).team).toEqual(['accounting']);
   });
 
   it('suggests one specialist or nothing', () => {

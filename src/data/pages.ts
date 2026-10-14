@@ -1,67 +1,55 @@
 /**
- * Metadata for the fixed pages. Titles are 50-60 characters and descriptions 150-160;
- * `tests/seo.test.ts` enforces both for every page on the site.
+ * Metadata for the fixed pages. Titles are 50-60 characters with the brand and descriptions
+ * 150-160; `tests/seo.test.ts` enforces both for every page on the site.
  */
 export const pages = {
   home: {
-    title: 'Offshore Talent on U.S. Hours | Akrostech Consulting',
+    title: 'Offshore Teams in India Working U.S. Hours',
     description:
-      'Vetted professionals in India working your U.S. hours: virtual assistants, recruiters, accountants, legal support and web developers. Onboarded within 48 hours.',
+      'Dedicated, vetted offshore teams in India for U.S. businesses: virtual assistants, recruiters, accountants, legal support and web developers. Live in 48 hours.',
     path: '/',
   },
   about: {
-    title: 'About Akrostech: Offshore Teams, Onshore Standards',
+    title: 'About Akrostech: Offshore Teams for U.S. Businesses',
     description:
-      'Akrostech places vetted professionals in India on U.S. working hours, from our headquarters in Wilmington, Delaware. Our mission, values, standards and people.',
+      'Akrostech is a Wilmington, Delaware company building dedicated, vetted offshore teams in India that work U.S. hours, from virtual assistance to web development.',
     path: '/about',
   },
   services: {
-    title: 'Outsourcing Services for Growing U.S. Teams | Akrostech',
+    title: 'Offshore Services: VA, RPO, Accounting, Legal',
     description:
-      'Virtual assistance, recruitment process outsourcing, accounting, legal process outsourcing and website development, delivered from India on your U.S. hours.',
+      'Compare five offshore services: virtual assistants, recruitment outsourcing, accounting, legal process outsourcing and website development, all on U.S. hours.',
     path: '/services',
   },
-  work: {
-    title: 'Work & Engagement Blueprints by Practice | Akrostech',
-    description:
-      'How Akrostech staffs and runs real engagements: executive assistants, hiring pods, month-end close, contract backlogs, Shopify rebuilds and client portals.',
-    path: '/work',
-  },
   blog: {
-    title: 'Outsourcing, Hiring & Web Insights Blog | Akrostech',
+    title: 'Offshore Staffing & Outsourcing Guides',
     description:
-      'Practical guides on virtual assistants, recruitment outsourcing, offshore accounting, legal process outsourcing and building fast business websites that rank.',
+      'Practical guides on hiring virtual assistants, recruitment process outsourcing, offshore bookkeeping, legal process outsourcing and fast business websites.',
     path: '/blog',
   },
   contact: {
-    title: 'Contact Akrostech: Book a 30-Minute Discovery Call',
+    title: 'Contact Akrostech: Get an Offshore Team Proposal Today',
     description:
-      'Talk to Akrostech about offshore virtual assistants, recruiters, accountants, legal support or a new website. Wilmington, DE office. Reply in one business day.',
+      'Tell us what you need and we will match vetted, U.S.-hours talent to your workflow. Get a proposal within one business day or book a 30-minute discovery call.',
     path: '/contact',
   },
   privacy: {
-    title: 'Privacy Policy: How We Handle Your Data | Akrostech',
+    title: 'Privacy Policy: How We Handle Your Data',
     description:
       'How Akrostech Consulting collects, uses, protects and retains personal information from website visitors, enquiries and clients, and the choices you have.',
     path: '/privacy',
   },
   terms: {
-    title: 'Website Terms and Conditions of Use and Access | Akrostech',
+    title: 'Website Terms and Conditions of Use and Access',
     description:
       'The terms that govern your use of the Akrostech Consulting website, including content ownership, acceptable use, third-party links, liability and governing law.',
     path: '/terms',
   },
   notFound: {
-    title: 'Page Not Found: Let’s Get You Back on Track | Akrostech',
+    title: 'Page Not Found: Let’s Get You Back on Track',
     description:
-      'The page you were looking for has moved or no longer exists. Find our services, blueprints, articles and contact details from here, or go back to the homepage.',
+      'The page you were looking for has moved or no longer exists. Find our services, guides and contact details from here, or go back to the Akrostech homepage.',
     path: '/404',
-  },
-  locations: {
-    title: 'Service Areas: Wilmington, Philadelphia & NYC | Akrostech',
-    description:
-      'Akrostech serves businesses across the United States from Wilmington, Delaware, with dedicated support for Wilmington, Philadelphia and New York City teams.',
-    path: '/locations',
   },
 } as const;
 
