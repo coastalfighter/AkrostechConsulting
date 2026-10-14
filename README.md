@@ -2,7 +2,7 @@
 
 Marketing website for **Akrostech Consulting**: vetted professionals in India working U.S. business hours (virtual assistance, recruitment process outsourcing, accounting, legal process outsourcing and website development). Headquartered at 1207 Delaware Ave, Wilmington, DE 19806.
 
-The design is built around one idea from the business itself: **your team in India, working your U.S. hours**. The 24-hour band (one cell per hour of the client's day, the India shift lit in moss) appears in the preloader, the artwork, the favicon and the 404, and the homepage's **shift planner** lets a visitor pick their time zone and see their specialist's India shift live.
+The visual world is a **standards manual**: the site reads as Akrostech's own corporate identity manual. Near-black plates, whole lime (`#C9FF4A`) fields, the M-wave mark from the akrosstech.com logo, Archivo set expanded for display, a visible 12-column grid with ruled modules, and real photography in grid modules. **Every page hero is a live, interactive diagram unique to that page**: the homepage shift dial (drag your U.S. working day, see the India shift and whether it's live right now), a practice matrix, an inbox triage, a hiring funnel model, a bank reconciliation, a clause abstractor, a page builder with a performance gauge, an org chain, a blueprint board, a timeline scrubber, a call-week grid, live article search, a reading outline, an I-95 corridor, city routes, a privacy data-flow, a terms clause index and a 404 page finder.
 
 ---
 
@@ -12,10 +12,10 @@ The design is built around one idea from the business itself: **your team in Ind
 | --- | --- |
 | Framework | [Astro 7](https://astro.build) — static output, zero JS by default, per-page code splitting |
 | Hosting | Vercel (`@astrojs/vercel`); static pages plus one serverless function (`/api/contact`) |
-| Type | Space Grotesk (display) + Inter (text), self-hosted variable WOFF2 with metric-matched fallbacks |
-| Motion | GSAP 3 (ScrollTrigger, SplitText), Lenis smooth scroll, native cross-document View Transitions |
-| 3D | Three.js particle globe (lazy-loaded, desktop / capable devices only, static SVG poster otherwise) |
-| Images | Generated artwork → Astro `<Picture>` (AVIF + WebP srcsets) with blur-up placeholders |
+| Type | Archivo variable (weight 100–900, width 62–125%), self-hosted WOFF2 with a metric-matched fallback |
+| Motion | Lenis smooth scroll (fine pointers), IntersectionObserver reveals, CSS transitions, cross-document View Transitions |
+| Heroes | One lazy-loaded TypeScript module per page in `src/scripts/heroes/`, server-rendered in a working default state |
+| Images | Stock photography (Unsplash License, `src/assets/photos/credits.json`) → Astro `<Picture>` (AVIF + WebP srcsets) |
 | Tests | Vitest (time-zone maths, SEO metadata lengths and schema, contact validation, rate limiting) |
 
 ## Project structure
@@ -26,7 +26,8 @@ The design is built around one idea from the business itself: **your team in Ind
 ├── vercel.json               # security headers (CSP, HSTS…), caching, clean URLs
 ├── .env.example              # copy to .env for local development
 ├── scripts/
-│   └── generate-art.mjs      # npm run art → artwork, OG cards, icons
+│   ├── generate-og.mjs       # npm run og → Open Graph cards and app icons
+│   └── fetch-photos.mjs      # downloads the stock photographs and writes credits.json
 ├── public/                   # fonts, OG images, icons, manifest
 ├── src/
 │   ├── config/site.ts        # NAP, hours, geo, socials — single source of truth
@@ -34,8 +35,9 @@ The design is built around one idea from the business itself: **your team in Ind
 │   ├── content/blog/*.md     # articles (typed collection, see content.config.ts)
 │   ├── lib/                  # seo.ts (JSON-LD), time.ts (shift maths), contact.ts, rate-limit.ts, blog.ts
 │   ├── styles/               # tokens.css (design system), base.css (global components)
-│   ├── scripts/              # main.ts (always), motion.ts + hero3d.ts (lazy), theme, menu, favicon…
-│   ├── components/           # Header, Footer, PageHero, Media, ShiftPlanner, Carousel3D, Faq, CtaBand…
+│   ├── assets/photos/        # stock photographs + credits.json (licence and source per photo)
+│   ├── scripts/              # main.ts (always), motion.ts (lazy), heroes/*.ts (lazy, per page), theme, menu, header
+│   ├── components/           # Logo, Header, Footer, Hero, heroes/*, Photo, Compare, PostCard, WorkCard, Faq, CtaBand…
 │   ├── layouts/              # BaseLayout (SEO head, schema graph, shell), LegalLayout
 │   └── pages/                # routes, incl. api/contact.ts, rss.xml.ts, robots.txt.ts
 └── tests/                    # Vitest suites
@@ -62,7 +64,7 @@ npm run dev                   # http://localhost:4321
 | `npm run preview` | Preview the production build |
 | `npm run check` | Type-check `.astro` and `.ts` files |
 | `npm test` | Run the Vitest suites |
-| `npm run art` | Regenerate artwork, OG cards and icons (after adding services, blueprints, posts or locations) |
+| `npm run og` | Regenerate Open Graph cards and icons (after adding services, blueprints, posts or locations) |
 
 ## Environment variables
 
@@ -92,18 +94,19 @@ Without `RESEND_API_KEY` the endpoint returns a 503 with the email address and p
 - **Services:** `src/data/services.ts`; Website Development extras (sub-services, stack, pricing tiers, FAQ) in `src/data/webdev.ts`.
 - **Work:** `src/data/work.ts`. Entries are *engagement blueprints* (worked plans). For a real, approved case study set `kind: 'case-study'` and fill `client`, `outcomes` and `quote`; the template renders them.
 - **Testimonials and ratings:** `src/data/reviews.ts`. Empty on purpose. Add only real, permission-granted reviews; the homepage carousel switches to them and `AggregateRating` schema is emitted automatically.
-- **Blog:** add a Markdown file to `src/content/blog/`. Frontmatter is validated (see `src/content.config.ts`); `metaTitle` must be 50–60 characters and `description` 150–160 (enforced by `npm test`). Run `npm run art` to create its cover and OG card.
+- **Blog:** add a Markdown file to `src/content/blog/`. Frontmatter is validated (see `src/content.config.ts`); `metaTitle` must be 50–60 characters and `description` 150–160 (enforced by `npm test`). Its cover photo is picked from `art`/`artVariant` (see `src/data/photos.ts`); run `npm run og` to create its social card.
 - **Page titles and descriptions:** `src/data/pages.ts` (tests enforce lengths and uniqueness).
 
 ## Design system
 
-`src/styles/tokens.css` defines:
+The full system is documented in `DESIGN.md`. In short, `src/styles/tokens.css` defines:
 
-- **Colour:** full 50–950 scales for *sand* (neutral), *moss* (accent), *char* (ink) and *clay* (errors), mapped to semantic roles with `light-dark()` so light and dark themes come from one set of tokens. All text pairs meet WCAG AA in both themes.
-- **Type:** fluid `clamp()` scale from 320 px to 1920 px, display tracking and leading.
-- **Space, elevation, radius, motion** (easing curves, durations, stagger) and z-index layers.
+- **Colour:** *lime* (brand, 50–950) and *carbon* (neutral, 0–950) scales mapped to semantic roles: `--ground`, `--plate`, `--ink`, `--ink-2`, `--rule`, `--accent`, `--field`. Dark is the brand default; `data-theme="light"` is the "printed manual" variant. The `.lime` class turns any module into a lime field and re-maps ink, rules, focus and buttons for it.
+- **Type:** one family at two widths: expanded (125%) bold capitals for display, normal width for text, fluid `clamp()` sizes.
+- **Grid:** `.grid` is 4 / 8 / 12 columns; `.c-N` spans and `.s-N` start columns; `.ruled` draws hairlines between modules.
+- **Motion:** Emil Kowalski's curves (`--ease-out`, `--ease-in-out`, `--ease-drawer`), 160 ms press feedback, UI motion under 300 ms; reduced motion keeps everything visible and static.
 
-The theme toggle follows the platform pattern (system by default, a stored override only when it differs from the system) and switches with a circular View Transition from the toggle.
+`src/styles/base.css` holds the global components (buttons, links, chips, forms, photo modules, prose, reveal states). The theme switch stores the light choice only; the brand dark is the default.
 
 ## SEO, local SEO and accessibility
 
@@ -142,4 +145,4 @@ These are written in, but need a human to confirm:
 
 ## License
 
-Code © Akrostech Consulting. Fonts: Space Grotesk and Inter, SIL Open Font License (see `public/fonts/`). Third-party Claude Code skills in `.claude/skills/` keep their own licenses.
+Code © Akrostech Consulting. Font: Archivo, SIL Open Font License (see `public/fonts/`). Photographs: Unsplash License, credited in `src/assets/photos/credits.json`; they show people at work in general, not Akrostech staff or clients. Third-party Claude Code skills in `.claude/skills/` keep their own licenses.
