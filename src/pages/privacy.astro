@@ -12,10 +12,15 @@ const crumbs = [
 
 <LegalLayout
   {...pages.privacy}
-  heading="Privacy policy"
+  heading="Privacy policy."
   lead="What we collect when you visit or send an enquiry, why we collect it, who handles it on the way and how long it is kept."
-  updated="2026-10-13"
+  quiet="How we handle your data."
+  updated="2026-10-14"
   crumbs={crumbs}
+  scene="shield"
+  toolTitle="Where an enquiry goes."
+  toolIntro="Follow an enquiry from your browser to our inbox. Select any step to see what it handles, why, and how long it is kept, quoted from the policy below."
+  toolTone="ink"
 >
   <DataFlow slot="instrument" />
   <p>
@@ -42,7 +47,7 @@ const crumbs = [
   </p>
   <h3>Embedded content</h3>
   <p>
-    Our contact and location pages embed Google Maps, which may set cookies and collect data under Google’s privacy policy when the map loads.
+    Our contact page embeds Google Maps, which may set cookies and collect data under Google’s privacy policy when the map loads.
   </p>
 
   <h2>How we use it</h2>

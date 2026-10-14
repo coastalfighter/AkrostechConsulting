@@ -4,7 +4,7 @@
  * minutes left. On narrow screens the outline collapses into a sticky bar with a toggle.
  */
 
-const pad = (n: number): string => String(n).padStart(2, '0');
+const pad = (n: number): string => String(n);
 
 export default function initOutline(root: HTMLElement): void {
   const body = document.querySelector<HTMLElement>('[data-article-body]');
@@ -72,7 +72,7 @@ export default function initOutline(root: HTMLElement): void {
         if (i === index) s.link?.setAttribute('aria-current', 'location');
         else s.link?.removeAttribute('aria-current');
       });
-      if (pos) pos.textContent = pad(Math.max(0, index + 1));
+      if (pos) pos.textContent = pad(Math.max(1, index + 1));
       if (currentName) currentName.textContent = index >= 0 ? (sections[index]?.name ?? defaultName) : defaultName;
     }
   }

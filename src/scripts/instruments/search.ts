@@ -1,21 +1,18 @@
 /**
- * Article search instrument: one filter (query + category) drives the index in the hero, the
- * register of lit cells, the count, and the article grid in the page body. Matched words are
- * marked. The state is mirrored in the URL (?q=, ?category=) so a filtered view can be shared,
- * and tag links in the A–Z index set the query without a reload.
+ * Guide finder: one filter (query + service) drives the guide grid in the page body, the
+ * register of lit cells and the count. Matched words in the visible titles are marked. The
+ * first visible guide takes the lead (large) slot. The state is mirrored in the URL
+ * (?q=, ?category=) so a filtered view can be shared.
  */
 
 interface Entry {
   id: string;
   cat: string;
   text: string;
-  row: HTMLElement;
+  item: HTMLElement;
   cell: HTMLElement | null;
-  items: HTMLElement[];
   marks: { el: HTMLElement; src: string }[];
 }
-
-const pad = (n: number): string => String(n).padStart(2, '0');
 
 const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -36,31 +33,25 @@ export default function initSearch(root: HTMLElement): void {
   const clear = root.querySelector<HTMLButtonElement>('[data-clear]');
   const shown = root.querySelector<HTMLElement>('[data-shown]');
   const status = root.querySelector<HTMLElement>('[data-status]');
-  const empty = root.querySelector<HTMLElement>('[data-empty]');
-  const emptyQ = root.querySelector<HTMLElement>('[data-empty-q]');
-  const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
   const cats = [...root.querySelectorAll<HTMLButtonElement>('button[data-cat]')];
   if (!input || !form) return;
 
   // Body counterparts, anywhere on the page.
   const bodyEmpty = document.querySelector<HTMLElement>('[data-filter-empty]');
+  const bodyEmptyQ = document.querySelector<HTMLElement>('[data-filter-empty-q]');
   const bodyStatus = document.querySelector<HTMLElement>('[data-filter-status]');
   const bodyResets = document.querySelectorAll<HTMLButtonElement>('[data-filter-reset]');
-  const tagLinks = document.querySelectorAll<HTMLAnchorElement>('[data-tag-link]');
   const total = Number(root.dataset.total ?? 0);
 
-  const entries: Entry[] = [...root.querySelectorAll<HTMLElement>('[data-row]')].map((row) => {
-    const id = row.dataset.row ?? '';
-    const items = [...document.querySelectorAll<HTMLElement>(`[data-filter-item="${CSS.escape(id)}"]`)];
-    const markEls = [...row.querySelectorAll<HTMLElement>('[data-hl]'), ...items.flatMap((it) => [...it.querySelectorAll<HTMLElement>('.post__title a')])];
+  const entries: Entry[] = [...document.querySelectorAll<HTMLElement>('[data-filter-item]')].map((item) => {
+    const id = item.dataset.filterItem ?? '';
     return {
       id,
-      cat: row.dataset.cat ?? '',
-      text: row.dataset.text ?? '',
-      row,
+      cat: item.dataset.cat ?? '',
+      text: (item.dataset.text ?? '').toLowerCase(),
+      item,
       cell: root.querySelector<HTMLElement>(`[data-cell="${CSS.escape(id)}"]`),
-      items,
-      marks: markEls.map((el) => ({ el, src: el.textContent ?? '' })),
+      marks: [...item.querySelectorAll<HTMLElement>('[data-hl]')].map((el) => ({ el, src: el.textContent ?? '' })),
     };
   });
 
@@ -74,24 +65,20 @@ export default function initSearch(root: HTMLElement): void {
     entries.forEach((e) => {
       const on = (cat === 'all' || e.cat === cat) && terms.every((t) => e.text.includes(t));
       if (on) count++;
-      e.row.hidden = !on;
-      e.cell?.classList.toggle('is-on', on);
-      e.items.forEach((it) => {
-        it.hidden = !on;
-        it.classList.toggle('is-lead', on && lead);
-      });
+      e.item.hidden = !on;
+      e.item.classList.toggle('is-lead', on && lead);
       if (on) lead = false;
+      e.cell?.classList.toggle('is-on', on);
       e.marks.forEach((m) => (m.el.innerHTML = highlight(m.src, terms)));
     });
 
-    if (shown) shown.textContent = pad(count);
+    if (shown) shown.textContent = String(count);
     const catName = cats.find((b) => b.dataset.cat === cat)?.querySelector('span')?.textContent ?? '';
-    const sentence = `${count} of ${total} article${total === 1 ? '' : 's'}${cat !== 'all' ? ` in ${catName}` : ''}${raw ? ` matching “${raw}”` : ''}`;
+    const sentence = `${count} of ${total} guide${total === 1 ? '' : 's'}${cat !== 'all' ? ` in ${catName}` : ''}${raw ? ` matching “${raw}”` : ''}`;
     if (status) status.textContent = sentence;
     if (bodyStatus) bodyStatus.textContent = `Showing ${sentence}.`;
-    if (empty) empty.hidden = count > 0;
     if (bodyEmpty) bodyEmpty.hidden = count > 0;
-    if (emptyQ) emptyQ.textContent = raw ? `“${raw}”` : 'this filter';
+    if (bodyEmptyQ) bodyEmptyQ.textContent = raw ? `“${raw}”` : 'this filter';
     if (clear) clear.hidden = raw.length === 0;
     if (terms.length || cat !== 'all') root.dataset.active = '';
     else delete root.dataset.active;
@@ -146,34 +133,7 @@ export default function initSearch(root: HTMLElement): void {
     apply();
     input.focus();
   });
-  reset?.addEventListener('click', resetAll);
   bodyResets.forEach((b) => b.addEventListener('click', resetAll));
-
-  tagLinks.forEach((a) =>
-    a.addEventListener('click', (e) => {
-      const tag = a.dataset.tagLink;
-      if (!tag) return;
-      e.preventDefault();
-      input.value = tag;
-      setCat('all');
-      apply();
-      const target = document.getElementById('articles');
-      target?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-    }),
-  );
-
-  // Hold the instrument at its full height while it filters, so the hero does not jump.
-  const hold = (): void => {
-    root.style.minHeight = '';
-    if (!root.dataset.active) root.style.minHeight = `${root.offsetHeight}px`;
-  };
-  hold();
-  let lastWidth = window.innerWidth;
-  window.addEventListener('resize', () => {
-    if (window.innerWidth === lastWidth) return;
-    lastWidth = window.innerWidth;
-    root.style.minHeight = '';
-  });
 
   const params = new URL(location.href).searchParams;
   const q = params.get('q');

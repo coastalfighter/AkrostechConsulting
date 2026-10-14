@@ -1,13 +1,15 @@
 ---
+/**
+ * Not found (Sample-3 "Off the trail"): the hero carries the generative field and the way
+ * back; the body holds the wrong-turn instrument (the broken address, the closest real page,
+ * and a type-to-find over every page on the site) and the site map on one sheet.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
+import FieldHero from '@/components/FieldHero.astro';
 import WrongTurn from '@/components/instruments/WrongTurn.astro';
 import Icon from '@/components/Icon.astro';
 import { pages } from '@/data/pages';
 import { services, serviceHref } from '@/data/services';
-import { webSubServices } from '@/data/webdev';
-import { work } from '@/data/work';
-import { locations } from '@/data/locations';
 import { getPosts, postHref } from '@/lib/blog';
 import type { SearchEntry } from '@/lib/fuzzy';
 
@@ -15,50 +17,36 @@ const posts = await getPosts();
 
 const links = [
   { href: '/', label: 'Home', body: 'Start again from the top.' },
-  { href: '/services', label: 'Services', body: 'Five practices on your U.S. hours.' },
-  { href: '/work', label: 'Work', body: 'How we staff and run engagements.' },
-  { href: '/blog', label: 'Insights', body: 'Guides on outsourcing and the web.' },
-  { href: '/contact', label: 'Contact', body: 'Talk to a client partner.' },
+  { href: '/services', label: 'Services', body: 'Five services on your U.S. hours.' },
+  { href: '/blog', label: 'Blog', body: 'Guides on offshore teams, hiring and the web.' },
+  { href: '/about', label: 'About', body: 'Who we are and how we work.' },
+  { href: '/contact', label: 'Contact', body: 'Book a call or ask for a proposal.' },
 ];
 
 /** Every page on the site, grouped as the site map shows them. Built at build time. */
 const groups: { name: string; entries: SearchEntry[] }[] = [
   {
-    name: 'Practices',
+    name: 'Services',
     entries: [
-      { title: 'All services', path: '/services', group: 'Practices', keywords: 'outsourcing offshore staffing practices' },
+      { title: 'All services', path: '/services', group: 'Services', keywords: 'outsourcing offshore staffing compare' },
       ...services.map((s) => ({
         title: s.name,
         path: serviceHref(s.slug),
-        group: 'Practices',
+        group: 'Services',
         keywords: [
           s.shortName,
-          ...s.capabilities.map((c) => c.title),
-          ...s.tools,
-          ...(s.slug === 'website-development' ? [...webSubServices.map((w) => w.title), ...webSubServices.flatMap((w) => w.stack)] : []),
+          s.summary,
+          ...s.offerings.map((o) => o.title),
+          ...(s.techStack ?? []).flatMap((t) => t.items),
         ].join(' '),
       })),
     ],
   },
   {
-    name: 'Blueprints',
+    name: 'Guides',
     entries: [
-      { title: 'All engagement blueprints', path: '/work', group: 'Blueprints', keywords: 'work portfolio case studies examples' },
-      ...work.map((w) => ({ title: w.title, path: `/work/${w.slug}`, group: 'Blueprints', keywords: `${w.industry} ${w.format} ${w.tools.join(' ')}` })),
-    ],
-  },
-  {
-    name: 'Field notes',
-    entries: [
-      { title: 'All articles', path: '/blog', group: 'Field notes', keywords: 'blog insights articles guides' },
-      ...posts.map((p) => ({ title: p.data.title, path: postHref(p), group: 'Field notes', keywords: `${p.data.category} ${p.data.tags.join(' ')}` })),
-    ],
-  },
-  {
-    name: 'Locations',
-    entries: [
-      { title: 'Service areas', path: '/locations', group: 'Locations', keywords: 'locations cities offices' },
-      ...locations.map((l) => ({ title: `${l.city}, ${l.region}`, path: `/locations/${l.slug}`, group: 'Locations', keywords: `${l.regionName} ${l.isHeadquarters ? 'headquarters office' : ''}` })),
+      { title: 'All guides', path: '/blog', group: 'Guides', keywords: 'blog insights articles guides' },
+      ...posts.map((p) => ({ title: p.data.title, path: postHref(p), group: 'Guides', keywords: `${p.data.category} ${p.data.tags.join(' ')}` })),
     ],
   },
   {
@@ -66,8 +54,8 @@ const groups: { name: string; entries: SearchEntry[] }[] = [
     entries: [
       { title: 'Home', path: '/', group: 'Company', keywords: 'homepage start' },
       { title: 'About Akrostech', path: '/about', group: 'Company', keywords: 'company mission team values people' },
-      { title: 'Contact', path: '/contact', group: 'Company', keywords: 'book call email phone enquiry address calendly' },
-      { title: 'Privacy policy', path: '/privacy', group: 'Company', keywords: 'data cookies gdpr ccpa' },
+      { title: 'Contact', path: '/contact', group: 'Company', keywords: 'book call email phone enquiry address calendly proposal' },
+      { title: 'Privacy policy', path: '/privacy', group: 'Company', keywords: 'data cookies ccpa personal information' },
       { title: 'Terms and conditions', path: '/terms', group: 'Company', keywords: 'legal terms of use' },
     ],
   },
@@ -77,38 +65,45 @@ const starters: SearchEntry[] = links.map((l) => ({ title: l.label, path: l.href
 ---
 
 <BaseLayout {...pages.notFound} noindex preloader={false}>
-  <Hero labelledby="nf-title" split="5-7">
-    <h1 class="h1 hero__title" id="nf-title">Nobody’s on shift for <span class="accent">this page.</span></h1>
-    <p class="hero__lead">
-      Error 404: the page you asked for has moved or never existed. Everything else is open for business. Find it by name, or pick up from the site map.
-    </p>
+  <FieldHero scene="lost" labelledby="nf-title" hint="The field has lost its pattern. Move through it to pull it back together.">
+    <h1 class="fhero__title" id="nf-title">Off the trail. <span class="quiet">Let’s get you back.</span></h1>
+    <p class="fhero__lead">Error 404: the page you are looking for has moved or no longer exists. Everything else is open for business: find it by name below, or start again from a page we know is there.</p>
     <div class="actions">
-      <a class="btn btn--primary" href="/">Back to the homepage <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
-      <a class="btn btn--ghost" href="/contact">Talk to a client partner <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--primary" href="/">Back to home <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--ghost" href="/services">Explore services <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
     </div>
-    <WrongTurn slot="instrument" entries={entries} starters={starters} />
-  </Hero>
+  </FieldHero>
+
+  <section class="section" aria-labelledby="find-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="find-title" data-split>Find the page you meant.</h2>
+        <p data-reveal>We read the address you followed, show where it breaks and offer the closest real page. Or type a word to search every page on the site.</p>
+      </div>
+      <div class="nf-tool panel">
+        <WrongTurn entries={entries} starters={starters} />
+      </div>
+    </div>
+  </section>
 
   <section class="section section--flush-top" aria-labelledby="map-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="map-title">Every page, on one sheet.</h2>
-        <p>
-          {entries.length} pages across five practices, {work.length} blueprints, {posts.length} articles and three service areas. Looking for a service?
+        <h2 class="h2" id="map-title" data-split>Every page, on one sheet.</h2>
+        <p data-reveal>
+          {entries.length} pages: five services, {posts.length} guides and the company pages. Looking for a service?
           {
             services.map((s, i) => (
-              <>
-                <a class="link" href={serviceHref(s.slug)}>{s.shortName}</a>{i < services.length - 1 ? ', ' : '.'}
-              </>
+              <><a class="link" href={serviceHref(s.slug)}>{s.name}</a>{i < services.length - 2 ? ', ' : i === services.length - 2 ? ' or ' : '.'}</>
             ))
           }
         </p>
       </div>
-      <nav class="sitemap ruled" aria-labelledby="map-title">
+      <nav class="sitemap" aria-labelledby="map-title">
         {
           groups.map((g) => (
-            <div class="module sitemap__group">
-              <h3 class="label sitemap__name">
+            <div class:list={['sitemap__group', `sitemap__group--${g.name.toLowerCase()}`]}>
+              <h3 class="sitemap__name">
                 {g.name} <span class="sitemap__n">{g.entries.length}</span>
               </h3>
               <ul role="list">
@@ -129,16 +124,20 @@ const starters: SearchEntry[] = links.map((l) => ({ title: l.label, path: l.href
 </BaseLayout>
 
 <style>
-  .sitemap { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .sitemap { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64rem) { .sitemap { grid-template-columns: 1fr 1fr 1.2fr 0.8fr 0.8fr; } }
-  @media (min-width: 40rem) and (max-width: 63.99rem) { .sitemap__group:last-child { grid-column: 1 / -1; } }
+  .nf-tool { padding: clamp(1.25rem, 0.8rem + 2.4vw, 3rem); border-radius: calc(var(--radius) * 1.6); }
+
+  .sitemap { display: grid; gap: var(--s-7) var(--gutter); }
+  @media (min-width: 48rem) { .sitemap { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) { .sitemap { grid-template-columns: 1fr 2fr 1fr; } }
+  /* The guides list is the long one: two columns of links on wide screens. */
+  @media (min-width: 64rem) { .sitemap__group--guides ul { columns: 2; column-gap: var(--gutter); } .sitemap__group--guides li { break-inside: avoid; } }
+  @media (min-width: 48rem) and (max-width: 63.99rem) { .sitemap__group--guides { grid-column: 1 / -1; order: 3; } }
   .sitemap__group { display: grid; gap: var(--s-4); align-content: start; }
-  .sitemap__name { display: flex; justify-content: space-between; color: var(--accent-text); }
-  .sitemap__n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .sitemap__name { display: flex; align-items: center; justify-content: space-between; font-size: 1.25rem; font-weight: 650; letter-spacing: -0.015em; }
+  .sitemap__n { display: inline-grid; place-items: center; min-width: 2rem; height: 1.75rem; padding-inline: 0.5rem; border-radius: var(--radius-pill); background: var(--plate-2); font-family: var(--font); font-size: 0.8125rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
   .sitemap ul { border-top: 1px solid var(--rule-strong); }
   .sitemap li { border-bottom: 1px solid var(--rule); }
-  .sitemap__link { display: flex; align-items: center; min-height: 44px; padding-block: 0.45rem; font-size: var(--t-small); line-height: 1.3; text-decoration: none; color: var(--ink-2); transition: color var(--t-ui) ease; }
-  .sitemap__link.is-index { color: var(--ink); font-weight: 650; font-stretch: 112%; }
-  @media (hover: hover) and (pointer: fine) { .sitemap__link:hover { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; } }
+  .sitemap__link { display: flex; align-items: center; min-height: 44px; padding-block: 0.5rem; font-size: var(--t-small); line-height: 1.35; text-decoration: none; color: var(--ink-2); transition: color var(--t-ui) ease; }
+  .sitemap__link.is-index { color: var(--ink); font-weight: 650; }
+  @media (hover: hover) and (pointer: fine) { .sitemap__link:hover { color: var(--ink); text-decoration: underline; text-decoration-color: var(--second-strong); text-decoration-thickness: 2px; text-underline-offset: 0.2em; } }
 </style>
