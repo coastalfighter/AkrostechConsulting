@@ -1,6 +1,6 @@
 ---
 /**
- * Legal hero instrument: contract abstraction. A sample agreement excerpt sits beside an
+ * Legal instrument (in the page body): contract abstraction. A sample agreement excerpt sits beside an
  * abstraction sheet. Choosing a field highlights the clause it comes from and fills that row;
  * "Abstract all" walks through every field. When renewal and notice are both abstracted, the
  * sheet derives the renewal-calendar entry. Generic sample text, no real parties.
@@ -88,7 +88,7 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
 <div class="ca" data-instrument="clauses" data-done={[...done].join(',')} data-selected={selected}>
   <div class="ca__top">
     <p class="ca__title">
-      <span class="label">Sample agreement</span>
+      <span class="ca__name">Sample agreement</span>
       <span class="small muted">Master services agreement, excerpt</span>
     </p>
     <div class="ca__actions">
@@ -99,13 +99,13 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
 
   <div class="ca__grid">
     <article class="ca__doc has-selection" aria-label="Sample agreement excerpt" data-doc>
-      <h2 class="ca__doc-title">Master Services Agreement</h2>
+      <h3 class="ca__doc-title">Master Services Agreement</h3>
       {
         clauses.map((c) => (
           <section class:list={['ca__clause', { 'is-selected': c.id === selected, 'is-done': done.has(c.id) }]} id={`ca-${c.id}`} data-clause={c.id}>
-            <h3 class="ca__clause-h">
+            <h4 class="ca__clause-h">
               <span class="ca__sec tabular">{c.section}</span> {c.heading}
-            </h3>
+            </h4>
             <p class="ca__clause-p">
               {c.pre}<mark class="ca__span">{c.span}</mark>{c.post}
             </p>
@@ -116,7 +116,7 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
 
     <div class="ca__sheet">
       <div class="ca__sheet-head">
-        <h2 class="label">Abstraction sheet</h2>
+        <h3 class="ca__sheet-title">Abstraction sheet</h3>
         <p class="small muted" aria-live="polite">
           <b data-out="done">{done.size}</b> of {clauses.length} fields
         </p>
@@ -147,7 +147,7 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
         }
       </ol>
       <div class="ca__derived" data-derived hidden>
-        <p class="label">Added to the renewal calendar</p>
+        <p class="ca__derived-key">Added to the renewal calendar</p>
         <p class="ca__derived-text">{derived}</p>
       </div>
       <p class="ca__hint small muted">Choose a field to find its clause. Arrow keys move between fields.</p>
@@ -160,47 +160,62 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
   .ca { display: grid; gap: var(--s-4); }
   .ca__top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-3) var(--s-5); }
   .ca__title { display: grid; gap: 2px; }
+  .ca__name { font-family: var(--font-display); font-size: 1.25rem; font-weight: 650; letter-spacing: -0.015em; }
   .ca__actions { display: flex; align-items: center; gap: var(--s-4); }
   .ca__reset { min-height: 44px; font-weight: 650; color: var(--ink); text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: var(--rule-strong); }
   @media (hover: hover) and (pointer: fine) { .ca__reset:hover { text-decoration-color: currentColor; } }
 
-  .ca__grid { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .ca__grid { display: grid; gap: var(--s-3); }
   @media (min-width: 40rem) { .ca__grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
 
-  /* ---- The document ---- */
-  .ca__doc { background: var(--plate); padding: var(--s-4) var(--s-5) var(--s-5); display: grid; gap: var(--s-1); align-content: start; }
-  .ca__doc-title { font-size: 0.8125rem; font-weight: 750; font-stretch: 125%; letter-spacing: 0.06em; text-transform: uppercase; padding-bottom: var(--s-3); margin-bottom: var(--s-2); border-bottom: 1px solid var(--rule-strong); }
-  .ca__clause { padding: var(--s-2) var(--s-3); margin-inline: calc(var(--s-3) * -1); transition: opacity var(--t-ui) ease, background-color var(--t-ui) ease; }
-  .ca__clause-h { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-stretch: 112%; color: var(--ink-2); display: flex; gap: var(--s-2); }
+  /* ---- The document: a paper sheet, in both themes ---- */
+  .ca__doc {
+    --ink: var(--carbon-950);
+    --ink-2: var(--carbon-600);
+    --ink-3: var(--carbon-500);
+    --rule: rgb(22 17 16 / 0.13);
+    --rule-strong: rgb(22 17 16 / 0.3);
+    --focus: var(--violet-600);
+    background: var(--carbon-50);
+    color: var(--carbon-950);
+    border-radius: var(--radius);
+    padding: var(--s-5) var(--s-6) var(--s-6);
+    display: grid;
+    gap: var(--s-1);
+    align-content: start;
+  }
+  .ca__doc-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; padding-bottom: var(--s-3); margin-bottom: var(--s-2); border-bottom: 1px solid var(--rule-strong); }
+  .ca__clause { padding: var(--s-2) var(--s-3); margin-inline: calc(var(--s-3) * -1); border-radius: var(--radius-sm); transition: opacity var(--t-ui) ease, background-color var(--t-ui) ease; }
+  .ca__clause-h { font-family: var(--font); font-size: 0.8125rem; font-weight: 700; color: var(--ink-2); display: flex; gap: var(--s-2); }
   .ca__sec { color: var(--ink-3); min-width: 2.25rem; }
-  .ca__clause-p { font-size: 0.875rem; line-height: 1.5; color: var(--ink-2); }
+  .ca__clause-p { font-size: 0.9375rem; line-height: 1.55; color: var(--ink-2); }
   .ca__span { background: none; color: inherit; transition: background-color var(--t-ui) ease, color var(--t-ui) ease; }
-  .ca__clause.is-done .ca__span { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-text); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+  .ca__clause.is-done .ca__span { color: var(--ink); text-decoration: underline; text-decoration-color: var(--violet-600); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
   /* Isolate the selected clause, dim the rest */
   .ca__doc.has-selection .ca__clause:not(.is-selected) { color: var(--ink-3); }
-  .ca__clause.is-selected { background: var(--ground); outline: 1px solid var(--rule-strong); }
+  .ca__clause.is-selected { background: var(--carbon-0); box-shadow: inset 0 0 0 1px var(--rule-strong); }
   .ca__clause.is-selected .ca__clause-p { color: var(--ink); }
-  .ca__clause.is-selected .ca__span { background: var(--field); color: var(--field-ink); text-decoration: none; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0.05em 0.15em; }
+  .ca__clause.is-selected .ca__span { background: var(--lime-400); color: var(--carbon-950); text-decoration: none; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0.05em 0.15em; border-radius: 0.2em; }
 
   /* ---- The sheet ---- */
-  .ca__sheet { background: var(--ground); display: grid; align-content: start; }
-  .ca__sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--rule-strong); }
-  .ca__sheet-head h2 { font-weight: 600; }
+  .ca__sheet { display: grid; align-content: start; border-radius: var(--radius); border: 1px solid var(--rule); background: var(--plate); overflow: hidden; }
+  .ca__sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); padding: var(--s-3) var(--s-5); border-bottom: 1px solid var(--rule); background: var(--plate-2); }
+  .ca__sheet-title { font-family: var(--font); font-size: 0.9375rem; font-weight: 650; }
   .ca__sheet-head b { color: var(--ink); }
   .ca__fields li + li { border-top: 1px solid var(--rule); }
   .ca__field {
     width: 100%;
     display: grid;
     gap: 2px;
-    padding: var(--s-3) var(--s-4);
+    padding: var(--s-3) var(--s-5);
     min-height: 3.75rem;
     text-align: left;
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease;
   }
   .ca__field:focus-visible { outline-offset: -3px; }
   .ca__field-key { display: flex; justify-content: space-between; gap: var(--s-3); }
-  .ca__field-name { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-stretch: 112%; color: var(--ink-2); }
-  .ca__field-ref { font-size: 0.75rem; color: var(--ink-3); }
+  .ca__field-name { font-size: 0.8125rem; font-weight: 650; color: var(--ink-2); }
+  .ca__field-ref { font-size: 0.8125rem; color: var(--ink-3); }
   .ca__field-val { font-size: 0.9375rem; font-weight: 600; line-height: 1.3; color: var(--ink-3); }
   .ca__field.is-done .ca__field-val { color: var(--ink); }
   .ca__field.is-filling .ca__field-val { animation: ca-fill 260ms var(--ease-out); }
@@ -211,10 +226,10 @@ const derived = 'Non-renewal notice due 60 days before each anniversary';
   .ca__field[aria-pressed='true']:focus-visible { outline-color: var(--carbon-950); }
   @media (hover: hover) and (pointer: fine) { .ca__field:hover:not([aria-pressed='true']) { background: var(--plate-2); } }
 
-  .ca__derived { margin: var(--s-3) var(--s-4) 0; padding: var(--s-3) var(--s-4); border: 1px solid var(--accent-text); display: grid; gap: var(--s-1); }
-  .ca__derived .label { color: var(--accent-text); }
+  .ca__derived { margin: var(--s-3) var(--s-4) 0; padding: var(--s-3) var(--s-4); border-radius: var(--radius-sm); background: var(--violet-600); color: var(--carbon-50); display: grid; gap: var(--s-1); }
+  .ca__derived-key { color: var(--violet-100); font-size: 0.8125rem; font-weight: 650; }
   .ca__derived-text { font-weight: 650; font-size: 0.9375rem; line-height: 1.3; }
-  .ca__hint { padding: var(--s-3) var(--s-4) var(--s-4); }
+  .ca__hint { padding: var(--s-3) var(--s-5) var(--s-4); }
   .ca__note { max-width: 60ch; }
 
   :global(html:not(.js)) .ca__actions, :global(html:not(.js)) .ca__hint { display: none; }

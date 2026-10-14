@@ -1,0 +1,88 @@
+---
+/**
+ * A process drawn as a climb (after Sample-3's TrailSteps): each step is a camp a little higher
+ * than the last, linked by a trail; the final camp carries a flag. The ordered list below holds
+ * the words; the drawing is decorative.
+ */
+interface Step {
+  title: string;
+  duration: string;
+  detail: string;
+}
+interface Props {
+  steps: readonly Step[];
+  /** Index of the step to mark as the one most clients care about (filled chartreuse). */
+  highlight?: number;
+}
+const { steps, highlight = -1 } = Astro.props;
+const n = steps.length;
+const camp = (i: number) => ({ x: 40 + (920 * i) / Math.max(n - 1, 1), y: 170 - (130 * i) / Math.max(n - 1, 1) });
+let d = '';
+for (let i = 0; i < n; i++) {
+  const p = camp(i);
+  if (i === 0) d += `M${p.x} ${p.y}`;
+  else {
+    const prev = camp(i - 1);
+    const mx = (prev.x + p.x) / 2;
+    d += ` C${mx} ${prev.y} ${mx} ${p.y} ${p.x} ${p.y}`;
+  }
+}
+---
+
+<div class="trail" style={`--n:${n}`}>
+  <svg class="trail__svg" viewBox="0 0 1000 200" aria-hidden="true" data-reveal>
+    <path class="trail__base" d={d} />
+    <path class="trail__path" d={d} />
+    {
+      steps.map((_, i) => {
+        const p = camp(i);
+        const last = i === n - 1;
+        return (
+          <g transform={`translate(${p.x} ${p.y})`}>
+            {last ? <path class="trail__flag" d="M0 0 L0 -40 L24 -32 L0 -24" /> : <path class="trail__peak" d="M-11 0 L0 -18 L11 0 Z" />}
+            <circle class:list={['trail__camp', { 'is-hi': i === highlight }]} r="6" />
+          </g>
+        );
+      })
+    }
+  </svg>
+  <ol class="trail__list" role="list" data-reveal-group>
+    {
+      steps.map((s, i) => (
+        <li class:list={['trail__step', { 'is-hi': i === highlight }]} data-reveal>
+          <span class="trail__dur tabular">{s.duration}</span>
+          <h3 class="trail__title">{s.title}</h3>
+          <p class="trail__detail">{s.detail}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .trail { display: grid; gap: var(--s-6); }
+  .trail__svg { display: none; width: 100%; height: auto; overflow: visible; }
+  @media (min-width: 48rem) { .trail__svg { display: block; } }
+  .trail__base { fill: none; stroke: var(--rule-strong); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .trail__path { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 2 9; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .trail__peak { fill: var(--ink); }
+  .trail__flag { fill: var(--lime-400); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+  .trail__camp { fill: var(--ground); stroke: var(--ink); stroke-width: 2.5; }
+  .trail__camp.is-hi { fill: var(--lime-400); }
+
+  .trail__list { display: grid; gap: var(--s-5) var(--gutter); }
+  @media (min-width: 48rem) { .trail__list { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); } }
+  .trail__step { display: grid; align-content: start; gap: var(--s-2); padding-left: var(--s-5); border-left: 1px solid var(--rule-strong); }
+  @media (min-width: 48rem) { .trail__step { padding: var(--s-5) 0 0; border-left: 0; border-top: 1px solid var(--rule-strong); } }
+  .trail__dur {
+    justify-self: start;
+    padding: 0.15rem 0.6rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--rule-strong);
+    font-size: 0.875rem;
+    font-weight: 650;
+  }
+  .trail__step.is-hi .trail__dur { background: var(--mark); border-color: var(--mark); color: var(--mark-ink); }
+  .trail__title { font-size: var(--t-h3); line-height: var(--lh-snug); letter-spacing: -0.015em; font-weight: 650; margin-top: var(--s-2); }
+  .trail__detail { color: var(--ink-2); max-width: 30ch; }
+</style>
