@@ -48,7 +48,7 @@ export const serviceMedia: Record<ServiceSlug, ServiceMedia> = {
     title: ['Hire faster', 'without lowering the bar.'],
     teamNoun: 'recruiters',
     offeringsTitle: 'Industries we recruit for.',
-    og: '/og/service-recruitment-process-outsourcing.png',
+    og: '/og/service-recruitment.png',
     ctaPhoto: 'people-recruiters',
     benefitsPhoto: 'talking-hands',
     instrument: {
@@ -62,7 +62,7 @@ export const serviceMedia: Record<ServiceSlug, ServiceMedia> = {
     title: ['Books that are always current', 'and audit-ready.'],
     teamNoun: 'accountants',
     offeringsTitle: 'What our team can take on.',
-    og: '/og/service-accounting-assistance.png',
+    og: '/og/service-accounting.png',
     ctaPhoto: 'team-laptops',
     benefitsPhoto: 'desk-overhead',
     instrument: {
@@ -76,7 +76,7 @@ export const serviceMedia: Record<ServiceSlug, ServiceMedia> = {
     title: ['Free your attorneys', 'for the work only they can do.'],
     teamNoun: 'legal assistants',
     offeringsTitle: 'Practice areas we support.',
-    og: '/og/service-legal-process-outsourcing.png',
+    og: '/og/service-legal.png',
     ctaPhoto: 'meeting-room',
     benefitsPhoto: 'office-hallway',
     instrument: {
