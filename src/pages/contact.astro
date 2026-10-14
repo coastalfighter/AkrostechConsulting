@@ -1,6 +1,12 @@
 ---
+/**
+ * Contact, in the Sample-3 order: the ask and three channels, the enquiry form beside a sticky
+ * "what happens next" timeline, a time that suits both sides (the call week instrument, key
+ * `week`), the office and the U.S. hours we cover, questions. The form posts to /api/contact
+ * with the same fields, names, honeypot and timing field as before; only its styling changed.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
+import FieldHero from '@/components/FieldHero.astro';
 import CallWeek from '@/components/instruments/CallWeek.astro';
 import Photo from '@/components/Photo.astro';
 import Faq from '@/components/Faq.astro';
@@ -8,7 +14,7 @@ import Icon from '@/components/Icon.astro';
 import { site, fullAddress, mapsDirectionsUrl, mapsEmbedUrl, mapsPlaceUrl } from '@/config/site';
 import { pages } from '@/data/pages';
 import { contactFaqs } from '@/data/company';
-import { locations } from '@/data/locations';
+import { hubs, processSteps } from '@/data/home';
 import { LIMITS, SERVICE_OPTIONS, TEAM_SIZES } from '@/lib/contact';
 import { faqSchema, ids } from '@/lib/seo';
 
@@ -17,226 +23,302 @@ const crumbs = [
   { name: 'Contact', path: '/contact' },
 ];
 const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': ids.business } };
+
+/** Our contact questions, then the Sample-3 ones they do not already cover. */
+const faqs = [
+  ...contactFaqs,
+  { q: 'How soon can a team start?', a: 'Most roles are onboarded within about 48 hours of the discovery call, with access, SOPs and a first-week plan ready.' },
+  { q: 'Which time zones do you cover?', a: 'Teams work your chosen U.S. time zone: EST, CST, MST or PST.' },
+  {
+    q: 'Is there a minimum commitment?',
+    a: 'You can start with a single specialist and scale up or down as your needs change. We agree terms together after the discovery call.',
+  },
+];
+
+const channels = [
+  { icon: 'mail', label: 'Email us', value: site.email, note: 'Replies within one business day', href: `mailto:${site.email}` },
+  { icon: 'phone', label: 'Call us', value: site.phone, note: 'U.S. business hours', href: `tel:${site.phoneE164}` },
+  { icon: 'calendar', label: 'Book a call', value: '30-minute discovery call', note: 'Pick a time that suits you', href: site.calendly, external: true },
+] as const;
+
+const tips = ['The roles or tasks you want covered', 'Tools you use today (CRM, ATS, QuickBooks…)', 'Your time zone and ideal start date', 'What a great first month looks like'];
 ---
 
-<BaseLayout {...pages.contact} image="/og/contact.png" breadcrumbs={crumbs} webPage={contactPage} schema={[faqSchema(contactFaqs)]}>
-  <Hero labelledby="contact-title" split="5-7" crumbs={crumbs}>
-    <h1 class="h1 hero__title" id="contact-title">Let’s talk <span class="accent">about your hours.</span></h1>
-    <p class="hero__lead">
-      Tell us what you want to hand off. A client partner replies within one business day, or you can book a 30-minute discovery call right now.
+<BaseLayout {...pages.contact} image="/og/contact.png" breadcrumbs={crumbs} webPage={contactPage} schema={[faqSchema(faqs)]}>
+  <FieldHero scene="relay" labelledby="contact-title" crumbs={crumbs} wide>
+    <h1 class="fhero__title" id="contact-title">Tell us what’s slowing you down. <span class="quiet">We’ll staff the fix.</span></h1>
+    <p class="fhero__lead">
+      Share the work you want off your plate. Within one business day you’ll get a recommended team shape, a start date and clear next steps. No
+      obligation.
     </p>
     <div class="actions">
-      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
-        Book a call <Icon name="calendar" class="btn__arrow" />
-      </a>
-      <a class="btn btn--ghost" href={`tel:${site.phoneE164}`}>
-        <Icon name="phone" /> {site.phone}
-      </a>
+      <a class="btn btn--primary" href="#enquiry">Request a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--ghost" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="calendar" class="btn__arrow" /></a>
     </div>
-    <CallWeek slot="instrument" />
-  </Hero>
 
-  <!-- Enquiry form and the direct routes -->
-  <section class="section section--flush-top ct" id="enquiry" aria-labelledby="form-title">
-    <div class="wrap grid ct__grid">
-      <div class="ct__form-wrap c-7">
-        <div class="ct__head">
-          <h2 class="h2" id="form-title" data-split>Send an enquiry.</h2>
-          <p class="ct__intro" data-reveal>Fields marked with an asterisk are required. We never share your details.</p>
-        </div>
-
-        <div class="ct__notice ct__notice--ok lime" role="status" tabindex="-1" hidden data-form-success>
-          <Icon name="check" class="icon ct__notice-icon" />
-          <div>
-            <p class="ct__notice-title">Message received.</p>
-            <p data-form-success-text>Thanks. A client partner will reply within one business day.</p>
-          </div>
-        </div>
-        <div class="ct__notice ct__notice--err" role="alert" hidden data-form-error>
-          <p class="ct__notice-title">Not sent.</p>
-          <p data-form-error-text></p>
-        </div>
-
-        <form class="form" action="/api/contact" method="post" novalidate data-contact-form>
-          <div class="form__grid">
-            <div class="input">
-              <label class="input__label" for="ct-name">Your name *</label>
-              <input class="input__control" id="ct-name" type="text" name="name" autocomplete="name" required minlength="2" maxlength={LIMITS.name} aria-describedby="err-name" />
-              <span class="input__error" id="err-name" data-error="name">Please tell us your name.</span>
-            </div>
-            <div class="input">
-              <label class="input__label" for="ct-email">Work email *</label>
-              <input class="input__control" id="ct-email" type="email" name="email" autocomplete="email" required maxlength={LIMITS.email} inputmode="email" spellcheck="false" aria-describedby="err-email" />
-              <span class="input__error" id="err-email" data-error="email">Please enter a valid email, like name@company.com.</span>
-            </div>
-            <div class="input">
-              <label class="input__label" for="ct-company">Company</label>
-              <input class="input__control" id="ct-company" type="text" name="company" autocomplete="organization" maxlength={LIMITS.company} />
-            </div>
-            <div class="input">
-              <label class="input__label" for="ct-phone">Phone</label>
-              <input class="input__control" id="ct-phone" type="tel" name="phone" autocomplete="tel" maxlength={LIMITS.phone} pattern="[+()0-9 .\-]{7,30}" aria-describedby="err-phone" />
-              <span class="input__error" id="err-phone" data-error="phone">Please use digits, spaces and + ( ) - only.</span>
-            </div>
-            <div class="input">
-              <label class="input__label" for="ct-service">What do you need? *</label>
-              <select class="input__control" id="ct-service" name="service" required aria-describedby="err-service">
-                <option value="" disabled selected>Choose one</option>
-                {SERVICE_OPTIONS.map((o) => <option value={o}>{o}</option>)}
-              </select>
-              <span class="input__error" id="err-service" data-error="service">Please choose what you need help with.</span>
-            </div>
-            <div class="input">
-              <label class="input__label" for="ct-team">Team size</label>
-              <select class="input__control" id="ct-team" name="teamSize">
-                <option value="" selected>Not sure yet</option>
-                {TEAM_SIZES.map((o) => <option value={o}>{o}</option>)}
-              </select>
-            </div>
-            <div class="input form__full">
-              <label class="input__label" for="ct-message">What would you like to hand off? *</label>
-              <textarea
-                class="input__control"
-                id="ct-message"
-                name="message"
-                required
-                minlength={LIMITS.messageMin}
-                maxlength={LIMITS.message}
-                rows="6"
-                aria-describedby="hint-message err-message"></textarea>
-              <span class="input__hint" id="hint-message">The tasks, the tools you use and the hours you need covered.</span>
-              <span class="input__error" id="err-message" data-error="message">A sentence or two helps us prepare: at least {LIMITS.messageMin} characters.</span>
-            </div>
-          </div>
-
-          <div class="form__trap" aria-hidden="true">
-            <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
-          </div>
-          <input type="hidden" name="elapsedMs" value="0" data-elapsed />
-
-          <div class="input form__consent-wrap">
-            <label class="check form__consent">
-              <input type="checkbox" name="consent" required aria-describedby="err-consent" />
-              <span>I agree that Akrostech may contact me about this enquiry, as described in the <a class="link" href="/privacy">privacy policy</a>. *</span>
-            </label>
-            <span class="input__error form__consent-error" id="err-consent" data-error="consent">Please confirm we may contact you about this enquiry.</span>
-          </div>
-
-          <div class="form__actions">
-            <button class="btn btn--primary form__submit" type="submit" data-submit>
-              <span data-submit-label>Send enquiry</span>
-              <Icon name="arrow-up-right" class="btn__arrow" />
-            </button>
-            <p class="form__alt small">or email <a class="link" href={`mailto:${site.email}`}>{site.email}</a></p>
-          </div>
-        </form>
-      </div>
-
-      <aside class="ct__side c-4 s-9" aria-label="Contact details">
-        <div class="ct__routes ruled">
-          <div class="module ct__block">
-            <h2 class="label ct__label">Headquarters</h2>
-            <address class="ct__addr">
-              {site.legalName}<br />{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}
-            </address>
-            <a class="more" href={mapsDirectionsUrl} target="_blank" rel="noopener"><Icon name="route" /> Driving directions</a>
-          </div>
-          <div class="module ct__block">
-            <h2 class="label ct__label">Office hours</h2>
-            <p class="ct__status live is-off" data-open-status hidden><span data-open-text></span></p>
-            <table class="ct__hours">
-              <caption class="sr-only">Office hours, Eastern Time</caption>
-              <tbody>
-                <tr><th scope="row">Monday to Friday</th><td>9:00 am – 6:00 pm ET</td></tr>
-                <tr><th scope="row">Saturday and Sunday</th><td>Closed</td></tr>
-              </tbody>
-            </table>
-            <p class="ct__small small">Your specialists work your own U.S. shift, Eastern, Central, Mountain or Pacific.</p>
-          </div>
-          <div class="module ct__block">
-            <h2 class="label ct__label">Direct</h2>
-            <ul role="list" class="ct__direct">
-              <li><a class="ct__route" href={`tel:${site.phoneE164}`}><Icon name="phone" /> {site.phone}</a></li>
-              <li><a class="ct__route" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></li>
-              <li><a class="ct__route" href={site.socials.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" /> LinkedIn</a></li>
-            </ul>
-          </div>
-        </div>
-        <Photo name="desk-window" ratio="4 / 3" sizes="(min-width: 64rem) 28vw, 100vw" reveal="clip" />
-      </aside>
-    </div>
-  </section>
-
-  <!-- Map -->
-  <section class="section plate map" aria-labelledby="map-title">
-    <div class="wrap grid map__grid">
-      <div class="map__text c-5">
-        <h2 class="h2" id="map-title" data-split>Find us in Wilmington.</h2>
-        <p data-reveal>
-          We are on Delaware Avenue (DE-52) in Wilmington, a few minutes from I-95 exit 7 and the Wilmington Amtrak station, with street parking on
-          Delaware Avenue and the nearby side streets. Visits are by appointment.
-        </p>
-        <dl class="spec map__spec">
-          <div><dt>Address</dt><dd>{fullAddress}</dd></div>
-          <div><dt>By road</dt><dd>I-95, exit 7, then Delaware Avenue (DE-52)</dd></div>
-          <div><dt>By rail</dt><dd>Wilmington Amtrak station</dd></div>
-          <div><dt>Visits</dt><dd>By appointment, {site.hoursLabel}</dd></div>
-        </dl>
-        <div class="actions">
-          <a class="btn btn--ghost btn--small" href={mapsDirectionsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-up-right" class="btn__arrow" /></a>
-          <a class="btn btn--ghost btn--small" href={mapsPlaceUrl} target="_blank" rel="noopener">Open in Google Maps <Icon name="arrow-up-right" class="btn__arrow" /></a>
-        </div>
-      </div>
-      <div class="map__frame c-7" data-map>
-        <iframe
-          title={`Map showing ${site.name} at ${fullAddress}`}
-          src={mapsEmbedUrl}
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          allowfullscreen
-          width="800"
-          height="600"></iframe>
-      </div>
-    </div>
-  </section>
-
-  <!-- Locations -->
-  <section class="section locs" aria-labelledby="locs-title">
-    <div class="wrap">
-      <div class="section-head grid">
-        <h2 class="h2" id="locs-title" data-split>Where we work.</h2>
-        <p data-reveal>A headquarters in Delaware, client partners for the Northeast corridor, and delivery teams in India on your clock.</p>
-      </div>
-      <ul class="locs__grid ruled" role="list" data-reveal-group>
-        <li class="module module--flex lime locs__card" data-reveal>
-          <h3 class="locs__name">India</h3>
-          <p class="label locs__kind">Delivery</p>
-          <p class="locs__body">Specialists and team leads on fixed U.S. shifts.</p>
-        </li>
+    <div slot="after" class="reach">
+      <ul class="reach__channels" role="list" aria-label="Ways to reach us">
         {
-          locations.map((l) => (
-            <li class="module module--flex locs__card" data-reveal>
-              <h3 class="locs__name">
-                <a class="stretch locs__link" href={`/locations/${l.slug}`}>
-                  {l.city}, {l.region}
-                </a>
-              </h3>
-              <p class="label locs__kind">{l.isHeadquarters ? 'Headquarters' : 'Service area'}</p>
-              <p class="locs__body">{l.distance}</p>
-              <Icon name="arrow-up-right" class="icon locs__arrow" />
+          channels.map((c) => (
+            <li>
+              <a class="reach__card" href={c.href} {...('external' in c ? { target: '_blank', rel: 'noopener' } : {})}>
+                <span class="reach__icon" aria-hidden="true">
+                  <Icon name={c.icon} />
+                </span>
+                <span class="reach__text">
+                  <span class="small muted">{c.label}</span>
+                  <span class="reach__value">{c.value}</span>
+                  <span class="small muted">{c.note}</span>
+                </span>
+                <span class="reach__go" aria-hidden="true">
+                  <Icon name="arrow-up-right" />
+                </span>
+              </a>
             </li>
           ))
         }
       </ul>
+      <aside class="reach__status ink-plate" aria-label="Our availability">
+        <p class="reach__live live is-off" data-open-status><span data-open-text>Office hours: {site.hoursLabel}</span></p>
+        <dl class="reach__clocks" data-clocks hidden>
+          <div><dt class="small muted">Wilmington, DE</dt><dd data-clock={site.timezone}></dd></div>
+          <div><dt class="small muted">Delivery, India</dt><dd data-clock={site.deliveryTimezone}></dd></div>
+        </dl>
+        <p class="small muted reach__note"><Icon name="clock" /> A real person replies within one business day.</p>
+      </aside>
+    </div>
+  </FieldHero>
+
+  <!-- Enquiry form beside the sticky timeline -->
+  <section class="section section--flush-top ct" id="enquiry" aria-labelledby="form-title">
+    <div class="wrap grid ct__grid">
+      <aside class="ct__side c-4" aria-label="What happens next">
+        <div class="ct__next">
+          <h2 class="h3">What happens next</h2>
+          <ol class="ct__steps" role="list">
+            {
+              processSteps.map((step, i) => (
+                <li class:list={['ct__step', { 'ct__step--first': i === 0 }]}>
+                  <span class="ct__dot" aria-hidden="true" />
+                  <span class="ct__step-head">
+                    <strong>{step.title}</strong>
+                    <span class="small muted tabular">{step.duration}</span>
+                  </span>
+                  <span class="small muted">{step.detail}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+        <div class="ct__tips">
+          <h2 class="ct__tips-title">Helpful to include</h2>
+          <ul class="ticks small" role="list">{tips.map((t) => <li>{t}</li>)}</ul>
+        </div>
+        <div class="ct__am">
+          <span class="ct__am-mark" aria-hidden="true">AM</span>
+          <p class="small"><strong>Your account manager</strong><br /><span class="muted">Reads every enquiry and stays your single point of contact.</span></p>
+        </div>
+      </aside>
+
+      <div class="ct__panel c-8">
+        <div class="ct__bar small">
+          <span>Proposal request</span>
+          <span class="muted">About 2 minutes</span>
+        </div>
+        <div class="ct__body">
+          <div class="ct__head">
+            <h2 class="h2" id="form-title">Tell us what you need.</h2>
+            <p class="ct__intro">Fields marked with an asterisk are required. We never share your details.</p>
+            <div class="ready" data-ready>
+              <p class="ready__row small" id="ready-label"><span>Proposal readiness</span><span class="tabular"><span data-ready-count>0</span>/5</span></p>
+              <div class="ready__track" role="progressbar" aria-labelledby="ready-label" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" data-ready-bar>
+                <span class="ready__fill"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ct__notice ct__notice--ok lime" role="status" tabindex="-1" hidden data-form-success>
+            <Icon name="check" class="icon ct__notice-icon" />
+            <div>
+              <p class="ct__notice-title">Message received.</p>
+              <p data-form-success-text>Thanks. A client partner will reply within one business day.</p>
+            </div>
+          </div>
+          <div class="ct__notice ct__notice--err" role="alert" hidden data-form-error>
+            <p class="ct__notice-title">Not sent.</p>
+            <p data-form-error-text></p>
+          </div>
+
+          <form class="form" action="/api/contact" method="post" novalidate data-contact-form>
+            <div class="form__grid">
+              <div class="input">
+                <label class="input__label" for="ct-name">Your name *</label>
+                <input class="input__control" id="ct-name" type="text" name="name" autocomplete="name" required minlength="2" maxlength={LIMITS.name} aria-describedby="err-name" />
+                <span class="input__error" id="err-name" data-error="name">Please tell us your name.</span>
+              </div>
+              <div class="input">
+                <label class="input__label" for="ct-email">Work email *</label>
+                <input class="input__control" id="ct-email" type="email" name="email" autocomplete="email" required maxlength={LIMITS.email} inputmode="email" spellcheck="false" aria-describedby="err-email" />
+                <span class="input__error" id="err-email" data-error="email">Please enter a valid email, like name@company.com.</span>
+              </div>
+              <div class="input">
+                <label class="input__label" for="ct-company">Company</label>
+                <input class="input__control" id="ct-company" type="text" name="company" autocomplete="organization" maxlength={LIMITS.company} />
+              </div>
+              <div class="input">
+                <label class="input__label" for="ct-phone">Phone</label>
+                <input class="input__control" id="ct-phone" type="tel" name="phone" autocomplete="tel" maxlength={LIMITS.phone} pattern="[+()0-9 .\-]{7,30}" aria-describedby="err-phone" />
+                <span class="input__error" id="err-phone" data-error="phone">Please use digits, spaces and + ( ) - only.</span>
+              </div>
+              <div class="input">
+                <label class="input__label" for="ct-service">What do you need? *</label>
+                <select class="input__control" id="ct-service" name="service" required aria-describedby="err-service">
+                  <option value="" disabled selected>Choose one</option>
+                  {SERVICE_OPTIONS.map((o) => <option value={o}>{o}</option>)}
+                </select>
+                <span class="input__error" id="err-service" data-error="service">Please choose what you need help with.</span>
+              </div>
+              <div class="input">
+                <label class="input__label" for="ct-team">Team size</label>
+                <select class="input__control" id="ct-team" name="teamSize">
+                  <option value="" selected>Not sure yet</option>
+                  {TEAM_SIZES.map((o) => <option value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div class="input form__full">
+                <label class="input__label" for="ct-message">What would you like to hand off? *</label>
+                <textarea
+                  class="input__control"
+                  id="ct-message"
+                  name="message"
+                  required
+                  minlength={LIMITS.messageMin}
+                  maxlength={LIMITS.message}
+                  rows="6"
+                  aria-describedby="hint-message err-message"></textarea>
+                <span class="input__hint" id="hint-message">The tasks, the tools you use and the hours you need covered.</span>
+                <span class="input__error" id="err-message" data-error="message">A sentence or two helps us prepare: at least {LIMITS.messageMin} characters.</span>
+              </div>
+            </div>
+
+            <div class="form__trap" aria-hidden="true">
+              <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+            </div>
+            <input type="hidden" name="elapsedMs" value="0" data-elapsed />
+
+            <div class="input form__consent-wrap">
+              <label class="check form__consent">
+                <input type="checkbox" name="consent" required aria-describedby="err-consent" />
+                <span>I agree that Akrostech may contact me about this enquiry, as described in the <a class="link" href="/privacy">privacy policy</a>. *</span>
+              </label>
+              <span class="input__error form__consent-error" id="err-consent" data-error="consent">Please confirm we may contact you about this enquiry.</span>
+            </div>
+
+            <div class="form__actions">
+              <button class="btn btn--primary form__submit" type="submit" data-submit>
+                <span data-submit-label>Send enquiry</span>
+                <Icon name="arrow-up-right" class="btn__arrow" />
+              </button>
+              <p class="form__alt small">or email <a class="link" href={`mailto:${site.email}`}>{site.email}</a></p>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </section>
 
-  <Faq faqs={contactFaqs} name="contact" heading="Before you get in touch" />
+  <!-- Pick a time: the call week instrument -->
+  <section class="section section--flush-top" aria-labelledby="book-title">
+    <div class="wrap">
+      <div class="book panel">
+        <div class="book__copy">
+          <h2 class="h2" id="book-title" data-split>Prefer to talk? Pick a time that suits both sides.</h2>
+          <p class="book__lead">
+            A 30-minute call with your account manager. Choose your time zone, pick an hour inside our office hours, and see the same moment in
+            Wilmington and in India.
+          </p>
+          <ul class="ticks" role="list">
+            {['The roles or tasks you want covered', 'How your hours and tools line up with ours', 'A clear next step, with no obligation'].map((t) => <li>{t}</li>)}
+          </ul>
+          <Photo name="two-women-laptop" ratio="4 / 3" sizes="(min-width: 64rem) 30vw, 100vw" reveal="clip" class="book__photo" />
+        </div>
+        <div class="book__week"><CallWeek /></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Office and coverage -->
+  <section class="section" aria-labelledby="where-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="where-title" data-split>Headquartered in Delaware. Delivering from India. Working your hours.</h2>
+        <p data-reveal>Visits to Wilmington are by appointment. Your team works the U.S. hours you choose.</p>
+      </div>
+      <div class="where">
+        <div class="where__map" data-map>
+          <iframe
+            title={`Map showing ${site.name} at ${fullAddress}`}
+            src={mapsEmbedUrl}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+            width="800"
+            height="600"></iframe>
+        </div>
+        <div class="where__hq panel">
+          <h3 class="where__title"><Icon name="pin" /> U.S. headquarters</h3>
+          <address class="where__addr">
+            {site.legalName}<br />{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}
+          </address>
+          <dl class="spec where__spec">
+            <div><dt>By road</dt><dd>I-95, exit 7, then Delaware Avenue (DE-52)</dd></div>
+            <div><dt>By rail</dt><dd>Wilmington Amtrak station</dd></div>
+            <div><dt>Visits</dt><dd>By appointment, {site.hoursLabel}</dd></div>
+          </dl>
+          <div class="actions">
+            <a class="btn btn--primary btn--small" href={mapsDirectionsUrl} target="_blank" rel="noopener">Get directions <Icon name="route" class="btn__arrow" /></a>
+            <a class="btn btn--ghost btn--small" href={mapsPlaceUrl} target="_blank" rel="noopener">Open in Google Maps <Icon name="arrow-up-right" class="btn__arrow" /></a>
+          </div>
+        </div>
+        <div class="where__hours panel">
+          <h3 class="where__title"><Icon name="clock" /> Hours we cover</h3>
+          <table class="where__table">
+            <caption class="sr-only">U.S. time zones our teams cover</caption>
+            <tbody>
+              {
+                hubs.map((h) => (
+                  <tr>
+                    <th scope="row">{h.zone}</th>
+                    <td class="muted">{h.city}</td>
+                    <td>Your 9–6</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+          <p class="small muted">Office in Wilmington: {site.hoursLabel}. Closed weekends.</p>
+        </div>
+        <div class="where__photo">
+          <Photo name="office-hallway" fill sizes="(min-width: 64rem) 25vw, 100vw" />
+        </div>
+        <div class="where__direct lime">
+          <h3 class="where__title">Direct lines</h3>
+          <ul role="list" class="where__routes">
+            <li><a class="where__route" href={`tel:${site.phoneE164}`}><Icon name="phone" /> {site.phone}</a></li>
+            <li><a class="where__route" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></li>
+            <li><a class="where__route" href={site.socials.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" /> LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Faq faqs={faqs} name="contact" heading="Before you reach out." intro="How fast we reply, what the call covers and what to prepare." />
 </BaseLayout>
 
 <script>
   import { validateContact, type ContactField } from '@/lib/contact';
-  import { wallClock } from '@/lib/time';
+  import { formatClock, wallClock } from '@/lib/time';
 
   // Live open/closed status from the office hours (Eastern Time).
   const status = document.querySelector<HTMLElement>('[data-open-status]');
@@ -244,10 +326,18 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
     const w = wallClock('America/New_York', new Date());
     const minutes = w.hour * 60 + w.minute;
     const open = w.weekday >= 1 && w.weekday <= 5 && minutes >= 9 * 60 && minutes < 18 * 60;
-    status.hidden = false;
     status.classList.toggle('is-off', !open);
     const text = status.querySelector('[data-open-text]');
     if (text) text.textContent = open ? 'Open now in Wilmington' : 'Closed now: we reply next business morning';
+  }
+
+  // Two clocks: Wilmington and the delivery team in India, refreshed each minute.
+  const clocks = document.querySelector<HTMLElement>('[data-clocks]');
+  if (clocks) {
+    const paint = () => clocks.querySelectorAll<HTMLElement>('[data-clock]').forEach((el) => (el.textContent = formatClock(new Date(), el.dataset.clock ?? 'UTC')));
+    paint();
+    clocks.hidden = false;
+    setInterval(paint, 30_000);
   }
 
   // Map frame: a plate until the iframe has loaded.
@@ -273,13 +363,48 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
       errorText.textContent = 'We could not send that. Please check the fields and try again, or email us directly.';
       errorBox.hidden = false;
     }
-    // Preselect the service when arriving from a service page (?service=Website%20development).
-    const wanted = params.get('service');
+    // Preselect the service when arriving from a service page (?service=website-development or ?service=Website%20development).
+    const slugs: Record<string, string> = {
+      'virtual-assistance': 'Virtual assistance',
+      recruitment: 'Recruitment process outsourcing',
+      accounting: 'Accounting assistance',
+      legal: 'Legal process outsourcing',
+      'website-development': 'Website development',
+    };
+    const wantedRaw = params.get('service');
+    const wanted = wantedRaw ? (slugs[wantedRaw] ?? wantedRaw) : null;
     const select = form.querySelector<HTMLSelectElement>('select[name="service"]');
     if (wanted && select) {
       const match = [...select.options].find((o) => o.value.toLowerCase() === wanted.toLowerCase());
       if (match) select.value = match.value;
     }
+    // Arriving from an engagement model: start the message with it.
+    const model = params.get('model');
+    const message = form.querySelector<HTMLTextAreaElement>('textarea[name="message"]');
+    if (model && message && !message.value) message.value = `I’m interested in the ${model.slice(0, 60)} model. `;
+
+    // Proposal readiness: the five things we need to send a proposal.
+    const readyCount = document.querySelector<HTMLElement>('[data-ready-count]');
+    const readyBar = document.querySelector<HTMLElement>('[data-ready-bar]');
+    const readiness = () => {
+      const v = (n: string) => (form.querySelector<HTMLInputElement>(`[name="${n}"]`)?.value ?? '').trim();
+      const checks = [
+        v('name').length > 1,
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email')),
+        v('service') !== '',
+        v('message').length >= 20,
+        Boolean(form.querySelector<HTMLInputElement>('[name="consent"]')?.checked),
+      ];
+      const n = checks.filter(Boolean).length;
+      if (readyCount) readyCount.textContent = String(n);
+      if (readyBar) {
+        readyBar.setAttribute('aria-valuenow', String(n));
+        readyBar.style.setProperty('--ready', String(n / checks.length));
+      }
+    };
+    form.addEventListener('input', readiness);
+    form.addEventListener('change', readiness);
+    readiness();
 
     const control = (name: string) => form.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[name="${name}"]`);
     const showErrors = (errors: Partial<Record<ContactField, string>>) => {
@@ -344,6 +469,7 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
         const body = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; errors?: Partial<Record<ContactField, string>> };
         if (res.ok && body.ok) {
           form.reset();
+          readiness();
           const text = success.querySelector('[data-form-success-text]');
           if (text) text.textContent = body.message ?? 'Thanks. We will be in touch.';
           success.hidden = false;
@@ -368,12 +494,72 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
 </script>
 
 <style>
+  /* ---- Hero: channels and availability ---- */
+  .reach { display: grid; gap: var(--s-4); }
+  @media (min-width: 64rem) { .reach { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); } }
+  .reach__channels { display: grid; gap: var(--s-4); }
+  @media (min-width: 48rem) { .reach__channels { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .reach__card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--s-4);
+    align-items: start;
+    height: 100%;
+    padding: var(--s-5);
+    border-radius: var(--radius);
+    background: var(--plate);
+    border: 1px solid var(--rule);
+    text-decoration: none;
+    transition: border-color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
+  }
+  .reach__card:active { transform: scale(0.98); }
+  .reach__icon { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--plate-2); }
+  .reach__text { display: grid; gap: 0.15rem; min-width: 0; }
+  .reach__value { font-weight: 650; font-size: 1.0625rem; overflow-wrap: anywhere; }
+  .reach__go { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1px solid var(--rule-strong); transition: background-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out), border-color var(--t-ui) ease; }
+  .reach__go :global(.icon) { width: 1rem; height: 1rem; }
+  @media (hover: hover) and (pointer: fine) {
+    .reach__card:hover { border-color: var(--ink); }
+    .reach__card:hover .reach__go { background: var(--mark); border-color: var(--mark); color: var(--mark-ink); transform: rotate(45deg); }
+  }
+  .reach__status { display: grid; gap: var(--s-4); align-content: start; padding: var(--s-5); border-radius: var(--radius); }
+  .reach__live { font-weight: 650; font-size: var(--t-small); }
+  .reach__clocks { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+  .reach__clocks dd { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .reach__note { display: flex; gap: var(--s-2); align-items: center; }
+
   /* ---- Enquiry ---- */
-  .ct__grid { row-gap: var(--s-8); }
-  .ct__head { display: grid; gap: var(--s-4); padding-top: var(--s-5); border-top: 1px solid var(--rule-strong); margin-bottom: var(--s-6); }
+  .ct__grid { row-gap: var(--s-7); align-items: start; }
+  .ct__side { display: grid; gap: var(--s-6); align-content: start; }
+  @media (min-width: 64rem) { .ct__side { position: sticky; top: calc(var(--header-h) + var(--s-5)); } }
+  .ct__next { display: grid; gap: var(--s-5); }
+  .ct__steps { position: relative; display: grid; gap: var(--s-5); }
+  .ct__steps::before { content: ''; position: absolute; left: 0.55rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: var(--rule-strong); }
+  .ct__step { position: relative; display: grid; gap: 0.2rem; padding-left: 2.25rem; }
+  .ct__dot { position: absolute; left: 0; top: 0.2rem; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--ground); border: 2px solid var(--ink); }
+  .ct__step--first .ct__dot { background: var(--mark); }
+  .ct__step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); }
+  .ct__tips { display: grid; gap: var(--s-3); padding: var(--s-5); border-radius: var(--radius); border: 1px dashed var(--rule-strong); }
+  .ct__tips-title { font-family: var(--font); font-size: var(--t-small); font-weight: 650; }
+  .ct__am { display: flex; gap: var(--s-4); align-items: center; }
+  .ct__am-mark { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; flex: none; border-radius: 50%; background: var(--second); color: var(--second-ink); font-weight: 700; font-size: 0.875rem; }
+
+  .ct__panel { border-radius: calc(var(--radius) * 1.6); border: 1px solid var(--rule); background: var(--plate); overflow: hidden; }
+  .ct__bar { display: flex; justify-content: space-between; gap: var(--s-3); padding: var(--s-3) var(--module-pad); border-bottom: 1px solid var(--rule); background: var(--plate-2); font-weight: 600; }
+  .ct__body { padding: var(--module-pad); }
+  .ct__head { display: grid; gap: var(--s-3); margin-bottom: var(--s-6); }
   .ct__intro { color: var(--ink-2); }
+  .ready { display: grid; gap: var(--s-2); margin-top: var(--s-3); }
+  .ready__row { display: flex; justify-content: space-between; font-weight: 600; }
+  .ready__track { height: 6px; border-radius: 3px; background: var(--plate-3); overflow: hidden; }
+  .ready__fill { display: block; height: 100%; border-radius: inherit; background: var(--lime-500); transform-origin: 0 50%; transform: scaleX(var(--ready, 0)); transition: transform 500ms var(--ease-out); }
+  :global(:root[data-theme='dark']) .ready__fill { background: var(--lime-400); }
+  :global(html:not(.js)) .ready { display: none; }
+
   .form__grid { display: grid; grid-template-columns: 1fr; gap: var(--s-5) var(--s-4); align-items: start; }
   @media (min-width: 40rem) { .form__grid { grid-template-columns: 1fr 1fr; } .form__full { grid-column: 1 / -1; } }
+  .form .input__control { background: var(--ground); }
   .form__trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
   /* Errors stay hidden until the field is invalid (on blur, or after a submit). */
   .form .input__error { display: none; }
@@ -387,61 +573,57 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
   .form__consent-error { margin-left: 2rem; }
   .form__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-5); margin-top: var(--s-6); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
   .form__submit { min-width: 14rem; }
-  /* Sending: keep the lime, show the busy arrow, block a second press. */
   .form__submit[aria-busy='true'] { --btn-bg: var(--accent); --btn-ink: var(--accent-ink); --btn-line: var(--accent); opacity: 0.8; }
   .form[aria-busy='true'] .input__control { opacity: 0.6; pointer-events: none; }
   .form__alt { color: var(--ink-2); }
   @media (max-width: 39.99rem) { .form__submit { width: 100%; } }
 
-  .ct__notice { display: flex; gap: var(--s-4); align-items: start; padding: var(--s-5); margin-bottom: var(--s-6); outline: none; }
-  .ct__notice--err { border: 1px solid var(--danger); color: var(--ink); }
+  .ct__notice { display: flex; gap: var(--s-4); align-items: start; padding: var(--s-5); margin-bottom: var(--s-6); border-radius: var(--radius); outline: none; }
+  .ct__notice--err { flex-direction: column; gap: var(--s-2); border: 1px solid var(--danger); color: var(--ink); }
   .ct__notice--err .ct__notice-title { color: var(--danger); }
-  .ct__notice--err { flex-direction: column; gap: var(--s-2); }
   .ct__notice-icon { width: 1.5rem; height: 1.5rem; flex: none; }
-  .ct__notice-title { font-size: 1.25rem; font-weight: 750; font-stretch: var(--wide); text-transform: uppercase; line-height: 1.1; }
+  .ct__notice-title { font-family: var(--font-display); font-size: 1.375rem; font-weight: 700; letter-spacing: -0.015em; line-height: 1.1; }
   @media (prefers-reduced-motion: no-preference) {
     .ct__notice:not([hidden]) { animation: notice-in 260ms var(--ease-out); }
   }
   @keyframes notice-in { from { opacity: 0; translate: 0 -8px; } }
 
-  .ct__side { display: grid; gap: var(--s-5); align-content: start; }
-  .ct__routes { grid-template-columns: 1fr; }
-  .ct__block { display: grid; gap: var(--s-3); }
-  .ct__label { color: var(--ink-2); }
-  .ct__addr { font-size: 1.1875rem; font-weight: 600; font-stretch: var(--semi-wide); line-height: 1.35; }
-  .ct__status { font-weight: 650; font-size: var(--t-small); }
-  .ct__hours { font-size: var(--t-small); }
-  .ct__hours th, .ct__hours td { padding: 0.55rem 0; text-align: left; border-bottom: 1px solid var(--rule); font-weight: 500; }
-  .ct__hours td { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
-  .ct__small { color: var(--ink-2); }
-  .ct__direct { display: grid; }
-  .ct__route { display: inline-flex; align-items: center; gap: var(--s-3); min-height: 44px; font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
-  @media (hover: hover) and (pointer: fine) { .ct__route:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; } }
+  /* ---- Book ---- */
+  .book { display: grid; gap: var(--s-7); padding: clamp(1.5rem, 1rem + 3vw, 3.5rem); border-radius: calc(var(--radius) * 1.6); }
+  @media (min-width: 64rem) { .book { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); align-items: start; } }
+  .book__copy { display: grid; gap: var(--s-5); align-content: start; }
+  .book__lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.45; }
+  .book__copy :global(.book__photo) { margin-top: var(--s-3); }
+  @media (max-width: 63.99rem) { .book__copy :global(.book__photo) { display: none; } }
+  .book__week { min-width: 0; }
 
-  /* ---- Map ---- */
-  .map__grid { row-gap: var(--s-7); align-items: start; }
-  .map__text { display: grid; gap: var(--s-5); }
-  .map__text > p { color: var(--ink-2); max-width: 46ch; }
-  .map__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--plate-2); border: 1px solid var(--rule); }
-  .map__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(0.6) contrast(1.05); opacity: 0; transition: opacity 400ms var(--ease-out); }
-  .map__frame.is-loaded iframe { opacity: 1; }
-  :global(html:not(.js)) .map__frame iframe { opacity: 1; }
-
-  /* ---- Locations ---- */
-  .locs__grid { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .locs__grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 64rem) { .locs__grid { grid-template-columns: repeat(4, 1fr); } }
-  .locs__card { gap: var(--s-3); min-height: 13rem; }
-  .locs__kind { color: var(--ink-2); }
-  .locs__name { font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem); font-stretch: var(--wide); line-height: 1.05; letter-spacing: -0.015em; text-transform: uppercase; padding-right: 2rem; }
-  .locs__body { margin-top: auto; }
-  .locs__link { text-decoration: none; }
-  .locs__link:focus-visible { outline: none; }
-  .locs__card:has(.locs__link:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; }
-  .locs__body { color: var(--ink-2); font-size: var(--t-small); }
-  .locs__arrow { position: absolute; right: var(--module-pad); top: var(--module-pad); width: 1.5rem; height: 1.5rem; transition: transform var(--t-ui) var(--ease-out); }
-  @media (hover: hover) and (pointer: fine) {
-    .locs__card:has(.locs__link):hover { background: var(--plate); }
-    .locs__card:hover .locs__arrow { transform: translate(3px, -3px); }
+  /* ---- Where ---- */
+  .where { display: grid; gap: var(--s-4); }
+  @media (min-width: 48rem) { .where { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64rem) {
+    .where { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .where__map { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+    .where__hq { grid-column: 3 / span 2; grid-row: 1; }
+    .where__hours { grid-column: 3; grid-row: 2; }
+    .where__photo { grid-column: 4; grid-row: 2 / span 2; }
+    .where__direct { grid-column: 1 / span 3; grid-row: 3; }
   }
+  .where > * { min-width: 0; }
+  .where__map { position: relative; min-height: 22rem; overflow: hidden; border-radius: calc(var(--radius) * 1.6); background: var(--plate-2); }
+  .where__map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(0.6) contrast(1.05); opacity: 0; transition: opacity 400ms var(--ease-out); }
+  .where__map.is-loaded iframe { opacity: 1; }
+  :global(html:not(.js)) .where__map iframe { opacity: 1; }
+  .where__hq, .where__hours, .where__direct { display: grid; gap: var(--s-4); align-content: start; padding: var(--module-pad); border-radius: var(--radius); }
+  .where__title { display: flex; align-items: center; gap: var(--s-2); font-size: 1.25rem; line-height: 1.2; letter-spacing: -0.015em; font-weight: 650; }
+  .where__addr { font-family: var(--font-display); font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.6rem); font-weight: 600; line-height: 1.25; letter-spacing: -0.015em; }
+  .where__spec { font-size: var(--t-small); }
+  .where__table { font-size: var(--t-small); }
+  .where__table th, .where__table td { padding: 0.55rem 0; text-align: left; border-bottom: 1px solid var(--rule); }
+  .where__table th { font-weight: 700; }
+  .where__table td:last-child { text-align: right; font-weight: 650; }
+  .where__photo { min-height: 16rem; }
+  .where__photo :global(.photo) { height: 100%; }
+  .where__routes { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-6); }
+  .where__route { display: inline-flex; align-items: center; gap: var(--s-3); min-height: 44px; font-weight: 650; text-decoration: none; overflow-wrap: anywhere; }
+  @media (hover: hover) and (pointer: fine) { .where__route:hover { text-decoration: underline; text-decoration-thickness: 2px; } }
 </style>
