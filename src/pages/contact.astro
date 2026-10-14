@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
+import Hero from '@/components/Hero.astro';
+import CallWeek from '@/components/heroes/CallWeek.astro';
+import Photo from '@/components/Photo.astro';
 import Faq from '@/components/Faq.astro';
 import Icon from '@/components/Icon.astro';
 import { site, fullAddress, mapsDirectionsUrl, mapsEmbedUrl, mapsPlaceUrl } from '@/config/site';
@@ -18,148 +20,174 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
 ---
 
 <BaseLayout {...pages.contact} image="/og/contact.png" breadcrumbs={crumbs} webPage={contactPage} schema={[faqSchema(contactFaqs)]}>
-  <PageHero
-    title={['Let’s talk', 'about your hours.']}
-    lede="Tell us what you want to hand off. A client partner replies within one business day, or you can book a 30-minute discovery call right now."
-    crumbs={crumbs}
-  >
-    <Fragment slot="actions">
-      <a class="btn" href={site.calendly} target="_blank" rel="noopener" data-magnetic>
-        <span class="btn__label">Book a call <Icon name="calendar" class="btn__arrow" /></span>
+  <Hero labelledby="contact-title" split="5-7" crumbs={crumbs}>
+    <h1 class="h1 hero__title" id="contact-title">Let’s talk <span class="accent">about your hours.</span></h1>
+    <p class="hero__lead">
+      Tell us what you want to hand off. A client partner replies within one business day, or you can book a 30-minute discovery call right now.
+    </p>
+    <div class="actions">
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
+        Book a call <Icon name="calendar" class="btn__arrow" />
       </a>
-      <a class="btn btn--ghost" href={`tel:${site.phoneE164}`} data-magnetic>
-        <span class="btn__label"><Icon name="phone" /> {site.phone}</span>
+      <a class="btn btn--ghost" href={`tel:${site.phoneE164}`}>
+        <Icon name="phone" /> {site.phone}
       </a>
-    </Fragment>
-  </PageHero>
-
-  <section class="ct wrap" id="enquiry" aria-labelledby="form-title">
-    <div class="ct__form-wrap">
-      <h2 class="h2" id="form-title" data-split>Send an enquiry.</h2>
-      <p class="ct__intro" data-reveal>Fields marked with an asterisk are required. We never share your details.</p>
-
-      <div class="ct__notice ct__notice--ok" role="status" hidden data-form-success>
-        <Icon name="check" class="icon ct__notice-icon" />
-        <div>
-          <p class="ct__notice-title">Message received.</p>
-          <p data-form-success-text>Thanks. A client partner will reply within one business day.</p>
-        </div>
-      </div>
-      <div class="ct__notice ct__notice--err" role="alert" hidden data-form-error>
-        <p data-form-error-text></p>
-      </div>
-
-      <form class="form" action="/api/contact" method="post" novalidate data-contact-form>
-        <div class="form__grid">
-          <label class="field">
-            <input class="field__control" type="text" name="name" autocomplete="name" required minlength="2" maxlength={LIMITS.name} placeholder=" " aria-describedby="err-name" />
-            <span class="field__label">Your name *</span>
-            <span class="field__error" id="err-name" data-error="name">Please tell us your name.</span>
-          </label>
-          <label class="field">
-            <input class="field__control" type="email" name="email" autocomplete="email" required maxlength={LIMITS.email} placeholder=" " inputmode="email" spellcheck="false" aria-describedby="err-email" />
-            <span class="field__label">Work email *</span>
-            <span class="field__error" id="err-email" data-error="email">Please enter a valid email, like name@company.com.</span>
-          </label>
-          <label class="field">
-            <input class="field__control" type="text" name="company" autocomplete="organization" maxlength={LIMITS.company} placeholder=" " />
-            <span class="field__label">Company</span>
-          </label>
-          <label class="field">
-            <input class="field__control" type="tel" name="phone" autocomplete="tel" maxlength={LIMITS.phone} placeholder=" " pattern="[+()0-9 .\-]{7,30}" aria-describedby="err-phone" />
-            <span class="field__label">Phone</span>
-            <span class="field__error" id="err-phone" data-error="phone">Please use digits, spaces and + ( ) - only.</span>
-          </label>
-          <label class="field field--select">
-            <select class="field__control" name="service" required aria-describedby="err-service">
-              <option value="" disabled selected>Choose one</option>
-              {SERVICE_OPTIONS.map((o) => <option value={o}>{o}</option>)}
-            </select>
-            <span class="field__label">What do you need? *</span>
-            <span class="field__error" id="err-service" data-error="service">Please choose what you need help with.</span>
-          </label>
-          <label class="field field--select">
-            <select class="field__control" name="teamSize">
-              <option value="" selected>Not sure yet</option>
-              {TEAM_SIZES.map((o) => <option value={o}>{o}</option>)}
-            </select>
-            <span class="field__label">Team size</span>
-          </label>
-          <label class="field form__full">
-            <textarea class="field__control" name="message" required minlength={LIMITS.messageMin} maxlength={LIMITS.message} placeholder=" " rows="6" aria-describedby="err-message hint-message"></textarea>
-            <span class="field__label">What would you like to hand off? *</span>
-            <span class="field__error" id="err-message" data-error="message">A sentence or two helps us prepare: at least {LIMITS.messageMin} characters.</span>
-            <span class="field__hint" id="hint-message">The tasks, the tools you use and the hours you need covered.</span>
-          </label>
-        </div>
-
-        <div class="form__trap" aria-hidden="true">
-          <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
-        </div>
-        <input type="hidden" name="elapsedMs" value="0" data-elapsed />
-
-        <label class="check form__consent">
-          <input type="checkbox" name="consent" required aria-describedby="err-consent" />
-          <span>I agree that Akrostech may contact me about this enquiry, as described in the <a class="link link--static" href="/privacy">privacy policy</a>. *</span>
-        </label>
-        <span class="field__error form__consent-error" id="err-consent" data-error="consent">Please confirm we may contact you about this enquiry.</span>
-
-        <div class="form__actions">
-          <button class="btn form__submit" type="submit" data-magnetic data-submit>
-            <span class="btn__label"><span data-submit-label>Send enquiry</span> <Icon name="arrow-up-right" class="btn__arrow" /></span>
-            <span class="form__spinner" aria-hidden="true"></span>
-          </button>
-          <p class="form__alt">or email <a class="link link--static" href={`mailto:${site.email}`}>{site.email}</a></p>
-        </div>
-      </form>
     </div>
+    <CallWeek slot="instrument" />
+  </Hero>
 
-    <aside class="ct__side" aria-label="Contact details">
-      <div class="ct__block" data-reveal>
-        <h2 class="ct__label">Headquarters</h2>
-        <address class="ct__addr">
-          {site.legalName}<br />{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}
-        </address>
-        <a class="arrow-link" href={mapsDirectionsUrl} target="_blank" rel="noopener"><Icon name="route" /> Driving directions</a>
+  <!-- Enquiry form and the direct routes -->
+  <section class="section section--flush-top ct" id="enquiry" aria-labelledby="form-title">
+    <div class="wrap grid ct__grid">
+      <div class="ct__form-wrap c-7">
+        <div class="ct__head">
+          <h2 class="h2" id="form-title" data-split>Send an enquiry.</h2>
+          <p class="ct__intro" data-reveal>Fields marked with an asterisk are required. We never share your details.</p>
+        </div>
+
+        <div class="ct__notice ct__notice--ok lime" role="status" tabindex="-1" hidden data-form-success>
+          <Icon name="check" class="icon ct__notice-icon" />
+          <div>
+            <p class="ct__notice-title">Message received.</p>
+            <p data-form-success-text>Thanks. A client partner will reply within one business day.</p>
+          </div>
+        </div>
+        <div class="ct__notice ct__notice--err" role="alert" hidden data-form-error>
+          <p class="ct__notice-title">Not sent.</p>
+          <p data-form-error-text></p>
+        </div>
+
+        <form class="form" action="/api/contact" method="post" novalidate data-contact-form>
+          <div class="form__grid">
+            <div class="input">
+              <label class="input__label" for="ct-name">Your name *</label>
+              <input class="input__control" id="ct-name" type="text" name="name" autocomplete="name" required minlength="2" maxlength={LIMITS.name} aria-describedby="err-name" />
+              <span class="input__error" id="err-name" data-error="name">Please tell us your name.</span>
+            </div>
+            <div class="input">
+              <label class="input__label" for="ct-email">Work email *</label>
+              <input class="input__control" id="ct-email" type="email" name="email" autocomplete="email" required maxlength={LIMITS.email} inputmode="email" spellcheck="false" aria-describedby="err-email" />
+              <span class="input__error" id="err-email" data-error="email">Please enter a valid email, like name@company.com.</span>
+            </div>
+            <div class="input">
+              <label class="input__label" for="ct-company">Company</label>
+              <input class="input__control" id="ct-company" type="text" name="company" autocomplete="organization" maxlength={LIMITS.company} />
+            </div>
+            <div class="input">
+              <label class="input__label" for="ct-phone">Phone</label>
+              <input class="input__control" id="ct-phone" type="tel" name="phone" autocomplete="tel" maxlength={LIMITS.phone} pattern="[+()0-9 .\-]{7,30}" aria-describedby="err-phone" />
+              <span class="input__error" id="err-phone" data-error="phone">Please use digits, spaces and + ( ) - only.</span>
+            </div>
+            <div class="input">
+              <label class="input__label" for="ct-service">What do you need? *</label>
+              <select class="input__control" id="ct-service" name="service" required aria-describedby="err-service">
+                <option value="" disabled selected>Choose one</option>
+                {SERVICE_OPTIONS.map((o) => <option value={o}>{o}</option>)}
+              </select>
+              <span class="input__error" id="err-service" data-error="service">Please choose what you need help with.</span>
+            </div>
+            <div class="input">
+              <label class="input__label" for="ct-team">Team size</label>
+              <select class="input__control" id="ct-team" name="teamSize">
+                <option value="" selected>Not sure yet</option>
+                {TEAM_SIZES.map((o) => <option value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div class="input form__full">
+              <label class="input__label" for="ct-message">What would you like to hand off? *</label>
+              <textarea
+                class="input__control"
+                id="ct-message"
+                name="message"
+                required
+                minlength={LIMITS.messageMin}
+                maxlength={LIMITS.message}
+                rows="6"
+                aria-describedby="hint-message err-message"></textarea>
+              <span class="input__hint" id="hint-message">The tasks, the tools you use and the hours you need covered.</span>
+              <span class="input__error" id="err-message" data-error="message">A sentence or two helps us prepare: at least {LIMITS.messageMin} characters.</span>
+            </div>
+          </div>
+
+          <div class="form__trap" aria-hidden="true">
+            <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
+          <input type="hidden" name="elapsedMs" value="0" data-elapsed />
+
+          <div class="input form__consent-wrap">
+            <label class="check form__consent">
+              <input type="checkbox" name="consent" required aria-describedby="err-consent" />
+              <span>I agree that Akrostech may contact me about this enquiry, as described in the <a class="link" href="/privacy">privacy policy</a>. *</span>
+            </label>
+            <span class="input__error form__consent-error" id="err-consent" data-error="consent">Please confirm we may contact you about this enquiry.</span>
+          </div>
+
+          <div class="form__actions">
+            <button class="btn btn--primary form__submit" type="submit" data-submit>
+              <span data-submit-label>Send enquiry</span>
+              <Icon name="arrow-up-right" class="btn__arrow" />
+            </button>
+            <p class="form__alt small">or email <a class="link" href={`mailto:${site.email}`}>{site.email}</a></p>
+          </div>
+        </form>
       </div>
-      <div class="ct__block" data-reveal>
-        <h2 class="ct__label">Office hours</h2>
-        <p class="ct__status" data-open-status hidden><span class="ct__dot" aria-hidden="true"></span><span data-open-text></span></p>
-        <table class="ct__hours">
-          <caption class="sr-only">Office hours, Eastern Time</caption>
-          <tbody>
-            <tr><th scope="row">Monday to Friday</th><td>9:00 am – 6:00 pm ET</td></tr>
-            <tr><th scope="row">Saturday and Sunday</th><td>Closed</td></tr>
-          </tbody>
-        </table>
-        <p class="ct__small">Your specialists work your own U.S. shift, Eastern, Central, Mountain or Pacific.</p>
-      </div>
-      <div class="ct__block" data-reveal>
-        <h2 class="ct__label">Direct</h2>
-        <ul role="list" class="ct__direct">
-          <li><a class="link" href={`tel:${site.phoneE164}`}><Icon name="phone" /> {site.phone}</a></li>
-          <li><a class="link" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></li>
-          <li><a class="link" href={site.socials.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" /> LinkedIn</a></li>
-        </ul>
-      </div>
-    </aside>
+
+      <aside class="ct__side c-4 s-9" aria-label="Contact details">
+        <div class="ct__routes ruled">
+          <div class="module ct__block">
+            <h2 class="label ct__label">Headquarters</h2>
+            <address class="ct__addr">
+              {site.legalName}<br />{site.address.street}<br />{site.address.locality}, {site.address.region} {site.address.postalCode}
+            </address>
+            <a class="more" href={mapsDirectionsUrl} target="_blank" rel="noopener"><Icon name="route" /> Driving directions</a>
+          </div>
+          <div class="module ct__block">
+            <h2 class="label ct__label">Office hours</h2>
+            <p class="ct__status live is-off" data-open-status hidden><span data-open-text></span></p>
+            <table class="ct__hours">
+              <caption class="sr-only">Office hours, Eastern Time</caption>
+              <tbody>
+                <tr><th scope="row">Monday to Friday</th><td>9:00 am – 6:00 pm ET</td></tr>
+                <tr><th scope="row">Saturday and Sunday</th><td>Closed</td></tr>
+              </tbody>
+            </table>
+            <p class="ct__small small">Your specialists work your own U.S. shift, Eastern, Central, Mountain or Pacific.</p>
+          </div>
+          <div class="module ct__block">
+            <h2 class="label ct__label">Direct</h2>
+            <ul role="list" class="ct__direct">
+              <li><a class="ct__route" href={`tel:${site.phoneE164}`}><Icon name="phone" /> {site.phone}</a></li>
+              <li><a class="ct__route" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></li>
+              <li><a class="ct__route" href={site.socials.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" /> LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <Photo name="desk-window" ratio="4 / 3" sizes="(min-width: 64rem) 28vw, 100vw" reveal="clip" />
+      </aside>
+    </div>
   </section>
 
   <!-- Map -->
-  <section class="map section" aria-labelledby="map-title">
-    <div class="wrap map__grid">
-      <div class="map__text">
-        <h2 class="h1" id="map-title" data-split>Find us in Wilmington.</h2>
+  <section class="section plate map" aria-labelledby="map-title">
+    <div class="wrap grid map__grid">
+      <div class="map__text c-5">
+        <h2 class="h2" id="map-title" data-split>Find us in Wilmington.</h2>
         <p data-reveal>
           We are on Delaware Avenue (DE-52) in Wilmington, a few minutes from I-95 exit 7 and the Wilmington Amtrak station, with street parking on
           Delaware Avenue and the nearby side streets. Visits are by appointment.
         </p>
-        <ul role="list" class="map__links">
-          <li><a class="arrow-link" href={mapsDirectionsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-up-right" /></a></li>
-          <li><a class="arrow-link" href={mapsPlaceUrl} target="_blank" rel="noopener">Open in Google Maps <Icon name="arrow-up-right" /></a></li>
-        </ul>
+        <dl class="spec map__spec">
+          <div><dt>Address</dt><dd>{fullAddress}</dd></div>
+          <div><dt>By road</dt><dd>I-95, exit 7, then Delaware Avenue (DE-52)</dd></div>
+          <div><dt>By rail</dt><dd>Wilmington Amtrak station</dd></div>
+          <div><dt>Visits</dt><dd>By appointment, {site.hoursLabel}</dd></div>
+        </dl>
+        <div class="actions">
+          <a class="btn btn--ghost btn--small" href={mapsDirectionsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-up-right" class="btn__arrow" /></a>
+          <a class="btn btn--ghost btn--small" href={mapsPlaceUrl} target="_blank" rel="noopener">Open in Google Maps <Icon name="arrow-up-right" class="btn__arrow" /></a>
+        </div>
       </div>
-      <div class="map__frame skeleton" data-map>
+      <div class="map__frame c-7" data-map>
         <iframe
           title={`Map showing ${site.name} at ${fullAddress}`}
           src={mapsEmbedUrl}
@@ -173,29 +201,34 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
   </section>
 
   <!-- Locations -->
-  <section class="locs wrap section" aria-labelledby="locs-title">
-    <h2 class="h2" id="locs-title" data-split>Where we work.</h2>
-    <ul class="locs__grid" role="list" data-reveal-group>
-      <li class="locs__card locs__card--dark" data-reveal>
-        <p class="locs__kind">Delivery</p>
-        <h3 class="locs__name">India</h3>
-        <p>Specialists and team leads on fixed U.S. shifts.</p>
-      </li>
-      {
-        locations.map((l) => (
-          <li data-reveal>
-            <a class="locs__card" href={`/locations/${l.slug}`}>
-              <p class="locs__kind">{l.isHeadquarters ? 'Headquarters' : 'Service area'}</p>
+  <section class="section locs" aria-labelledby="locs-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="locs-title" data-split>Where we work.</h2>
+        <p data-reveal>A headquarters in Delaware, client partners for the Northeast corridor, and delivery teams in India on your clock.</p>
+      </div>
+      <ul class="locs__grid ruled" role="list" data-reveal-group>
+        <li class="module module--flex lime locs__card" data-reveal>
+          <h3 class="locs__name">India</h3>
+          <p class="label locs__kind">Delivery</p>
+          <p class="locs__body">Specialists and team leads on fixed U.S. shifts.</p>
+        </li>
+        {
+          locations.map((l) => (
+            <li class="module module--flex locs__card" data-reveal>
               <h3 class="locs__name">
-                {l.city}, {l.region}
+                <a class="stretch locs__link" href={`/locations/${l.slug}`}>
+                  {l.city}, {l.region}
+                </a>
               </h3>
-              <p>{l.distance}</p>
+              <p class="label locs__kind">{l.isHeadquarters ? 'Headquarters' : 'Service area'}</p>
+              <p class="locs__body">{l.distance}</p>
               <Icon name="arrow-up-right" class="icon locs__arrow" />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
 
   <Faq faqs={contactFaqs} name="contact" heading="Before you get in touch" />
@@ -212,24 +245,26 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
     const minutes = w.hour * 60 + w.minute;
     const open = w.weekday >= 1 && w.weekday <= 5 && minutes >= 9 * 60 && minutes < 18 * 60;
     status.hidden = false;
-    status.dataset.open = String(open);
-    status.querySelector('[data-open-text]')!.textContent = open ? 'Open now in Wilmington' : 'Closed now: we reply next business morning';
+    status.classList.toggle('is-off', !open);
+    const text = status.querySelector('[data-open-text]');
+    if (text) text.textContent = open ? 'Open now in Wilmington' : 'Closed now: we reply next business morning';
   }
 
-  // Map skeleton clears once the iframe has loaded.
+  // Map frame: a plate until the iframe has loaded.
   document.querySelectorAll<HTMLElement>('[data-map]').forEach((wrap) => {
-    wrap.querySelector('iframe')?.addEventListener('load', () => wrap.classList.remove('skeleton'), { once: true });
+    wrap.querySelector('iframe')?.addEventListener('load', () => wrap.classList.add('is-loaded'), { once: true });
   });
 
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
-  if (form) {
+  const success = document.querySelector<HTMLElement>('[data-form-success]');
+  const errorBox = document.querySelector<HTMLElement>('[data-form-error]');
+  const errorText = document.querySelector<HTMLElement>('[data-form-error-text]');
+  const submit = form?.querySelector<HTMLButtonElement>('[data-submit]');
+  const label = form?.querySelector<HTMLElement>('[data-submit-label]');
+  const elapsed = form?.querySelector<HTMLInputElement>('[data-elapsed]');
+
+  if (form && success && errorBox && errorText && submit && label && elapsed) {
     const started = Date.now();
-    const success = document.querySelector<HTMLElement>('[data-form-success]')!;
-    const errorBox = document.querySelector<HTMLElement>('[data-form-error]')!;
-    const errorText = document.querySelector<HTMLElement>('[data-form-error-text]')!;
-    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
-    const label = form.querySelector<HTMLElement>('[data-submit-label]')!;
-    const elapsed = form.querySelector<HTMLInputElement>('[data-elapsed]')!;
 
     // Status from a no-JS round trip.
     const params = new URL(location.href).searchParams;
@@ -254,14 +289,29 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
         const input = control(field);
         if (msg) el.textContent = msg;
         input?.setAttribute('aria-invalid', msg ? 'true' : 'false');
-        el.style.display = msg ? 'block' : '';
+        input?.closest('.input')?.classList.toggle('is-invalid', Boolean(msg));
+        el.classList.toggle('is-shown', Boolean(msg));
       });
     };
 
-    // Keep aria-invalid in sync with :user-invalid as people move through the form.
+    // Keep aria-invalid (and the field's error state) in sync with :user-invalid as people move through the form.
     form.addEventListener('focusout', (e) => {
       const el = e.target as HTMLInputElement;
-      if (el.matches?.('.field__control, input[type="checkbox"]')) el.setAttribute('aria-invalid', String(el.matches(':user-invalid')));
+      if (el.matches?.('.input__control, input[type="checkbox"]')) {
+        const invalid = el.matches(':user-invalid');
+        el.setAttribute('aria-invalid', String(invalid));
+        el.closest('.input')?.classList.toggle('is-invalid', invalid);
+      }
+    });
+    // Clear a field's error as soon as it becomes valid.
+    form.addEventListener('input', (e) => {
+      const el = e.target as HTMLInputElement;
+      const wrap = el.closest?.('.input');
+      if (wrap?.classList.contains('is-invalid') && el.checkValidity()) {
+        wrap.classList.remove('is-invalid');
+        el.setAttribute('aria-invalid', 'false');
+        wrap.querySelector('[data-error]')?.classList.remove('is-shown');
+      }
     });
 
     form.addEventListener('submit', async (e) => {
@@ -282,7 +332,8 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
       showErrors({});
 
       submit.disabled = true;
-      submit.classList.add('is-loading');
+      submit.setAttribute('aria-busy', 'true');
+      form.setAttribute('aria-busy', 'true');
       label.textContent = 'Sending…';
       try {
         const res = await fetch(form.action, {
@@ -293,10 +344,11 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
         const body = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; errors?: Partial<Record<ContactField, string>> };
         if (res.ok && body.ok) {
           form.reset();
-          success.querySelector('[data-form-success-text]')!.textContent = body.message ?? 'Thanks. We will be in touch.';
+          const text = success.querySelector('[data-form-success-text]');
+          if (text) text.textContent = body.message ?? 'Thanks. We will be in touch.';
           success.hidden = false;
           success.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
-          success.focus?.();
+          success.focus?.({ preventScroll: true });
         } else {
           if (body.errors) showErrors(body.errors);
           errorText.textContent = body.message ?? 'Something went wrong. Please try again or email us directly.';
@@ -307,7 +359,8 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
         errorBox.hidden = false;
       } finally {
         submit.disabled = false;
-        submit.classList.remove('is-loading');
+        submit.removeAttribute('aria-busy');
+        form.removeAttribute('aria-busy');
         label.textContent = 'Send enquiry';
       }
     });
@@ -315,65 +368,80 @@ const contactPage = { '@type': ['WebPage', 'ContactPage'], mainEntity: { '@id': 
 </script>
 
 <style>
-  .ct { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: var(--space-2xl) clamp(2rem, 6vw, 6rem); padding-block: var(--space-2xl) var(--section-gap); }
-  .ct__intro { margin-block: var(--space-s) var(--space-l); color: var(--muted); }
-  .form__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-s) var(--space-s); }
-  .form__full { grid-column: 1 / -1; }
-  .form__trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; } /* taste-skill-ignore: honeypot, not a rule */
-  .form__consent { margin-top: var(--space-m); }
+  /* ---- Enquiry ---- */
+  .ct__grid { row-gap: var(--s-8); }
+  .ct__head { display: grid; gap: var(--s-4); padding-top: var(--s-5); border-top: 1px solid var(--rule-strong); margin-bottom: var(--s-6); }
+  .ct__intro { color: var(--ink-2); }
+  .form__grid { display: grid; grid-template-columns: 1fr; gap: var(--s-5) var(--s-4); align-items: start; }
+  @media (min-width: 40rem) { .form__grid { grid-template-columns: 1fr 1fr; } .form__full { grid-column: 1 / -1; } }
+  .form__trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  /* Errors stay hidden until the field is invalid (on blur, or after a submit). */
+  .form .input__error { display: none; }
+  .form .input__error.is-shown,
+  .form .input:has(.input__control:user-invalid) .input__error,
+  .form .input:has(input[type='checkbox']:user-invalid) .input__error { display: block; }
+  .form .input:has(.input__control:user-invalid) .input__control { border-color: var(--danger); }
+  .form .input__control[aria-invalid='true'] { border-color: var(--danger); }
+  .form__consent-wrap { margin-top: var(--s-6); }
   .form__consent input:user-invalid ~ span { color: var(--danger); }
   .form__consent-error { margin-left: 2rem; }
-  .form__consent:has(input:user-invalid) + .form__consent-error { display: block; }
-  .form__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-m); margin-top: var(--space-l); }
-  .form__submit { min-width: 13rem; }
-  .form__submit:disabled { cursor: progress; opacity: 0.85; }
-  .form__spinner { position: absolute; right: 1rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; opacity: 0; }
-  .form__submit:global(.is-loading) .form__spinner { opacity: 1; animation: spin 700ms linear infinite; }
-  .form__submit:global(.is-loading) .btn__arrow { opacity: 0; }
-  @keyframes spin { to { rotate: 1turn; } }
-  .form__alt { color: var(--muted); }
-  @media (max-width: 599px) { .form__grid { grid-template-columns: 1fr; } .form__submit { width: 100%; } }
+  .form__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-5); margin-top: var(--s-6); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
+  .form__submit { min-width: 14rem; }
+  /* Sending: keep the lime, show the busy arrow, block a second press. */
+  .form__submit[aria-busy='true'] { --btn-bg: var(--accent); --btn-ink: var(--accent-ink); --btn-line: var(--accent); opacity: 0.8; }
+  .form[aria-busy='true'] .input__control { opacity: 0.6; pointer-events: none; }
+  .form__alt { color: var(--ink-2); }
+  @media (max-width: 39.99rem) { .form__submit { width: 100%; } }
 
-  .ct__notice { display: flex; gap: var(--space-s); align-items: start; padding: var(--space-m); margin-bottom: var(--space-l); }
-  .ct__notice--ok { background: var(--field); color: var(--field-ink); }
-  .ct__notice--err { background: light-dark(#f4dfd8, #3a1f18); color: var(--danger); font-weight: 500; }
+  .ct__notice { display: flex; gap: var(--s-4); align-items: start; padding: var(--s-5); margin-bottom: var(--s-6); outline: none; }
+  .ct__notice--err { border: 1px solid var(--danger); color: var(--ink); }
+  .ct__notice--err .ct__notice-title { color: var(--danger); }
+  .ct__notice--err { flex-direction: column; gap: var(--s-2); }
   .ct__notice-icon { width: 1.5rem; height: 1.5rem; flex: none; }
-  .ct__notice-title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; }
+  .ct__notice-title { font-size: 1.25rem; font-weight: 750; font-stretch: var(--wide); text-transform: uppercase; line-height: 1.1; }
   @media (prefers-reduced-motion: no-preference) {
-    .ct__notice:not([hidden]) { animation: notice-in 500ms var(--ease-out); }
+    .ct__notice:not([hidden]) { animation: notice-in 260ms var(--ease-out); }
   }
   @keyframes notice-in { from { opacity: 0; translate: 0 -8px; } }
 
-  .ct__side { display: grid; align-content: start; gap: var(--space-xl); padding-top: var(--space-s); }
-  .ct__label { font-family: var(--font-text); font-size: var(--step--1); font-weight: 600; color: var(--muted); margin-bottom: var(--space-xs); }
-  .ct__addr { font-style: normal; font-family: var(--font-display); font-size: var(--step-1); font-weight: 500; line-height: 1.3; color: var(--ink-strong); margin-bottom: var(--space-xs); }
-  .ct__status { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: var(--ink-strong); margin-bottom: var(--space-s); }
-  .ct__dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--muted); }
-  .ct__status[data-open='true'] .ct__dot { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 25%, transparent); }
-  .ct__hours { width: 100%; font-size: var(--step--1); }
-  .ct__hours th, .ct__hours td { padding: 0.55rem 0; text-align: left; border-bottom: 1px solid var(--line); font-weight: 500; }
-  .ct__hours td { text-align: right; color: var(--ink-strong); }
-  .ct__small { margin-top: var(--space-s); font-size: var(--step--1); color: var(--muted); }
-  .ct__direct { display: grid; gap: 0.1rem; }
-  .ct__direct a { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; color: var(--ink-strong); font-weight: 500; }
-  @media (max-width: 1023px) { .ct { grid-template-columns: 1fr; } }
+  .ct__side { display: grid; gap: var(--s-5); align-content: start; }
+  .ct__routes { grid-template-columns: 1fr; }
+  .ct__block { display: grid; gap: var(--s-3); }
+  .ct__label { color: var(--ink-2); }
+  .ct__addr { font-size: 1.1875rem; font-weight: 600; font-stretch: var(--semi-wide); line-height: 1.35; }
+  .ct__status { font-weight: 650; font-size: var(--t-small); }
+  .ct__hours { font-size: var(--t-small); }
+  .ct__hours th, .ct__hours td { padding: 0.55rem 0; text-align: left; border-bottom: 1px solid var(--rule); font-weight: 500; }
+  .ct__hours td { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .ct__small { color: var(--ink-2); }
+  .ct__direct { display: grid; }
+  .ct__route { display: inline-flex; align-items: center; gap: var(--s-3); min-height: 44px; font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+  @media (hover: hover) and (pointer: fine) { .ct__route:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; } }
 
-  .map { background: var(--surface); }
-  .map__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-2xl) var(--gutter); align-items: center; }
-  .map__text { display: grid; gap: var(--space-m); }
-  .map__text p { max-width: 46ch; }
-  .map__links { display: flex; flex-wrap: wrap; gap: var(--space-l); }
-  .map__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; }
-  .map__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(0.35) contrast(1.05); }
-  @media (max-width: 1023px) { .map__grid { grid-template-columns: 1fr; } }
+  /* ---- Map ---- */
+  .map__grid { row-gap: var(--s-7); align-items: start; }
+  .map__text { display: grid; gap: var(--s-5); }
+  .map__text > p { color: var(--ink-2); max-width: 46ch; }
+  .map__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--plate-2); border: 1px solid var(--rule); }
+  .map__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(0.6) contrast(1.05); opacity: 0; transition: opacity 400ms var(--ease-out); }
+  .map__frame.is-loaded iframe { opacity: 1; }
+  :global(html:not(.js)) .map__frame iframe { opacity: 1; }
 
-  .locs__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gutter); margin-top: var(--space-xl); }
-  .locs__card { position: relative; display: grid; align-content: start; gap: var(--space-xs); height: 100%; min-height: 14rem; padding: clamp(1.25rem, 2.5vw, 1.75rem); background: var(--bg-raised); text-decoration: none; color: inherit; transition: background-color var(--dur-base), color var(--dur-base); }
-  a.locs__card:hover { background: var(--inverse); color: var(--inverse-ink); }
-  .locs__card--dark { background: var(--field); color: var(--field-ink); }
-  .locs__kind { font-size: var(--step--1); font-weight: 600; opacity: 0.75; }
-  .locs__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; margin-bottom: auto; }
-  .locs__arrow { position: absolute; right: 1.25rem; top: 1.25rem; }
-  @media (max-width: 1023px) { .locs__grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 599px) { .locs__grid { grid-template-columns: 1fr; } .locs__card { min-height: auto; } }
+  /* ---- Locations ---- */
+  .locs__grid { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .locs__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .locs__grid { grid-template-columns: repeat(4, 1fr); } }
+  .locs__card { gap: var(--s-3); min-height: 13rem; }
+  .locs__kind { color: var(--ink-2); }
+  .locs__name { font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem); font-stretch: var(--wide); line-height: 1.05; letter-spacing: -0.015em; text-transform: uppercase; padding-right: 2rem; }
+  .locs__body { margin-top: auto; }
+  .locs__link { text-decoration: none; }
+  .locs__link:focus-visible { outline: none; }
+  .locs__card:has(.locs__link:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .locs__body { color: var(--ink-2); font-size: var(--t-small); }
+  .locs__arrow { position: absolute; right: var(--module-pad); top: var(--module-pad); width: 1.5rem; height: 1.5rem; transition: transform var(--t-ui) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .locs__card:has(.locs__link):hover { background: var(--plate); }
+    .locs__card:hover .locs__arrow { transform: translate(3px, -3px); }
+  }
 </style>
