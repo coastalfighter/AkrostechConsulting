@@ -1,0 +1,270 @@
+---
+/**
+ * Virtual Assistance hero instrument: a sample inbox. "Before" shows every message waiting on
+ * you; "With your VA" sorts them into three ruled lanes (handled, drafted for approval, needs
+ * you) and a counter shows what is left on your desk. Each message can be moved between lanes.
+ * Sample messages only: senders are roles, not people or companies.
+ * Server-rendered with the VA on, so the lanes read without JavaScript.
+ */
+type Lane = 'va' | 'draft' | 'you';
+
+interface Message {
+  time: string;
+  from: string;
+  subject: string;
+  lane: Lane;
+  notes: Record<Lane, string>;
+}
+
+const messages: Message[] = [
+  {
+    time: '7:12',
+    from: 'Your co-founder',
+    subject: 'Reschedule Thursday board prep',
+    lane: 'va',
+    notes: { va: 'Moved to Friday 10:00, invites re-sent', draft: 'Two new slots drafted for your OK', you: 'Waiting for you to pick a time' },
+  },
+  {
+    time: '7:40',
+    from: 'Vendor billing',
+    subject: 'Invoice #4471 from vendor',
+    lane: 'va',
+    notes: { va: 'Matched to the PO, queued for the payment run', draft: 'Payment approval drafted', you: 'Waiting for your approval' },
+  },
+  {
+    time: '8:05',
+    from: 'A mutual contact',
+    subject: 'Intro: partner at a logistics firm',
+    lane: 'draft',
+    notes: { va: 'Thanked, three call slots offered', draft: 'Warm reply drafted in your voice', you: 'Waiting for your reply' },
+  },
+  {
+    time: '8:31',
+    from: 'Travel desk',
+    subject: 'Flight change on Tuesday’s trip',
+    lane: 'va',
+    notes: { va: 'Rebooked, itinerary and calendar updated', draft: 'Two options drafted for you', you: 'Waiting for your choice' },
+  },
+  {
+    time: '9:02',
+    from: 'Head of sales',
+    subject: 'Pipeline numbers for Monday',
+    lane: 'draft',
+    notes: { va: 'Summary sent from the CRM', draft: 'Summary drafted from the CRM', you: 'Waiting for you to pull the numbers' },
+  },
+  {
+    time: '9:18',
+    from: 'Outside counsel',
+    subject: 'Contract redlines, round two',
+    lane: 'you',
+    notes: { va: 'Filed to the matter folder', draft: 'Cover note drafted, redlines attached', you: 'Your judgment needed' },
+  },
+  {
+    time: '9:46',
+    from: 'Support inbox',
+    subject: 'Customer asking about a refund',
+    lane: 'va',
+    notes: { va: 'Refunded under policy, ticket closed', draft: 'Reply drafted under the refund policy', you: 'Waiting for your decision' },
+  },
+  {
+    time: '10:03',
+    from: 'Hiring manager',
+    subject: 'Approve the final-round offer',
+    lane: 'you',
+    notes: { va: 'Offer paperwork prepared', draft: 'Approval note drafted', you: 'Your sign-off needed' },
+  },
+];
+
+const lanes: { id: Lane; title: string; short: string }[] = [
+  { id: 'va', title: 'Handled by your VA', short: 'VA' },
+  { id: 'draft', title: 'Drafted for your approval', short: 'Draft' },
+  { id: 'you', title: 'Needs you', short: 'You' },
+];
+
+const count = (l: Lane) => messages.filter((m) => m.lane === l).length;
+---
+
+<div class="ib" data-hero="inbox" data-mode="va">
+  <div class="ib__bar">
+    <p class="ib__title">
+      <span class="label">Sample inbox</span>
+      <span class="small ib__date">One morning, {messages.length} messages</span>
+    </p>
+    <div class="ib__switch" role="group" aria-label="Show the inbox">
+      <button type="button" class="ib__mode" aria-pressed="false" data-mode-btn="before">Before</button>
+      <button type="button" class="ib__mode" aria-pressed="true" data-mode-btn="va">With your VA</button>
+    </div>
+  </div>
+
+  <div class="ib__meter" aria-live="polite">
+    <p class="ib__left">
+      <span class="ib__fig" data-out="you">{count('you')}</span>
+      <span class="ib__left-text"><span class="label">Still need you</span><span class="small">of {messages.length} messages this morning</span></span>
+    </p>
+    <dl class="ib__tally">
+      <div><dt class="label">Handled</dt><dd data-out="va">{count('va')}</dd></div>
+      <div><dt class="label">Drafted</dt><dd data-out="draft">{count('draft')}</dd></div>
+    </dl>
+  </div>
+
+  <div class="ib__board">
+    <section class="ib__lane ib__lane--all" data-lane="all" aria-label="Inbox, all messages unread" hidden>
+      <h3 class="ib__lane-head"><span class="label">Inbox</span><span class="ib__lane-n">{messages.length} unread</span></h3>
+      <ol class="ib__list" role="list" data-list="all"></ol>
+    </section>
+    {
+      lanes.map((lane) => (
+        <section class={`ib__lane ib__lane--${lane.id}`} data-lane={lane.id} aria-label={lane.title}>
+          <h3 class="ib__lane-head">
+            <span class="label">{lane.title}</span>
+            <span class="ib__lane-n" data-lane-n={lane.id}>{count(lane.id)}</span>
+          </h3>
+          <ol class="ib__list" role="list" data-list={lane.id}>
+            {messages.map((m, i) =>
+              m.lane === lane.id ? (
+                <li class="ib__msg" data-msg={i} data-at={m.lane} data-note-va={m.notes.va} data-note-draft={m.notes.draft} data-note-you={m.notes.you}>
+                  <span class="ib__time tabular">{m.time}</span>
+                  <span class="ib__from">{m.from}</span>
+                  <span class="ib__body">
+                    <span class="ib__subject">{m.subject}</span>
+                    <span class="ib__note" data-note>{m.notes[m.lane]}</span>
+                  </span>
+                  <span class="ib__move" role="group" aria-label={`Move “${m.subject}”`}>
+                    {lanes.map((l) => (
+                      <button type="button" class="ib__to" data-to={l.id} aria-pressed={l.id === m.lane ? 'true' : 'false'} aria-label={`${l.title}: ${m.subject}`} title={l.title}>
+                        {l.short}
+                      </button>
+                    ))}
+                  </span>
+                </li>
+              ) : null,
+            )}
+          </ol>
+        </section>
+      ))
+    }
+  </div>
+  <p class="ib__hint small muted">Switch between Before and With your VA, or move any message to another lane with its VA, Draft and You buttons.</p>
+</div>
+
+<style>
+  .ib { display: grid; gap: var(--s-4); }
+
+  .ib__bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-3) var(--s-5); }
+  .ib__title { display: grid; gap: 2px; }
+  .ib__date { color: var(--ink-2); }
+  .ib__switch { display: inline-flex; border: 1px solid var(--rule-strong); }
+  .ib__mode {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    font-stretch: 112%;
+    color: var(--ink-2);
+    transition: background-color var(--t-ui) ease, color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
+  }
+  .ib__mode + .ib__mode { border-left: 1px solid var(--rule-strong); }
+  .ib__mode:active { transform: scale(0.97); }
+  .ib__mode[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); }
+  @media (hover: hover) and (pointer: fine) { .ib__mode:hover:not([aria-pressed='true']) { color: var(--ink); } }
+
+  /* ---- Counter ---- */
+  .ib__meter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--s-4) var(--s-6);
+    padding: var(--s-4) var(--s-5);
+    background: var(--plate);
+    border: 1px solid var(--rule);
+  }
+  .ib__left { display: flex; align-items: end; gap: var(--s-4); }
+  .ib__fig { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 750; font-stretch: 125%; line-height: 0.82; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--accent-text); }
+  .ib[data-mode='before'] .ib__fig { color: var(--danger); }
+  .ib__left-text { display: grid; gap: 2px; padding-bottom: 2px; }
+  .ib__left-text .small { color: var(--ink-2); }
+  .ib__tally { display: flex; gap: var(--s-6); }
+  .ib__tally div { display: grid; gap: 2px; }
+  .ib__tally dt { color: var(--ink-2); }
+  .ib__tally dd { font-size: 1.75rem; font-weight: 750; font-stretch: 125%; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ib[data-mode='before'] .ib__tally { opacity: 0.4; }
+
+  /* ---- Lanes ---- */
+  .ib__board { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .ib__lane { background: var(--ground); min-width: 0; }
+  .ib[data-mode='before'] .ib__lane:not(.ib__lane--all) { display: none; }
+  .ib[data-mode='before'] .ib__lane--all { display: block; }
+  .ib__lane-head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4); min-height: 2.5rem; font-weight: inherit; }
+  .ib__lane-n { font-size: 0.9375rem; font-weight: 750; font-stretch: 112%; font-variant-numeric: tabular-nums; }
+  .ib__lane--va .ib__lane-head { background: var(--field); color: var(--field-ink); }
+  .ib__lane--draft .ib__lane-head { background: var(--plate-2); }
+  .ib__lane--you .ib__lane-head { background: var(--plate-3); }
+  .ib__lane--all .ib__lane-head { background: var(--plate-3); }
+  .ib__list { display: grid; min-height: 0.5rem; }
+  .ib__list:empty::after { content: 'Nothing here'; display: block; padding: var(--s-3) var(--s-4); font-size: 0.875rem; color: var(--ink-3); }
+
+  .ib__msg {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 8.5rem) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s-1) var(--s-4);
+    padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
+    border-top: 1px solid var(--rule);
+    background: var(--ground);
+    position: relative;
+  }
+  .ib__list > .ib__msg:first-child { border-top: 0; }
+  .ib__time { font-size: 0.8125rem; color: var(--ink-3); font-weight: 600; }
+  .ib__from { font-size: 0.875rem; font-weight: 650; font-stretch: 112%; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ib__body { display: grid; min-width: 0; line-height: 1.3; }
+  .ib__subject { font-size: 0.9375rem; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+  .ib__note { font-size: 0.8125rem; color: var(--ink-2); }
+  .ib__msg[data-at='va'] .ib__note::before {
+    content: '';
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    margin-right: 0.4rem;
+    background: var(--accent-text);
+    clip-path: polygon(0 50%, 35% 85%, 100% 10%, 100% 30%, 35% 100%, 0 68%);
+  }
+  .ib__msg[data-at='va'] .ib__subject { color: var(--ink-2); }
+
+  /* Before: every message bold and unread */
+  .ib[data-mode='before'] .ib__msg::before { content: ''; position: absolute; left: 0.4rem; top: 50%; width: 0.4rem; height: 0.4rem; margin-top: -0.2rem; border-radius: 50%; background: var(--accent-text); }
+  .ib[data-mode='before'] .ib__subject { color: var(--ink); font-weight: 750; }
+  .ib[data-mode='before'] .ib__note::before { display: none; }
+  .ib[data-mode='before'] .ib__move { visibility: hidden; }
+
+  .ib__move { display: inline-flex; border: 1px solid var(--rule); }
+  .ib__to {
+    min-width: 2.75rem;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-stretch: 112%;
+    color: var(--ink-2);
+    transition: background-color var(--t-ui) ease, color var(--t-ui) ease, transform var(--t-press) var(--ease-out);
+  }
+  .ib__to + .ib__to { border-left: 1px solid var(--rule); }
+  .ib__to:active { transform: scale(0.94); }
+  .ib__to[aria-pressed='true'] { background: var(--ink); color: var(--ground); }
+  .ib__to[data-to='va'][aria-pressed='true'] { background: var(--field); color: var(--field-ink); }
+  .ib__to:focus-visible { outline-offset: -2px; }
+  @media (hover: hover) and (pointer: fine) { .ib__to:hover:not([aria-pressed='true']) { color: var(--ink); background: var(--plate-2); } }
+
+  @media (max-width: 39.99rem) {
+    .ib__msg { grid-template-columns: 2.25rem minmax(0, 1fr) auto; padding-left: var(--s-3); row-gap: 0; }
+    .ib__time { grid-column: 1; grid-row: 1; }
+    .ib__from { grid-column: 2; grid-row: 1; }
+    .ib__move { grid-column: 3; grid-row: 1; }
+    .ib__body { grid-column: 1 / -1; grid-row: 2; padding-bottom: var(--s-1); }
+    .ib[data-mode='before'] .ib__move { display: none; }
+  }
+
+  :global(html:not(.js)) .ib__switch, :global(html:not(.js)) .ib__move, :global(html:not(.js)) .ib__hint { display: none; }
+</style>
