@@ -1,0 +1,206 @@
+---
+/**
+ * Work hero instrument: a scatter board of the eight engagement blueprints. Across, the
+ * format (one specialist, a pod, or a fixed project); up, the length of the engagement, as an
+ * ordinal read from each blueprint's duration. Every square marker is a real link; hovering or
+ * focusing one fills the readout module, and the practice chips dim the markers that do not
+ * match. Server-rendered with all practices shown and the first blueprint in the readout.
+ */
+import { work, type WorkItem } from '@/data/work';
+import { services, type ServiceSlug } from '@/data/services';
+import Icon from '@/components/Icon.astro';
+import { lengthOf } from '@/lib/engagement';
+
+const CODES: Record<ServiceSlug, string> = {
+  'virtual-assistance': 'VA',
+  'recruitment-process-outsourcing': 'RPO',
+  'accounting-assistance': 'ACCT',
+  'legal-process-outsourcing': 'LPO',
+  'website-development': 'WEB',
+};
+
+const FORMATS: WorkItem['format'][] = ['Specialist', 'Pod', 'Project'];
+const FORMAT_NOTE: Record<WorkItem['format'], string> = { Specialist: 'One person', Pod: 'A team with a lead', Project: 'Fixed scope' };
+
+const plotted = work.map((w) => ({ w, len: lengthOf(w.duration), service: services.find((s) => s.slug === w.service) }));
+const weekRows = [...new Set(plotted.map((p) => p.len.weeks).filter((n): n is number => n !== null))].sort((a, b) => b - a);
+const rows: { key: string; label: string; weeks: number | null }[] = [
+  { key: 'ongoing', label: 'Ongoing', weeks: null },
+  ...weekRows.map((n) => ({ key: `w${n}`, label: `${n} weeks`, weeks: n })),
+];
+const inCell = (weeks: number | null, format: WorkItem['format']) => plotted.filter((p) => p.len.weeks === weeks && p.w.format === format);
+const filters = [{ slug: 'all', label: 'All practices' }, ...services.map((s) => ({ slug: s.slug, label: s.shortName }))];
+const first = plotted[0]!;
+---
+
+<div class="board" data-hero="board">
+  <div class="board__filters chips" role="group" aria-label="Show blueprints for one practice">
+    {
+      filters.map((f, i) => (
+        <button type="button" class="chip" aria-pressed={i === 0 ? 'true' : 'false'} data-board-filter={f.slug}>
+          {f.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="board__frame">
+    <p class="board__axis-y label" aria-hidden="true">Engagement length <Icon name="arrow-right" class="icon board__axis-arrow" /></p>
+    <div class="board__plot" role="list" aria-label="Eight blueprints by format and engagement length">
+      {
+        rows.map((r) => (
+          <>
+            <div class="board__ykey" aria-hidden="true">
+              <span>{r.label}</span>
+            </div>
+            {FORMATS.map((fmt) => (
+              <div class="board__cell" data-format={fmt}>
+                {inCell(r.weeks, fmt).map((p) => (
+                  <div role="listitem" class="board__slot">
+                    <a
+                      class:list={['board__marker', { 'is-active': p === first, 'is-tail': p.len.thenOngoing }]}
+                      href={`/work/${p.w.slug}`}
+                      data-board-item
+                      data-slug={p.w.slug}
+                      data-service={p.w.service}
+                      data-title={p.w.title}
+                      data-practice={p.service?.name ?? ''}
+                      data-format={p.w.format}
+                      data-team={p.w.team}
+                      data-duration={p.w.duration}
+                      aria-label={`${p.w.title}. ${p.service?.shortName ?? ''}, ${p.w.format}, ${p.w.duration}.`}
+                    >
+                      {CODES[p.w.service]}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </>
+        ))
+      }
+      <div class="board__corner" aria-hidden="true"></div>
+      {
+        FORMATS.map((fmt) => (
+          <div class="board__xkey" aria-hidden="true">
+            <span class="board__xname">{fmt}</span>
+            <span class="board__xnote">{FORMAT_NOTE[fmt]}</span>
+          </div>
+        ))
+      }
+    </div>
+    <p class="board__axis-x label" aria-hidden="true">Format <Icon name="arrow-right" class="icon board__axis-arrow" /></p>
+  </div>
+
+  <div class="board__readout ruled" data-board-readout>
+    <div class="module board__readout-main">
+      <p class="label board__tag">Blueprint · <span data-r="practice">{first.service?.name}</span></p>
+      <p class="board__title" data-r="title">{first.w.title}</p>
+      <a class="more" href={`/work/${first.w.slug}`} data-r="link">Open the blueprint <Icon name="arrow-right" /></a>
+    </div>
+    <dl class="module board__readout-spec">
+      <div><dt class="label">Format</dt><dd data-r="format">{first.w.format}</dd></div>
+      <div><dt class="label">Team</dt><dd data-r="team">{first.w.team}</dd></div>
+      <div><dt class="label">Duration</dt><dd data-r="duration">{first.w.duration}</dd></div>
+    </dl>
+  </div>
+  <p class="board__hint small" role="status" data-board-status>Hover or focus a square to read the blueprint. Each square opens it.</p>
+</div>
+
+<style>
+  .board { display: grid; gap: var(--s-4); }
+  .board__frame { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--s-2); }
+  .board__axis-y {
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    color: var(--ink-2);
+    font-size: 0.6875rem;
+    justify-self: center;
+  }
+  .board__axis-y .board__axis-arrow { rotate: 180deg; }
+  .board__axis-arrow { width: 0.9rem; height: 0.9rem; }
+  .board__axis-x { grid-column: 2; display: inline-flex; align-items: center; justify-content: flex-end; gap: var(--s-2); color: var(--ink-2); font-size: 0.6875rem; }
+
+  .board__plot {
+    display: grid;
+    grid-template-columns: 5.5rem repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .board__plot > * { background: var(--ground); }
+  .board__ykey { display: flex; align-items: center; padding: var(--s-2) var(--s-3); font-size: 0.8125rem; font-weight: 650; font-stretch: var(--semi-wide); color: var(--ink-2); font-variant-numeric: tabular-nums; background: var(--plate); white-space: nowrap; }
+  .board__cell {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: var(--s-2);
+    min-height: 5.25rem;
+    padding: var(--s-3) var(--s-2);
+    /* A centre cross-hair in every cell: the plotting grid. */
+    background:
+      linear-gradient(var(--rule), var(--rule)) 50% 50% / 1px 0.75rem no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 50% 50% / 0.75rem 1px no-repeat,
+      var(--ground);
+  }
+  .board__corner { background: var(--plate); }
+  .board__xkey { display: grid; gap: 2px; padding: var(--s-3); text-align: center; background: var(--plate); }
+  .board__xname { font-weight: 750; font-stretch: var(--wide); text-transform: uppercase; font-size: 0.875rem; }
+  .board__xnote { font-size: 0.75rem; color: var(--ink-2); }
+
+  .board__slot { display: contents; }
+  .board__marker {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 1px solid var(--ink);
+    background: var(--ground);
+    color: var(--ink);
+    font-size: 0.75rem;
+    font-weight: 750;
+    font-stretch: var(--wide);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: background-color var(--t-ui) ease, color var(--t-ui) ease, opacity var(--t-ui) ease, transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease;
+  }
+  .board__marker:active { transform: scale(0.97); }
+  .board__marker.is-active { background: var(--field); color: var(--field-ink); border-color: var(--field); }
+  /* A project that turns into ongoing intake: a dashed tail upward. */
+  .board__marker.is-tail::after { content: ''; position: absolute; left: 50%; bottom: 100%; height: 1.1rem; border-left: 1px dashed var(--ink-2); }
+  .board__marker:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) {
+    .board__marker:hover { border-color: var(--field); }
+  }
+  .board__marker.is-dim { opacity: 0.18; border-style: dashed; }
+  :global(:root[data-theme='light']) .board__marker.is-active { border-color: var(--carbon-950); }
+
+  .board__readout { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .board__readout { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+  .board__readout .module { padding: var(--s-4) var(--s-5); }
+  .board__readout-main { display: grid; gap: var(--s-3); align-content: start; }
+  .board__tag { color: var(--ink-2); }
+  .board__title { font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem); font-weight: 700; font-stretch: var(--semi-wide); line-height: 1.2; min-height: 2.4em; }
+  .board__readout-spec { display: grid; gap: var(--s-2); margin: 0; }
+  .board__readout-spec div { display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--s-3); align-items: baseline; }
+  .board__readout-spec dt { color: var(--ink-2); font-size: 0.6875rem; }
+  .board__readout-spec dd { font-size: 0.9375rem; font-weight: 550; }
+  .board__hint { color: var(--ink-2); }
+
+  @media (max-width: 30rem) {
+    .board__plot { grid-template-columns: 3.75rem repeat(3, minmax(0, 1fr)); }
+    .board__ykey { padding: var(--s-2); font-size: 0.75rem; white-space: normal; line-height: 1.2; }
+    .board__marker { width: 2.75rem; height: 2.75rem; font-size: 0.6875rem; }
+    .board__cell { padding-inline: 2px; gap: 4px; }
+    .board__xnote { display: none; }
+    .board__xname { font-size: 0.6875rem; font-stretch: var(--normal); letter-spacing: 0.02em; }
+    .board__xkey { padding-inline: 2px; }
+  }
+  :global(html:not(.js)) .board__filters { display: none; }
+</style>

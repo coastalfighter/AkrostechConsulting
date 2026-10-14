@@ -1,18 +1,28 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
-import Media from '@/components/Media.astro';
+import Hero from '@/components/Hero.astro';
+import OrgChain from '@/components/heroes/OrgChain.astro';
+import Photo from '@/components/Photo.astro';
+import type { PhotoName } from '@/components/Photo.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
 import { site, fullAddress } from '@/config/site';
 import { pages } from '@/data/pages';
-import { mission, vision, values, story, teamRoles, vetting } from '@/data/company';
+import { mission, vision, values, story, teamRoles, vetting, commitments } from '@/data/company';
 
 const crumbs = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
 ];
-const storyArt = ['about-va', 'about-rpo', 'about-accounting', 'about-web'];
+const f = site.figures;
+
+/** One photograph per story chapter. Generic stock: people at work, never our staff. */
+const storyPhotos: { name: PhotoName; focal?: string }[] = [
+  { name: 'meeting-presentation', focal: '50% 40%' },
+  { name: 'standup', focal: '45% 50%' },
+  { name: 'team-table', focal: '50% 50%' },
+  { name: 'office-lounge', focal: '50% 60%' },
+];
 
 const year = [
   { when: 'Day 0', title: 'Discovery call', body: 'Thirty minutes to list the work, the tools, the hours and what good looks like.' },
@@ -26,65 +36,101 @@ const year = [
 ---
 
 <BaseLayout {...pages.about} image="/og/about.png" breadcrumbs={crumbs} webPage={{ '@type': ['WebPage', 'AboutPage'] }}>
-  <PageHero
-    title={['Offshore teams,', 'onshore standard.']}
-    lede="Akrostech places vetted professionals in India on U.S. working hours, from our headquarters in Wilmington, Delaware. We exist so growing companies can add capacity without lowering the bar."
-    crumbs={crumbs}
-  />
+  <Hero labelledby="about-title" split="5-7" crumbs={crumbs}>
+    <h1 class="h1 hero__title" id="about-title">Offshore teams, <span class="accent">onshore standard.</span></h1>
+    <p class="hero__lead">
+      Akrostech places vetted professionals in India on U.S. working hours, from our headquarters in Wilmington, Delaware. We exist so growing
+      companies can add capacity without lowering the bar.
+    </p>
+    <div class="actions">
+      <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">
+        Meet a client partner <Icon name="arrow-up-right" class="btn__arrow" />
+      </a>
+      <a class="btn btn--ghost" href="#vetting-title">How we vet <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+    </div>
+    <OrgChain slot="instrument" />
 
-  <!-- Scroll-driven story -->
-  <section class="story" aria-labelledby="story-title" data-story>
-    <div class="story__inner wrap">
-      <div class="story__sticky" aria-hidden="true">
-        <div class="story__frames">
-          {
-            storyArt.map((id, i) => (
-              <div class="story__frame" data-frame={i}>
-                <Media id={id} alt="" ratio="4 / 5" sizes="(min-width: 1024px) 40vw, 90vw" widths={[480, 800, 1200]} />
-              </div>
-            ))
-          }
-        </div>
+    <div slot="strip" class="strip ruled">
+      <div class="module module--flex lime">
+        <p class="figure"><span data-count>{f.professionals}</span>+</p>
+        <p class="strip__text">Vetted professionals across five practices, every one through five stages of vetting.</p>
       </div>
-      <div class="story__chapters">
-        <h2 class="sr-only" id="story-title">Our story</h2>
-        {
-          story.map((c, i) => (
-            <article class="story__chapter" data-chapter={i}>
-              <p class="story__when">{c.when}</p>
-              <h3 class="story__title">{c.title}</h3>
-              <p class="story__body">{c.body}</p>
-            </article>
-          ))
-        }
+      <div class="strip__photo">
+        <Photo name="meeting-presentation" fill sizes="(min-width: 64rem) 36vw, 100vw" focal="50% 35%" />
+      </div>
+      <div class="module module--flex">
+        <p class="figure"><span data-count>{f.accuracy}</span>%</p>
+        <p class="strip__text">Task accuracy, with a team lead reviewing work before it reaches you.</p>
+      </div>
+      <div class="module module--flex">
+        <p class="figure">{f.matchHours}h</p>
+        <p class="strip__text">From the discovery call to a shortlist you can review.</p>
       </div>
     </div>
-  </section>
+  </Hero>
 
-  <!-- Mission and vision -->
-  <section class="mv" aria-labelledby="mission-title">
-    <div class="wrap mv__grid">
-      <div class="mv__block">
-        <h2 class="mv__label" id="mission-title">Mission</h2>
+  <!-- Mission and vision: a whole lime field -->
+  <section class="mv lime" aria-labelledby="mission-title">
+    <div class="wrap grid mv__grid">
+      <div class="mv__block c-8">
+        <h2 class="h3 mv__key" id="mission-title">Mission</h2>
         <p class="mv__text" data-reveal>{mission}</p>
       </div>
-      <div class="mv__block mv__block--vision">
-        <h2 class="mv__label">Vision</h2>
+      <div class="mv__block mv__block--vision c-4">
+        <h2 class="h3 mv__key">Vision</h2>
         <p class="mv__text mv__text--small" data-reveal>{vision}</p>
       </div>
     </div>
   </section>
 
-  <!-- Values as poster lines -->
-  <section class="values section" aria-labelledby="values-title">
+  <!-- The story: chapters on rules, a photograph module that follows them -->
+  <section class="section story" aria-labelledby="story-title" data-story>
     <div class="wrap">
-      <h2 class="h2 values__title" id="values-title" data-split>What we hold to.</h2>
-      <ul class="values__list" role="list">
+      <div class="section-head grid">
+        <h2 class="h2" id="story-title" data-split>Why Akrostech exists.</h2>
+        <p data-reveal>Four chapters, from the problem every growing company meets to the way we work today.</p>
+      </div>
+      <div class="grid story__grid">
+        <div class="story__frames c-5" aria-hidden="true">
+          {
+            storyPhotos.map((p, i) => (
+              <div class:list={['story__frame', { 'is-active': i === 0 }]} data-frame={i}>
+                <Photo name={p.name} alt="" ratio="4 / 5" focal={p.focal} sizes="(min-width: 64rem) 36vw, 100vw" />
+              </div>
+            ))
+          }
+          <p class="story__note small">Stock photography of people at work.</p>
+        </div>
+        <ol class="story__chapters c-6 s-7" role="list">
+          {
+            story.map((c, i) => (
+              <li class:list={['story__chapter', { 'is-active': i === 0 }]} data-chapter={i}>
+                <p class="label story__when">{c.when}</p>
+                <div class="story__copy">
+                  <h3 class="h3">{c.title}</h3>
+                  <p class="story__body">{c.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values as poster lines -->
+  <section class="section section--flush-top values" aria-labelledby="values-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="values-title" data-split>What we hold to.</h2>
+        <p data-reveal>Five rules that decide how the work is done, written into every engagement whatever the practice.</p>
+      </div>
+      <ul class="values__list" role="list" data-reveal-group>
         {
           values.map((v) => (
-            <li class="values__item" data-reveal>
-              <h3 class="values__name">{v.title}</h3>
-              <p class="values__body">{v.body}</p>
+            <li class="values__item grid" data-reveal>
+              <h3 class="values__name c-7">{v.title}</h3>
+              <p class="values__body c-4 s-9">{v.body}</p>
             </li>
           ))
         }
@@ -92,17 +138,18 @@ const year = [
     </div>
   </section>
 
-  <!-- Vetting -->
-  <section class="vetting section" aria-labelledby="vetting-title">
-    <div class="wrap vetting__grid">
-      <div class="vetting__head">
+  <!-- Vetting: a narrowing funnel -->
+  <section class="section plate vetting" aria-labelledby="vetting-title">
+    <div class="wrap grid vetting__grid">
+      <div class="vetting__head c-5">
         <h2 class="h2" id="vetting-title" data-split>Five checks before you meet anyone.</h2>
         <p class="vetting__intro" data-reveal>
           Most candidates do not make it through. The ones who do have passed a skills test, a language assessment, a background check, a paid work
           sample and an interview about judgment.
         </p>
+        <Photo name="pair-at-laptop" ratio="4 / 3" sizes="(min-width: 64rem) 36vw, 100vw" reveal="clip" />
       </div>
-      <ol class="vetting__steps" role="list" data-reveal-group>
+      <ol class="vetting__steps c-6 s-7" role="list" data-reveal-group>
         {
           vetting.map((v, i) => (
             <li class="vetting__step" data-reveal>
@@ -116,54 +163,28 @@ const year = [
     </div>
   </section>
 
-  <!-- Team -->
-  <section class="team section" aria-labelledby="team-title">
+  <!-- Team roles -->
+  <section class="section team" aria-labelledby="team-title">
     <div class="wrap">
-      <div class="team__head">
-        <h2 class="h1" id="team-title" data-split>The people on your account.</h2>
+      <div class="section-head grid">
+        <h2 class="h2" id="team-title" data-split>The people on your account.</h2>
         <p data-reveal>
           Every engagement has the same four roles. You always know who owns the relationship, who owns the quality and who does the work.
         </p>
       </div>
-      <ul class="team__grid" role="list" data-reveal-group>
-        {
-          teamRoles.map((r, i) => (
-            <li class="team__card" data-reveal data-tilt="4">
-              <span class="team__index" aria-hidden="true">
-                <svg viewBox="0 0 96 24" class="team__band">
-                  {Array.from({ length: 12 }, (_, c) => (
-                    <rect x={c * 8} y="0" width="7" height="24" class:list={{ on: c <= i * 3 + 2 }} />
-                  ))}
-                </svg>
-              </span>
-              <h3 class="team__role">{r.role}</h3>
-              <p class="team__where">{r.practice}</p>
-              <p class="team__body">{r.body}</p>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
-
-  <!-- First-year timeline -->
-  <section class="year section" aria-labelledby="year-title" data-timeline>
-    <div class="wrap year__grid">
-      <div class="year__head">
-        <h2 class="h2" id="year-title" data-split>How an engagement grows.</h2>
-        <p data-reveal>From a first call to a team, the same steps every time.</p>
-      </div>
-      <div class="year__track">
-        <div class="year__rail" aria-hidden="true"><span data-timeline-line></span></div>
-        <ol class="year__list" role="list">
+      <div class="grid team__grid">
+        <div class="team__photo c-5">
+          <Photo name="standup" ratio="4 / 5" sizes="(min-width: 64rem) 36vw, 100vw" reveal="clip" focal="40% 50%" />
+        </div>
+        <ol class="team__list c-7" role="list" data-reveal-group>
           {
-            year.map((y) => (
-              <li class="year__item" data-timeline-step>
-                <p class="year__when">{y.when}</p>
-                <div>
-                  <h3 class="year__title">{y.title}</h3>
-                  <p class="year__body">{y.body}</p>
+            teamRoles.map((r, i) => (
+              <li class:list={['team__role', { lime: i === 2 }]} data-reveal>
+                <div class="team__name">
+                  <h3 class="h3">{r.role}</h3>
+                  <p class="label team__where">{r.practice}</p>
                 </div>
+                <p class="team__body">{r.body}</p>
               </li>
             ))
           }
@@ -172,20 +193,72 @@ const year = [
     </div>
   </section>
 
-  <!-- Locations -->
-  <section class="places wrap section" aria-labelledby="places-title">
-    <h2 class="sr-only" id="places-title">Where we are</h2>
-    <div class="places__item" data-reveal>
-      <p class="places__label">Headquarters</p>
-      <p class="places__name">Wilmington, Delaware</p>
-      <p class="places__body">{fullAddress}. Client partners, contracts and billing. Visits by appointment, {site.hoursLabel}.</p>
-      <a class="arrow-link" href="/locations/wilmington-de">Wilmington service area <Icon name="arrow-up-right" /></a>
+  <!-- Commitments -->
+  <section class="section section--flush-top" aria-labelledby="commit-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="commit-title" data-split>Six commitments, in writing.</h2>
+        <p data-reveal>Written into every engagement letter, whether you hire one assistant or a team of ten.</p>
+      </div>
+      <ul class="commit ruled" role="list" data-reveal-group>
+        {
+          commitments.map((c) => (
+            <li class="module module--flex commit__item" data-reveal>
+              <p class="commit__figure">{c.figure}</p>
+              <h3 class="commit__title">{c.title}</h3>
+              <p class="commit__body">{c.body}</p>
+            </li>
+          ))
+        }
+      </ul>
     </div>
-    <div class="places__item" data-reveal>
-      <p class="places__label">Delivery</p>
-      <p class="places__name">India</p>
-      <p class="places__body">Specialists and team leads working fixed shifts on Eastern, Central, Mountain or Pacific time.</p>
-      <a class="arrow-link" href="/contact">Talk to a client partner <Icon name="arrow-up-right" /></a>
+  </section>
+
+  <!-- First-year timeline -->
+  <section class="section plate year" aria-labelledby="year-title">
+    <div class="wrap grid year__grid">
+      <div class="year__head c-4">
+        <h2 class="h2" id="year-title" data-split>How an engagement grows.</h2>
+        <p data-reveal>From a first call to a team, the same steps every time.</p>
+      </div>
+      <ol class="year__list c-8 s-5" role="list" data-reveal-group>
+        {
+          year.map((y, i) => (
+            <li class:list={['year__item', { 'is-key': i === 2 }]} data-reveal>
+              <p class="year__when">{y.when}</p>
+              <h3 class="year__title">{y.title}</h3>
+              <p class="year__body">{y.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Where we are -->
+  <section class="section places" aria-labelledby="places-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="places-title" data-split>Where we are.</h2>
+        <p data-reveal>Contracts and client partners in Delaware. Delivery teams in India, on your clock.</p>
+      </div>
+      <div class="places__grid ruled">
+        <div class="module module--flex places__item">
+          <p class="label places__key">Headquarters</p>
+          <p class="places__name">Wilmington, Delaware</p>
+          <p class="places__body">{fullAddress}. Client partners, contracts and billing. Visits by appointment, {site.hoursLabel}.</p>
+          <a class="more module__foot" href="/locations/wilmington-de">Wilmington service area <Icon name="arrow-up-right" /></a>
+        </div>
+        <div class="places__photo">
+          <Photo name="office-hallway" fill sizes="(min-width: 64rem) 34vw, 100vw" />
+        </div>
+        <div class="module module--flex places__item lime">
+          <p class="label places__key">Delivery</p>
+          <p class="places__name">India</p>
+          <p class="places__body">Specialists and team leads working fixed shifts on Eastern, Central, Mountain or Pacific time.</p>
+          <a class="more module__foot" href="/contact">Talk to a client partner <Icon name="arrow-up-right" /></a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -193,16 +266,15 @@ const year = [
 </BaseLayout>
 
 <script>
-  // Story: swap the sticky frame as chapters cross the middle of the viewport.
+  // Story: the photograph module follows the chapter crossing the middle of the viewport.
   document.querySelectorAll<HTMLElement>('[data-story]').forEach((root) => {
     const frames = root.querySelectorAll<HTMLElement>('[data-frame]');
     const chapters = root.querySelectorAll<HTMLElement>('[data-chapter]');
-    const set = (i: number) => {
-      root.dataset.active = String(i);
+    if (!frames.length || !chapters.length) return;
+    const set = (i: number): void => {
       frames.forEach((f) => f.classList.toggle('is-active', Number(f.dataset.frame) === Math.min(i, frames.length - 1)));
       chapters.forEach((c) => c.classList.toggle('is-active', Number(c.dataset.chapter) === i));
     };
-    set(0);
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && set(Number((e.target as HTMLElement).dataset.chapter))),
       { rootMargin: '-45% 0px -45% 0px' },
@@ -212,124 +284,119 @@ const year = [
 </script>
 
 <style>
-  /* Story */
-  .story { padding-block: var(--space-2xl) var(--section-gap); }
-  .story__inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--gutter) clamp(2rem, 8vw, 9rem); }
-  .story__sticky { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
-  .story__frames { display: grid; }
-  .story__frame { grid-area: 1 / 1; opacity: 0; scale: 1.03; transition: opacity 700ms var(--ease-out), scale 1100ms var(--ease-out); }
-  .story__frame.is-active { opacity: 1; scale: 1; }
-  :global(html:not(.js)) .story__frame:first-child { opacity: 1; }
-  .story__chapters { display: grid; gap: 30svh; padding-block: 10svh 30svh; }
-  .story__chapter { --ch-ink: var(--muted); transition: translate 600ms var(--ease-out); }
-  .story__chapter.is-active { --ch-ink: var(--ink-strong); translate: 0.5rem 0; }
-  .story__chapter .story__title { color: var(--ch-ink); transition: color 600ms var(--ease-out); }
-  :global(html:not(.js)) .story__chapter { --ch-ink: var(--ink-strong); }
-  .story__when { font-weight: 600; color: var(--accent-text); margin-bottom: var(--space-xs); }
-  .story__title { font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.04; letter-spacing: -0.035em; color: var(--ink-strong); }
-  .story__body { margin-top: var(--space-m); max-width: 46ch; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem); }
-  @media (max-width: 1023px) {
-    .story__inner { grid-template-columns: 1fr; }
-    .story__sticky { position: relative; top: 0; max-width: 26rem; }
-    .story__chapters { gap: var(--space-2xl); padding-block: var(--space-xl) 0; }
-    .story__chapter { --ch-ink: var(--ink-strong); }
+  /* ---- Hero strip ---- */
+  .strip { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .strip { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .strip { grid-template-columns: 3fr 4fr 2.5fr 2.5fr; } }
+  .strip .module { min-height: 9rem; gap: var(--s-4); justify-content: space-between; }
+  @media (min-width: 64rem) { .strip .module { min-height: 12rem; } }
+  .strip .figure { font-size: clamp(2.5rem, 1.6rem + 2vw, 3.5rem); white-space: nowrap; }
+  .strip .lime .figure { font-size: clamp(3.5rem, 2rem + 4vw, 5.5rem); }
+  .strip__text { max-width: 30ch; font-size: var(--t-small); color: var(--ink-2); }
+  .strip .lime .strip__text { font-size: 1.0625rem; font-weight: 550; }
+  .strip__photo { min-height: 14rem; }
+  @media (min-width: 40rem) and (max-width: 63.99rem) { .strip__photo { order: 4; } }
+
+  /* ---- Mission / vision ---- */
+  .mv { padding-block: var(--s-9); }
+  .mv__grid { row-gap: var(--s-8); align-items: end; }
+  .mv__block { display: grid; gap: var(--s-5); align-content: start; padding-top: var(--s-4); border-top: 1px solid var(--rule-strong); }
+  .mv__key { font-size: 1.125rem; }
+  .mv__text { font-size: clamp(1.75rem, 0.9rem + 2.8vw, 3.5rem); font-weight: 700; font-stretch: var(--wide); line-height: 1.04; letter-spacing: -0.025em; max-width: 24ch; }
+  .mv__text--small { font-size: clamp(1.25rem, 1rem + 0.9vw, 1.75rem); font-weight: 600; font-stretch: var(--semi-wide); line-height: 1.2; letter-spacing: -0.01em; }
+
+  /* ---- Story ---- */
+  .story__grid { row-gap: var(--s-7); }
+  .story__frames { display: grid; align-self: start; gap: var(--s-3); }
+  .story__frame { grid-area: 1 / 1; }
+  .story__note { grid-area: 2 / 1; color: var(--ink-3); }
+  @media (min-width: 64rem) {
+    .story__frames { position: sticky; top: calc(var(--header-h) + var(--s-6)); }
+    .story__frame { opacity: 0; transition: opacity 600ms var(--ease-out), clip-path 700ms var(--ease-in-out); clip-path: inset(0 0 8% 0); }
+    .story__frame.is-active { opacity: 1; clip-path: inset(0); }
   }
-
-  /* Mission and vision */
-  .mv { background: var(--field); color: var(--field-ink); padding-block: var(--section-gap); }
-  .mv__grid { display: grid; gap: var(--space-2xl); }
-  .mv__label { font-family: var(--font-text); font-size: var(--step-0); font-weight: 600; color: var(--field-muted); margin-bottom: var(--space-m); }
-  .mv__text { font-family: var(--font-display); font-size: clamp(1.75rem, 0.9rem + 3vw, 3.75rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.04em; max-width: 26ch; }
-  .mv__block--vision { justify-self: end; max-width: 40rem; }
-  .mv__text--small { font-size: clamp(1.375rem, 1rem + 1.4vw, 2.25rem); line-height: 1.15; font-weight: 500; letter-spacing: -0.025em; }
-
-  /* Values */
-  .values__title { margin-bottom: var(--space-2xl); }
-  .values__list { display: grid; }
-  .values__item {
+  @media (max-width: 63.99rem) {
+    .story__frame:not(:first-child) { display: none; }
+  }
+  .story__chapters { border-top: 1px solid var(--rule-strong); }
+  .story__chapter {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 26rem);
-    align-items: baseline;
-    gap: var(--space-s) var(--gutter);
-    padding-block: clamp(0.75rem, 1.5vw, 1.25rem);
+    gap: var(--s-3) var(--gutter);
+    padding-block: var(--s-6);
+    border-bottom: 1px solid var(--rule);
+    transition: opacity var(--t-ui) ease;
   }
-  .values__name {
-    font-family: var(--font-display);
-    font-size: clamp(2.25rem, 0.8rem + 5.6vw, 7rem);
-    font-weight: 600;
-    line-height: 0.95;
-    letter-spacing: -0.05em;
-    color: var(--ink-strong);
-    transition: color var(--dur-base) var(--ease-out), translate var(--dur-slow) var(--ease-out);
+  @media (min-width: 40rem) { .story__chapter { grid-template-columns: 9rem 1fr; } }
+  @media (min-width: 64rem) {
+    .story__chapter { min-height: 52svh; align-content: center; opacity: 0.4; }
+    .story__chapter.is-active { opacity: 1; }
+    :global(html:not(.js)) .story__chapter { opacity: 1; }
   }
-  .values__item:hover .values__name { color: var(--accent-text); translate: 0.08em 0; }
-  .values__body { color: var(--ink); }
-  @media (max-width: 1023px) {
-    .values__item { grid-template-columns: 1fr; }
+  .story__when { color: var(--accent-text); padding-top: 0.45rem; }
+  .story__copy { display: grid; gap: var(--s-4); }
+  .story__body { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; max-width: 46ch; }
+
+  /* ---- Values ---- */
+  .values__list { border-top: 1px solid var(--rule-strong); }
+  .values__item { padding-block: var(--s-5); border-bottom: 1px solid var(--rule); row-gap: var(--s-3); align-items: baseline; transition: opacity var(--t-ui) ease; }
+  .values__name { font-size: clamp(1.75rem, 0.9rem + 3.4vw, 4.25rem); font-weight: 750; font-stretch: var(--wide); line-height: 0.98; letter-spacing: -0.03em; text-transform: uppercase; transition: color var(--t-ui) ease; }
+  .values__body { color: var(--ink-2); }
+  @media (hover: hover) and (pointer: fine) {
+    .values__list:has(.values__item:hover) .values__item:not(:hover) { opacity: 0.35; }
+    .values__item:hover .values__name { color: var(--accent-text); }
   }
 
-  /* Vetting */
-  .vetting { background: var(--surface); }
-  .vetting__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-2xl) var(--gutter); }
-  .vetting__head { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
-  .vetting__intro { margin-top: var(--space-m); max-width: 40ch; }
-  .vetting__steps { display: grid; gap: var(--space-l); }
-  .vetting__bar { display: block; width: var(--w); height: 0.75rem; background: var(--accent); margin-bottom: var(--space-s); }
-  .vetting__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
-  .vetting__body { margin-top: 0.4rem; max-width: 52ch; }
-  @media (max-width: 1023px) {
-    .vetting__grid { grid-template-columns: 1fr; }
-    .vetting__head { position: static; }
-  }
+  /* ---- Vetting ---- */
+  .vetting__grid { row-gap: var(--s-7); }
+  .vetting__head { display: grid; gap: var(--s-5); align-content: start; }
+  @media (min-width: 64rem) { .vetting__head { position: sticky; top: calc(var(--header-h) + var(--s-6)); align-self: start; } }
+  .vetting__intro { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.45; max-width: 40ch; }
+  .vetting__steps { display: grid; border-top: 1px solid var(--rule-strong); }
+  .vetting__step { display: grid; gap: var(--s-2); padding-block: var(--s-5) var(--s-6); border-bottom: 1px solid var(--rule); }
+  .vetting__bar { display: block; width: var(--w); height: 0.75rem; background: var(--field); margin-bottom: var(--s-3); }
+  .vetting__name { font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem); font-stretch: var(--wide); line-height: 1.1; letter-spacing: -0.015em; }
+  .vetting__body { color: var(--ink-2); max-width: 52ch; }
 
-  /* Team */
-  .team__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-m) var(--gutter); align-items: end; margin-bottom: var(--space-2xl); }
-  .team__head h2 { grid-column: 1 / span 7; }
-  .team__head p { grid-column: 9 / -1; }
-  .team__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gutter); }
-  .team__card { display: grid; align-content: start; gap: 0.5rem; padding: clamp(1.25rem, 2vw, 1.75rem); background: var(--bg-raised); min-height: 20rem; transform-style: preserve-3d; }
-  .team__band { width: 6rem; height: 1.5rem; margin-bottom: auto; }
-  .team__band rect { fill: var(--surface-strong); }
-  .team__band rect.on { fill: var(--accent); }
-  .team__role { margin-top: var(--space-2xl); font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; color: var(--ink-strong); }
-  .team__where { font-size: var(--step--1); color: var(--muted); }
-  .team__body { margin-top: 0.4rem; }
-  @media (max-width: 1023px) {
-    .team__head h2, .team__head p { grid-column: 1 / -1; }
-    .team__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 599px) {
-    .team__grid { grid-template-columns: 1fr; }
-    .team__card { min-height: auto; }
-  }
+  /* ---- Team ---- */
+  .team__grid { row-gap: var(--s-6); }
+  .team__photo { align-self: stretch; }
+  .team__list { display: grid; border-top: 1px solid var(--rule-strong); align-content: start; }
+  .team__role { display: grid; gap: var(--s-3) var(--gutter); padding: var(--s-5) 0; border-bottom: 1px solid var(--rule); }
+  .team__role.lime { padding-inline: var(--s-5); }
+  @media (min-width: 40rem) { .team__role { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
+  .team__name { display: grid; gap: var(--s-2); align-content: start; }
+  .team__where { color: var(--ink-2); }
+  .team__body { color: var(--ink-2); }
 
-  /* Year timeline */
-  .year { background: var(--inverse); color: var(--inverse-ink); }
-  .year__grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: var(--space-2xl) var(--gutter); }
-  .year__head { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
-  .year__head .h2 { color: var(--inverse-ink); }
-  .year__head p { margin-top: var(--space-m); color: var(--inverse-muted); }
-  .year__track { position: relative; padding-left: clamp(1.5rem, 3vw, 3rem); }
-  .year__rail { position: absolute; left: 0; top: 0.6rem; bottom: 0.6rem; width: 3px; background: light-dark(var(--char-700), var(--sand-400)); }
-  .year__rail span { display: block; width: 100%; height: 100%; background: var(--inverse-accent); transform-origin: 50% 0; }
-  .year__list { display: grid; gap: var(--space-xl); }
-  .year__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--gutter); transition: translate 500ms var(--ease-out); }
-  .year__item:global(.is-active) { translate: 0.5rem 0; }
-  .year__when { font-weight: 600; color: var(--inverse-accent); }
-  .year__title { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
-  .year__body { margin-top: 0.35rem; color: var(--inverse-muted); max-width: 50ch; }
-  @media (max-width: 1023px) {
-    .year__grid { grid-template-columns: 1fr; }
-    .year__head { position: static; }
-    .year__item { grid-template-columns: 1fr; gap: 0.25rem; }
-  }
+  /* ---- Commitments ---- */
+  .commit { grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .commit { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .commit { grid-template-columns: repeat(3, 1fr); } }
+  .commit__item { gap: var(--s-3); }
+  @media (min-width: 64rem) { .commit__item { min-height: 15rem; } }
+  .commit__figure { font-size: clamp(2.25rem, 1.5rem + 2vw, 3.25rem); font-weight: 750; font-stretch: var(--wide); line-height: 1; color: var(--accent-text); letter-spacing: -0.02em; }
+  .commit__title { font-size: 1.1875rem; font-stretch: var(--semi-wide); line-height: 1.2; margin-top: auto; }
+  .commit__body { color: var(--ink-2); font-size: var(--t-small); }
 
-  /* Places */
-  .places { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl) var(--gutter); }
-  .places__label { font-weight: 600; color: var(--muted); }
-  .places__name { font-family: var(--font-display); font-size: var(--step-3); font-weight: 600; line-height: 0.95; letter-spacing: -0.05em; color: var(--ink-strong); margin-block: var(--space-xs) var(--space-m); }
-  .places__body { max-width: 40ch; margin-bottom: var(--space-s); }
-  @media (max-width: 767px) {
-    .places { grid-template-columns: 1fr; }
-  }
+  /* ---- Year ---- */
+  .year__grid { row-gap: var(--s-7); }
+  .year__head { display: grid; gap: var(--s-4); align-content: start; }
+  .year__head p { color: var(--ink-2); font-size: var(--t-lead); }
+  @media (min-width: 64rem) { .year__head { position: sticky; top: calc(var(--header-h) + var(--s-6)); align-self: start; } }
+  .year__list { position: relative; display: grid; border-top: 1px solid var(--rule-strong); }
+  .year__item { display: grid; gap: var(--s-2) var(--gutter); padding: var(--s-5) 0; border-bottom: 1px solid var(--rule); }
+  @media (min-width: 40rem) { .year__item { grid-template-columns: 8rem minmax(0, 2fr) minmax(0, 3fr); align-items: baseline; } }
+  .year__item.is-key { background: var(--field); color: var(--field-ink); --ink-2: var(--field-ink-2); --accent-text: var(--field-ink); padding-inline: var(--s-4); margin-inline: calc(var(--s-4) * -1); }
+  .year__when { font-weight: 700; font-stretch: var(--semi-wide); color: var(--accent-text); font-variant-numeric: tabular-nums; }
+  .year__title { font-size: 1.25rem; font-stretch: var(--semi-wide); line-height: 1.2; }
+  .year__body { color: var(--ink-2); }
+
+  /* ---- Places ---- */
+  .places__grid { grid-template-columns: 1fr; }
+  @media (min-width: 64rem) { .places__grid { grid-template-columns: 4fr 4fr 4fr; } }
+  .places__item { gap: var(--s-4); min-height: 20rem; }
+  .places__key { color: var(--ink-2); }
+  .places__name { text-wrap: balance; font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem); font-weight: 750; font-stretch: var(--wide); line-height: 1; letter-spacing: -0.025em; text-transform: uppercase; }
+  .places__body { color: var(--ink-2); max-width: 40ch; }
+  .places__photo { min-height: 18rem; }
 </style>
