@@ -1,77 +1,103 @@
 ---
+/**
+ * Guides index, in the Sample-3 order: hero, all guides (the live finder, then the grid with the
+ * newest guide in the lead slot), closing call to action. The hero carries the generative field;
+ * the guide finder instrument sits in the body directly above the grid it filters.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
+import FieldHero from '@/components/FieldHero.astro';
 import ArticleSearch from '@/components/instruments/ArticleSearch.astro';
-import PostCard from '@/components/PostCard.astro';
+import GuideCard from '@/components/GuideCard.astro';
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
 import { pages } from '@/data/pages';
-import { getPosts, postHref } from '@/lib/blog';
+import { categorySlug, formatDate, getPosts, postHref, readingMinutes } from '@/lib/blog';
 import { canonical, ids } from '@/lib/seo';
 
 const posts = await getPosts();
-const featured = posts.find((p) => p.data.featured) ?? posts[0]!;
-const rest = posts.filter((p) => p.id !== featured.id);
-const ordered = [featured, ...rest];
+const latest = posts[0]!;
 const crumbs = [
   { name: 'Home', path: '/' },
-  { name: 'Insights', path: '/blog' },
+  { name: 'Blog', path: '/blog' },
 ];
+const topics = new Set(posts.map((p) => p.data.category)).size;
+const minutes = posts.reduce((n, p) => n + readingMinutes(p.body), 0);
+
 const blogSchema = {
   '@type': 'Blog',
   '@id': `${canonical('/blog')}#blog`,
-  name: 'Akrostech Insights',
+  name: `${site.legalName} guides`,
+  url: canonical('/blog'),
   publisher: { '@id': ids.organization },
-  blogPost: posts.map((p) => ({ '@type': 'BlogPosting', headline: p.data.title, url: canonical(postHref(p)), datePublished: p.data.published.toISOString() })),
+  blogPost: posts.map((p) => ({
+    '@type': 'BlogPosting',
+    headline: p.data.title,
+    url: canonical(postHref(p)),
+    datePublished: p.data.published.toISOString(),
+    description: p.data.description,
+  })),
 };
-
-// A–Z index of tags: each tag once, with the articles that carry it.
-const tagMap = new Map<string, { tag: string; posts: typeof posts }>();
-posts.forEach((p) =>
-  p.data.tags.forEach((t) => {
-    const key = t.toLowerCase();
-    const entry = tagMap.get(key) ?? { tag: t, posts: [] };
-    entry.posts.push(p);
-    tagMap.set(key, entry);
-  }),
-);
-const tags = [...tagMap.values()].sort((a, b) => a.tag.localeCompare(b.tag, 'en', { sensitivity: 'base' }));
-const letters = [...new Set(tags.map((t) => t.tag[0]!.toUpperCase()))].map((letter) => ({
-  letter,
-  tags: tags.filter((t) => t.tag[0]!.toUpperCase() === letter),
-}));
+const listSchema = {
+  '@type': 'ItemList',
+  '@id': `${canonical('/blog')}#list`,
+  name: 'All guides',
+  numberOfItems: posts.length,
+  itemListElement: posts.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(postHref(p)), name: p.data.title })),
+};
 ---
 
-<BaseLayout {...pages.blog} image="/og/blog.png" breadcrumbs={crumbs} schema={[blogSchema]} webPage={{ '@type': ['WebPage', 'CollectionPage'] }}>
-  <Hero labelledby="page-title" split="5-7" crumbs={crumbs} class="blog-hero">
-    <h1 class="h1 hero__title" id="page-title">Insights. <span class="accent">Indexed.</span></h1>
-    <p class="hero__lead">Practical guides on outsourcing, hiring, finance operations, legal support and building websites that load fast and rank.</p>
+<BaseLayout
+  {...pages.blog}
+  image="/og/blog.png"
+  breadcrumbs={crumbs}
+  schema={[blogSchema, listSchema]}
+  webPage={{ '@type': ['WebPage', 'CollectionPage'], mainEntity: { '@id': `${canonical('/blog')}#list` } }}
+>
+  <FieldHero scene="flow" labelledby="blog-title" crumbs={crumbs}>
+    <h1 class="fhero__title" id="blog-title">Guides for building <span class="quiet">lean, global teams.</span></h1>
+    <p class="fhero__lead">Practical guides on offshore talent, operations, hiring and websites, from the team that does the work every day.</p>
     <div class="actions">
-      <a class="btn btn--primary" href={postHref(featured)}>Read the featured guide <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
+      <a class="btn btn--primary" href="#guides">Browse all guides <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
       <a class="btn btn--ghost" href="/rss.xml">RSS feed <Icon name="arrow-up-right" class="btn__arrow" /></a>
     </div>
-    <dl class="blog-hero__spec spec">
-      <div><dt>Featured</dt><dd><a class="link link--quiet" href={postHref(featured)}>{featured.data.title}</a></dd></div>
-      <div><dt>Written by</dt><dd>{featured.data.author}</dd></div>
+    <dl class="bfacts" slot="after">
+      <div><dt>Guides</dt><dd class="tabular">{posts.length}</dd></div>
+      <div><dt>Services covered</dt><dd class="tabular">{topics}</dd></div>
+      <div><dt>Minutes of reading</dt><dd class="tabular">{minutes}</dd></div>
+      <div>
+        <dt>Latest</dt>
+        <dd><time datetime={latest.data.published.toISOString()}>{formatDate(latest.data.published)}</time></dd>
+      </div>
     </dl>
-    <ArticleSearch slot="instrument" posts={posts} />
-  </Hero>
+  </FieldHero>
 
-  <section class="section articles" id="articles" aria-labelledby="all-title">
+  <section class="section guides" id="guides" aria-labelledby="guides-title">
     <div class="wrap">
       <div class="section-head grid">
-        <h2 class="h2" id="all-title">All articles</h2>
-        <p data-filter-status>Showing all {posts.length} articles. The search above filters this list as you type.</p>
+        <h2 class="h2" id="guides-title" data-split>All guides.</h2>
+        <p data-reveal>
+          Hiring virtual assistants, recruitment outsourcing, offshore bookkeeping, legal process outsourcing and fast business websites. Search by
+          a word or filter by service.
+        </p>
       </div>
 
-      <ul class="articles__grid" role="list">
+      <ArticleSearch posts={posts} controls="guide-grid" />
+
+      <p class="guides__status small" data-filter-status aria-hidden="true">Showing all {posts.length} guides, newest first.</p>
+
+      <ul class="guides__grid" id="guide-grid" role="list">
         {
-          ordered.map((p, i) => (
-            <li class:list={['articles__item', { 'is-lead': i === 0 }]} data-filter-item={p.id}>
-              <PostCard
+          posts.map((p, i) => (
+            <li
+              class:list={['guides__item', { 'is-lead': i === 0 }]}
+              data-filter-item={p.id}
+              data-cat={categorySlug(p.data.category)}
+              data-text={`${p.data.title} ${p.data.description} ${p.data.tags.join(' ')} ${p.data.category}`}
+            >
+              <GuideCard
                 post={p}
-                large={i === 0}
-                headingLevel="h3"
+                priority={i === 0}
                 sizes={i === 0 ? '(min-width: 64rem) 62vw, 100vw' : '(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw'}
               />
             </li>
@@ -79,86 +105,40 @@ const letters = [...new Set(tags.map((t) => t.tag[0]!.toUpperCase()))].map((lett
         }
       </ul>
 
-      <div class="articles__empty ruled" hidden data-filter-empty>
-        <div class="module module--flex">
-          <p class="h3">Nothing in the index matches that yet.</p>
-          <p class="muted">Try a broader word, or <a class="link" href="/contact">ask us the question directly</a>.</p>
+      <div class="guides__empty panel" hidden data-filter-empty>
+        <div class="guides__empty-copy">
+          <p class="h3">No guide matches <span data-filter-empty-q>this filter</span> yet.</p>
+          <p class="muted">Try a broader word or another service, or <a class="link" href="/contact">ask us the question directly</a>.</p>
         </div>
-        <div class="module module--flex lime articles__empty-act">
-          <button class="btn btn--primary" type="button" data-filter-reset>Show every article <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></button>
-        </div>
+        <button class="btn btn--primary" type="button" data-filter-reset>Show every guide <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></button>
       </div>
     </div>
   </section>
 
-  <section class="section section--flush-top az" aria-labelledby="az-title">
-    <div class="wrap grid az__grid">
-      <div class="az__head c-4">
-        <h2 class="h2" id="az-title">Index of tags</h2>
-        <p class="muted az__intro">Every subject the articles cover, A to Z. Choose a tag to filter the articles by it.</p>
-      </div>
-      <ol class="az__list c-8" role="list">
-        {
-          letters.map((l) => (
-            <li class="az__row">
-              <span class="az__letter" aria-hidden="true">
-                {l.letter}
-              </span>
-              <ul class="az__tags" role="list" aria-label={`Tags starting with ${l.letter}`}>
-                {l.tags.map((t) => (
-                  <li>
-                    <a class="az__tag" href={`/blog?q=${encodeURIComponent(t.tag)}#articles`} data-tag-link={t.tag}>
-                      <span class="az__name">{t.tag}</span>
-                      <span class="az__count">{t.posts.length}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))
-        }
-      </ol>
-    </div>
-  </section>
-
-  <CtaBand heading="Ask the question these articles miss." line="Have a question these articles do not answer? Bring it to a 30-minute call." photo="talking-hands" />
+  <CtaBand />
 </BaseLayout>
 
 <style>
-  .blog-hero__spec { max-width: 32rem; }
-  .blog-hero__spec dd { font-size: var(--t-small); }
+  /* ---- Hero facts ---- */
+  .bfacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5) var(--gutter); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
+  @media (min-width: 64rem) { .bfacts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .bfacts div { display: flex; flex-direction: column-reverse; gap: var(--s-1); }
+  .bfacts dt { color: var(--ink-2); font-size: var(--t-small); }
+  .bfacts dd { font-family: var(--font-display); font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
 
-  .articles__grid { display: grid; grid-template-columns: 1fr; gap: var(--s-7) var(--gutter); align-items: start; }
+  /* ---- Grid ---- */
+  .guides__status { margin: var(--s-7) 0 var(--s-5); color: var(--ink-2); }
+  .guides__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-7) var(--gutter); align-items: start; }
   @media (min-width: 40rem) {
-    .articles__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .articles__item.is-lead { grid-column: 1 / -1; }
+    .guides__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .guides__item.is-lead { grid-column: 1 / -1; }
   }
   @media (min-width: 64rem) {
-    .articles__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .articles__item.is-lead { grid-column: span 2; }
-    /* A lead card that is not the featured layout sits as photo + text side by side. */
-    .articles__item.is-lead :global(.post:not(.post--large)) { grid-template-columns: 3fr 2fr; align-items: end; column-gap: var(--gutter); }
-    .articles__item.is-lead :global(.post:not(.post--large) .post__title) { font-size: clamp(1.5rem, 1rem + 1.2vw, 2.25rem); font-stretch: 125%; line-height: 1.05; }
+    .guides__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .guides__item.is-lead { grid-column: span 2; grid-row: span 2; }
   }
-  .articles__item :global(.post__title mark) { background: var(--field); color: var(--field-ink); padding: 0 0.06em; }
-  .articles__empty { grid-template-columns: 1fr; }
-  @media (min-width: 40rem) { .articles__empty { grid-template-columns: 2fr 1fr; } }
-  .articles__empty .module { gap: var(--s-3); justify-content: center; }
-  .articles__empty-act { align-items: start; }
-
-  .az__grid { row-gap: var(--s-6); }
-  .az__head { display: grid; gap: var(--s-4); align-content: start; }
-  @media (min-width: 64rem) { .az__head { position: sticky; top: calc(var(--header-h) + var(--s-6)); align-self: start; } }
-  .az__intro { max-width: 32ch; }
-  .az__list { border-top: 1px solid var(--rule-strong); }
-  .az__row { display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: var(--s-4); align-items: baseline; padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
-  @media (min-width: 64rem) { .az__row { grid-template-columns: 6rem minmax(0, 1fr); } }
-  .az__letter { font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.75rem); font-weight: 750; font-stretch: 125%; line-height: 1; color: var(--accent-text); }
-  .az__tags { display: flex; flex-wrap: wrap; gap: 0 var(--s-5); }
-  .az__tag { display: inline-flex; align-items: baseline; gap: var(--s-2); min-height: 44px; padding-block: 0.6rem; text-decoration: none; font-size: 1.125rem; font-weight: 600; font-stretch: 112%; }
-  .az__count { font-size: 0.75rem; font-weight: 650; color: var(--ink-2); font-variant-numeric: tabular-nums; border: 1px solid var(--rule-strong); padding: 0.05rem 0.4rem; }
-  @media (hover: hover) and (pointer: fine) {
-    .az__tag:hover .az__name { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
-    .az__tag:hover .az__count { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  }
+  /* ---- Empty ---- */
+  .guides__empty { display: grid; gap: var(--s-5); align-items: center; padding: var(--module-pad); }
+  @media (min-width: 48rem) { .guides__empty { grid-template-columns: 1fr auto; } }
+  .guides__empty-copy { display: grid; gap: var(--s-2); }
 </style>

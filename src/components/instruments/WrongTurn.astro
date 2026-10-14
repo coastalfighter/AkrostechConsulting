@@ -7,6 +7,7 @@
  * match to the broken address is offered first. Without JavaScript the box searches articles.
  */
 import type { SearchEntry } from '@/lib/fuzzy';
+import { site } from '@/config/site';
 
 interface Props {
   entries: SearchEntry[];
@@ -16,22 +17,23 @@ interface Props {
 
 const { entries, starters } = Astro.props;
 const known = entries.map((e) => e.path);
+const host = new URL(site.url).host.replace(/^www\./, '');
 ---
 
 <div class="wt" data-instrument="lost">
   <div class="wt__route-box">
     <div class="wt__route-head">
-      <p class="label wt__key">Requested route</p>
-      <p class="label wt__status"><span class="wt__code">404</span> No page at this address</p>
+      <p class="wt__key">Requested route</p>
+      <p class="wt__status"><span class="wt__code">404</span> No page at this address</p>
     </div>
     <ol class="wt__route" role="list" data-route aria-label="The address you followed, segment by segment">
-      <li class="wt__seg wt__seg--root"><span class="wt__seg-name">akrosstech.com</span><span class="wt__seg-state">Home exists</span></li>
+      <li class="wt__seg wt__seg--root"><span class="wt__seg-name">{host}</span><span class="wt__seg-state">Home exists</span></li>
       <li class="wt__seg wt__seg--broken">
         <span class="wt__seg-name" data-broken-name>the page you followed</span><span class="wt__seg-state">Not found</span>
       </li>
     </ol>
     <p class="wt__suggest" data-suggest hidden>
-      <span class="label wt__key">Closest page</span>
+      <span class="wt__key">Closest page</span>
       <a class="wt__suggest-link" href="/" data-suggest-link><span data-suggest-title>Home</span> <span class="wt__suggest-path" data-suggest-path>/</span></a>
     </p>
   </div>
@@ -56,15 +58,15 @@ const known = entries.map((e) => e.path);
       </label>
     </form>
     <div class="wt__results-head">
-      <p class="label wt__key" data-results-label>Start from here</p>
-      <p class="label wt__count" data-results-count aria-live="polite"></p>
+      <p class="wt__key" data-results-label>Start from here</p>
+      <p class="wt__count" data-results-count aria-live="polite"></p>
     </div>
     <ul class="wt__results" role="list" id="wt-results" data-results>
       {
         starters.map((e) => (
           <li class="wt__result">
             <a class="wt__result-link" href={e.path}>
-              <span class="label wt__result-group">{e.group}</span>
+              <span class="wt__result-group">{e.group}</span>
               <span class="wt__result-title">{e.title}</span>
               <span class="wt__result-body">{e.body ?? e.path}</span>
             </a>
@@ -79,22 +81,23 @@ const known = entries.map((e) => e.path);
 </div>
 
 <style is:global>
-  .wt { display: grid; gap: var(--s-5); }
+  .wt { display: grid; gap: var(--s-6); }
+  @media (min-width: 64rem) { .wt { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); align-items: start; gap: var(--s-8); } }
 
   /* ---- Route ---- */
-  .wt__route-box { display: grid; gap: var(--s-4); padding: var(--s-5); border: 1px solid var(--rule-strong); background: var(--plate); }
+  .wt__route-box { display: grid; gap: var(--s-5); padding: var(--s-5); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--ground); }
   .wt__route-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-2) var(--s-4); }
-  .wt__key { color: var(--ink-2); }
-  .wt__status { color: var(--danger); display: inline-flex; align-items: center; gap: var(--s-2); }
-  .wt__code { padding: 0.1rem 0.4rem; border: 1px solid currentColor; font-variant-numeric: tabular-nums; }
+  .wt__key { color: var(--ink-2); font-size: var(--t-small); font-weight: 600; }
+  .wt__status { color: var(--danger); display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-small); font-weight: 600; }
+  .wt__code { padding: 0.05rem 0.5rem; border: 1px solid currentColor; border-radius: var(--radius-pill); font-variant-numeric: tabular-nums; }
 
   .wt__route { display: flex; flex-wrap: wrap; align-items: stretch; row-gap: var(--s-3); }
-  .wt__seg { position: relative; display: grid; gap: 0.2rem; padding: 0.6rem 0.8rem; border: 1px solid var(--ink); background: var(--ground); max-width: 100%; }
+  .wt__seg { position: relative; display: grid; gap: 0.2rem; padding: 0.6rem 0.8rem; border: 1px solid var(--ink); border-radius: var(--radius-sm); background: var(--plate); max-width: 100%; }
   .wt__seg + .wt__seg { margin-left: 2.25rem; }
   /* Connector to the previous segment. */
   .wt__seg + .wt__seg::before { content: ''; position: absolute; right: 100%; top: 50%; width: 2.25rem; border-top: 2px solid var(--ink); }
-  .wt__seg-name { font-weight: 700; font-stretch: 112%; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
-  .wt__seg-state { font-size: 0.6875rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+  .wt__seg-name { font-weight: 650; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+  .wt__seg-state { font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); }
   .wt__seg--root { background: var(--field); border-color: var(--field); color: var(--field-ink); }
   .wt__seg--root .wt__seg-state { color: var(--field-ink-2); }
   .wt__seg--broken { border: 1px dashed var(--danger); background: transparent; }
@@ -122,7 +125,7 @@ const known = entries.map((e) => e.path);
 
   .wt__suggest { display: grid; gap: var(--s-2); padding-top: var(--s-4); border-top: 1px solid var(--rule); }
   .wt__suggest[hidden] { display: none; }
-  .wt__suggest-link { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; min-height: 44px; align-content: center; text-decoration: none; font-size: 1.25rem; font-weight: 700; font-stretch: 112%; }
+  .wt__suggest-link { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; min-height: 44px; align-content: center; text-decoration: none; font-family: var(--font-display); font-size: 1.375rem; font-weight: 650; letter-spacing: -0.02em; }
   .wt__suggest-link > span:first-child { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
   .wt__suggest-path { font-size: 0.875rem; font-weight: 550; color: var(--ink-2); overflow-wrap: anywhere; }
 
@@ -133,9 +136,9 @@ const known = entries.map((e) => e.path);
   .wt__input { padding-left: 2.75rem; font-size: 1.0625rem; }
   .wt__input::-webkit-search-cancel-button { filter: grayscale(1); }
   .wt__results-head { display: flex; justify-content: space-between; gap: var(--s-3); padding-top: var(--s-2); }
-  .wt__count { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .wt__count { color: var(--ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
   .wt__results { list-style: none; padding: 0; border-top: 1px solid var(--rule-strong); min-height: 18rem; }
-  .wt__result { border-bottom: 1px solid var(--rule); }
+  .wt__result { border-bottom: 1px solid var(--rule); padding-block: 2px; }
   .wt__result-link {
     position: relative;
     display: grid;
@@ -143,15 +146,16 @@ const known = entries.map((e) => e.path);
     gap: 0.15rem var(--s-4);
     align-items: baseline;
     padding: 0.7rem 0.75rem;
+    border-radius: var(--radius-sm);
     text-decoration: none;
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease;
   }
-  .wt__result-group { grid-row: 1 / span 2; color: var(--ink-3); font-size: 0.6875rem; padding-top: 0.25rem; }
-  .wt__result-title { font-weight: 650; font-stretch: 112%; line-height: 1.25; }
+  .wt__result-group { grid-row: 1 / span 2; color: var(--ink-2); font-size: 0.8125rem; padding-top: 0.1rem; }
+  .wt__result-title { font-weight: 650; line-height: 1.25; }
   .wt__result-title mark { background: none; color: inherit; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
   .wt__result-body { grid-column: 2; font-size: 0.8125rem; color: var(--ink-2); overflow-wrap: anywhere; }
   .wt__result[aria-selected='true'] .wt__result-link { background: var(--field); color: var(--field-ink); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-2); --accent: var(--field-ink); }
-  @media (hover: hover) and (pointer: fine) { .wt__result:not([aria-selected='true']) .wt__result-link:hover { background: var(--plate); } }
+  @media (hover: hover) and (pointer: fine) { .wt__result:not([aria-selected='true']) .wt__result-link:hover { background: var(--plate-2); } }
   @media (max-width: 30rem) {
     .wt__result-link { grid-template-columns: 1fr; }
     .wt__result-group { grid-row: auto; padding-top: 0; }
@@ -159,7 +163,7 @@ const known = entries.map((e) => e.path);
   }
   .wt__empty { padding: var(--s-4) 0.75rem; color: var(--ink-2); }
   .wt__keys { display: flex; gap: 0.35rem; align-items: center; }
-  .wt__keys kbd { display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 0.3rem; border: 1px solid var(--rule-strong); font: inherit; font-size: 0.75rem; font-weight: 650; }
+  .wt__keys kbd { display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 0.3rem; border-radius: 0.35rem; border: 1px solid var(--rule-strong); font: inherit; font-size: 0.75rem; font-weight: 650; }
   html:not(.js) .wt__keys { display: none; }
   @media (hover: none) { .wt__keys { display: none; } }
 </style>

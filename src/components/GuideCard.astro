@@ -1,0 +1,72 @@
+---
+/**
+ * Guide card (blog index and related guides): rounded photo, service and reading time, title,
+ * description. The whole card is the link. Inside an element with `.is-lead` it becomes the
+ * large feature card (the blog index moves that class to the first visible guide).
+ * Words in the title carry [data-hl] so the guide finder can mark matches.
+ */
+import Photo, { type PhotoName } from './Photo.astro';
+import Icon from './Icon.astro';
+import { photoFor } from '@/data/photos';
+import { formatDate, postHref, readingMinutes, type Post } from '@/lib/blog';
+
+interface Props {
+  post: Post;
+  headingLevel?: 'h2' | 'h3';
+  sizes?: string;
+  priority?: boolean;
+  /** Override the cover (e.g. to avoid repeating a photo already on the page). */
+  photo?: PhotoName;
+}
+const { post, headingLevel: H = 'h3', sizes = '(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw', priority = false, photo } = Astro.props;
+const d = post.data;
+---
+
+<article class="gcard">
+  <div class="gcard__photo">
+    <Photo name={photo ?? photoFor(d.art, d.artVariant)} alt="" fill priority={priority} sizes={sizes} />
+  </div>
+  <div class="gcard__body">
+    <p class="gcard__meta">
+      <span class="gcard__cat">{d.category}</span>
+      <span>{readingMinutes(post.body)} min read</span>
+      <time datetime={d.published.toISOString()}>{formatDate(d.published)}</time>
+    </p>
+    <H class="gcard__title"><a class="stretch" href={postHref(post)} data-hl>{d.title}</a></H>
+    <p class="gcard__excerpt">{d.description}</p>
+    <span class="gcard__go" aria-hidden="true">Read guide <Icon name="arrow-right" /></span>
+  </div>
+</article>
+
+<style>
+  .gcard { position: relative; display: grid; gap: var(--s-4); align-content: start; }
+  .gcard__photo { aspect-ratio: 3 / 2; border-radius: var(--radius); overflow: hidden; }
+  .gcard__photo :global(.photo) { height: 100%; }
+  .gcard__photo :global(img) { transition: scale 600ms var(--ease-out); }
+  .gcard__body { display: grid; gap: var(--s-3); align-content: start; }
+  .gcard__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-4); font-size: 0.875rem; color: var(--ink-2); }
+  .gcard__cat { display: inline-flex; padding: 0.2rem 0.65rem; border-radius: var(--radius-pill); background: var(--second); color: var(--second-ink); font-weight: 600; }
+  .gcard__title { font-size: clamp(1.25rem, 1.1rem + 0.4vw, 1.4rem); font-weight: 650; line-height: 1.2; letter-spacing: -0.02em; }
+  .gcard__title a { text-decoration: none; }
+  .gcard__title a:focus-visible { outline: none; }
+  .gcard__title :global(mark) { background: var(--mark); color: var(--mark-ink); border-radius: 0.2em; padding-inline: 0.05em; }
+  .gcard__excerpt { color: var(--ink-2); font-size: var(--t-small); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .gcard__go { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: 650; font-size: var(--t-small); }
+  .gcard__go :global(.icon) { width: 1.1em; height: 1.1em; transition: transform var(--t-ui) var(--ease-out); }
+  .gcard:has(a:focus-visible) { outline: 2px solid var(--focus); outline-offset: 6px; border-radius: var(--radius); }
+  @media (hover: hover) and (pointer: fine) {
+    .gcard:hover .gcard__photo :global(img) { scale: 1.03; }
+    .gcard:hover .gcard__title a { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.18em; text-decoration-color: var(--second-strong); }
+    .gcard:hover .gcard__go :global(.icon) { transform: translateX(4px); }
+  }
+
+  /* Lead (feature) card */
+  :global(.is-lead) > .gcard .gcard__title { font-size: clamp(1.6rem, 1rem + 2vw, 2.75rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; }
+  :global(.is-lead) > .gcard .gcard__excerpt { font-size: var(--t-lead); line-height: 1.5; -webkit-line-clamp: 4; line-clamp: 4; max-width: 56ch; }
+  @media (min-width: 40rem) {
+    :global(.is-lead) > .gcard .gcard__photo { aspect-ratio: 16 / 10; }
+  }
+  @media (min-width: 40rem) and (max-width: 63.99rem) {
+    :global(.is-lead) > .gcard { grid-template-columns: 1.2fr 1fr; gap: var(--gutter); align-items: center; }
+  }
+</style>

@@ -44,7 +44,7 @@ const first = clauses[0]!;
           <li class="ci__item" data-group={c.group}>
             <button type="button" class="ci__entry" aria-pressed={i === 0 ? 'true' : 'false'} data-clause={c.id} data-index={i}>
               <span class="ci__title">{c.title}</span>
-              <span class="label ci__group">{c.group}</span>
+              <span class="ci__group">{c.group}</span>
             </button>
           </li>
         ))
@@ -53,10 +53,10 @@ const first = clauses[0]!;
 
     <article class="ci__card" aria-live="polite" aria-atomic="true">
       <div class="ci__card-head">
-        <p class="label" data-out="group">{first.group}</p>
-        <p class="label ci__pos"><span data-out="pos">1</span> of {clauses.length}</p>
+        <p class="ci__kgroup" data-out="group">{first.group}</p>
+        <p class="ci__pos"><span data-out="pos">1</span> of {clauses.length}</p>
       </div>
-      <h2 class="ci__card-title" data-out="title">{first.title}</h2>
+      <h3 class="ci__card-title" data-out="title">{first.title}</h3>
       <p class="ci__summary" data-out="summary">{first.summary}</p>
       <a class="btn btn--ghost btn--small ci__jump" href={`#${first.id}`} data-out="jump">
         Read the clause
@@ -76,8 +76,8 @@ const first = clauses[0]!;
   :global(html:not(.js)) .ci__filters, :global(html:not(.js)) .ci__count { display: none; }
 
   /* Coverage strip: one tick per clause; matches stay ink, the selected one turns lime. */
-  .ci__strip { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; height: 0.6rem; }
-  .ci__tick { background: var(--ink-2); transform-origin: 50% 100%; transition: background-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out), opacity var(--t-ui) ease; }
+  .ci__strip { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; height: 0.6rem; }
+  .ci__tick { border-radius: 999px; background: var(--ink-2); transform-origin: 50% 100%; transition: background-color var(--t-ui) ease, transform var(--t-ui) var(--ease-out), opacity var(--t-ui) ease; }
   .ci__tick.is-out { opacity: 0.2; transform: scaleY(0.4); }
   .ci__tick.is-sel { background: var(--field); }
 
@@ -85,7 +85,7 @@ const first = clauses[0]!;
   @media (min-width: 40rem) { .ci__body { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: stretch; } }
 
   .ci__list { border-top: 1px solid var(--rule-strong); }
-  .ci__item { border-bottom: 1px solid var(--rule); }
+  .ci__item { border-bottom: 1px solid var(--rule); padding-block: 2px; }
   .ci__entry {
     position: relative;
     display: grid;
@@ -94,21 +94,22 @@ const first = clauses[0]!;
     gap: var(--s-3);
     width: 100%;
     min-height: 2.9rem;
-    padding: 0.45rem 0.75rem 0.45rem 1.4rem;
+    padding: 0.45rem 0.85rem 0.45rem 1.75rem;
+    border-radius: var(--radius-sm);
     text-align: left;
     transition: background-color var(--t-ui) ease, color var(--t-ui) ease, opacity var(--t-ui) ease, transform var(--t-press) var(--ease-out);
   }
   .ci__entry:active { transform: scale(0.985); }
-  /* The index tab: a small square key at the left edge. */
-  .ci__entry::before { content: ''; position: absolute; left: 0.45rem; top: 50%; width: 0.45rem; height: 0.45rem; margin-top: -0.225rem; border: 1px solid var(--ink-3); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease; }
-  .ci__title { font-weight: 650; font-stretch: 112%; line-height: 1.2; }
-  .ci__group { color: var(--ink-3); font-size: 0.6875rem; white-space: nowrap; }
+  /* The index tab: a small round key at the left edge. */
+  .ci__entry::before { content: ''; position: absolute; left: 0.7rem; top: 50%; width: 0.55rem; height: 0.55rem; margin-top: -0.275rem; border-radius: 50%; border: 1.5px solid var(--ink-3); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease; }
+  .ci__title { font-weight: 600; line-height: 1.25; }
+  .ci__group { color: var(--ink-2); font-size: 0.8125rem; white-space: nowrap; }
   .ci__entry[aria-pressed='true'] { background: var(--field); color: var(--field-ink); }
   .ci__entry[aria-pressed='true'] .ci__group { color: var(--field-ink-2); }
   .ci__entry[aria-pressed='true']::before { background: var(--field-ink); border-color: var(--field-ink); }
   .ci__entry:disabled { opacity: 0.28; cursor: default; }
   .ci__entry:focus-visible { outline-offset: -2px; }
-  @media (hover: hover) and (pointer: fine) { .ci__entry:not(:disabled, [aria-pressed='true']):hover { background: var(--plate); } }
+  @media (hover: hover) and (pointer: fine) { .ci__entry:not(:disabled, [aria-pressed='true']):hover { background: var(--plate-2); } }
   @media (max-width: 30rem) { .ci__group { display: none; } }
 
   /* The index card: a lined card, text set on its lines. */
@@ -118,19 +119,20 @@ const first = clauses[0]!;
     align-content: start;
     gap: 0;
     padding: var(--s-4) var(--s-5) var(--s-5);
-    background-color: var(--plate);
+    background-color: var(--ground);
     background-image: linear-gradient(var(--rule) 1px, transparent 1px);
     background-size: 100% var(--line);
     background-position: 0 calc(var(--s-4) + var(--line) * 2 - 1px);
     border: 1px solid var(--rule-strong);
-    border-top: 6px solid var(--accent);
+    border-radius: var(--radius);
     min-height: 20rem;
   }
-  .ci__card-head { display: flex; justify-content: space-between; gap: var(--s-3); height: calc(var(--line) * 2); align-items: start; color: var(--ink-2); }
+  .ci__card-head { display: flex; justify-content: space-between; gap: var(--s-3); height: calc(var(--line) * 2); align-items: start; color: var(--ink-2); font-size: var(--t-small); font-weight: 600; }
+  .ci__kgroup { display: inline-flex; padding: 0.1rem 0.65rem; border-radius: var(--radius-pill); background: var(--second); color: var(--second-ink); }
   .ci__pos { font-variant-numeric: tabular-nums; }
-  .ci__card-title { font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem); font-weight: 750; font-stretch: 125%; line-height: var(--line); letter-spacing: -0.015em; text-transform: uppercase; }
+  .ci__card-title { font-family: var(--font-display); font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem); font-weight: 700; line-height: var(--line); letter-spacing: -0.02em; }
   .ci__summary { font-size: 1.125rem; line-height: var(--line); margin-top: var(--line); max-width: 34ch; }
-  .ci__jump { justify-self: start; margin-top: auto; margin-top: var(--line); background: var(--plate); }
+  .ci__jump { justify-self: start; margin-top: var(--line); background: var(--ground); }
   .ci__card.is-swapping .ci__card-title, .ci__card.is-swapping .ci__summary { opacity: 0; transform: translateY(4px); }
   .ci__card-title, .ci__summary { transition: opacity 160ms ease, transform 200ms var(--ease-out); }
 </style>

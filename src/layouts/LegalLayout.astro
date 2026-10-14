@@ -1,11 +1,12 @@
 ---
 /**
- * Legal pages: the standard hero (the page's own instrument on the right), then the full text
- * as long-form prose with a sticky contents list on desktop. Contents are read from the h2s of
- * the rendered text; any h2 without an id gets one, so every section can be linked.
+ * Legal pages (Sample-3 LegalPage structure): a hero with the title and the date it was last
+ * updated, then the page's instrument in its own section, then the full text as long-form
+ * prose with a sticky contents list on desktop. Contents are read from the h2s of the rendered
+ * text; any h2 without an id gets one, so every section can be linked.
  */
 import BaseLayout from './BaseLayout.astro';
-import Hero from '@/components/Hero.astro';
+import FieldHero from '@/components/FieldHero.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
 import type { Crumb } from '@/lib/seo';
@@ -15,12 +16,19 @@ interface Props {
   description: string;
   path: string;
   heading: string;
+  /** Second phrase of the headline, set back in tone. */
+  quiet?: string;
   /** One-line summary under the heading. */
   lead: string;
   updated: string;
   crumbs: Crumb[];
+  scene: 'shield' | 'index';
+  /** The instrument section: heading, short intro, and the panel it sits on. */
+  toolTitle: string;
+  toolIntro: string;
+  toolTone?: 'ink' | 'plate';
 }
-const { heading, lead, updated, crumbs, ...meta } = Astro.props;
+const { heading, quiet, lead, updated, crumbs, scene, toolTitle, toolIntro, toolTone = 'plate', ...meta } = Astro.props;
 
 const slugify = (t: string) =>
   t
@@ -42,21 +50,32 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
 ---
 
 <BaseLayout {...meta} image="/og/legal.png" breadcrumbs={crumbs} preloader={false}>
-  <Hero labelledby="legal-title" split="5-7" crumbs={crumbs}>
-    <h1 class="h1 hero__title legal__title" id="legal-title">{heading}</h1>
-    <p class="hero__lead">{lead}</p>
+  <FieldHero scene={scene} labelledby="legal-title" crumbs={crumbs}>
+    <h1 class="fhero__title" id="legal-title">{heading}{quiet && <> <span class="quiet">{quiet}</span></>}</h1>
+    <p class="fhero__lead">{lead}</p>
     <dl class="legal__meta">
-      <div><dt class="label">Last updated</dt><dd><time datetime={updated}>{updatedLabel}</time></dd></div>
-      <div><dt class="label">Sections</dt><dd>{toc.length}</dd></div>
-      <div><dt class="label">Questions</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
+      <div><dt>Last updated</dt><dd><time datetime={updated}>{updatedLabel}</time></dd></div>
+      <div><dt>Sections</dt><dd class="tabular">{toc.length}</dd></div>
+      <div><dt>Questions</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
     </dl>
-    <slot name="instrument" slot="instrument" />
-  </Hero>
+  </FieldHero>
 
-  <section class="section legal" aria-label={`${heading}: full text`}>
+  <section class="section legal-tool" aria-labelledby="legal-tool-title">
+    <div class="wrap">
+      <div class="section-head grid">
+        <h2 class="h2" id="legal-tool-title" data-split>{toolTitle}</h2>
+        <p data-reveal>{toolIntro}</p>
+      </div>
+      <div class:list={['legal-tool__panel', toolTone === 'ink' ? 'ink-plate' : 'panel']}>
+        <slot name="instrument" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flush-top legal" aria-labelledby="legal-text-title">
     <div class="wrap grid legal__grid">
       <nav class="legal__toc c-3" aria-labelledby="legal-toc-title">
-        <p class="label legal__toc-title" id="legal-toc-title">Contents</p>
+        <h2 class="legal__toc-title" id="legal-text-title"><span id="legal-toc-title">Contents</span><span class="sr-only">: {heading.replace(/\.$/, '')}, full text</span></h2>
         <ol role="list">
           {
             toc.map((t) => (
@@ -71,6 +90,9 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
         <a class="more legal__top" href="#main">Back to top <Icon name="arrow-right" /></a>
       </nav>
       <div class="prose legal__body c-7 s-5">
+        <p class="legal__stamp small">
+          Last updated <time datetime={updated}>{updatedLabel}</time>
+        </p>
         <Fragment set:html={html} />
       </div>
     </div>
@@ -95,17 +117,17 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
 </script>
 
 <style>
-  h1.legal__title.hero__title { max-width: none; font-size: clamp(2.5rem, 1rem + 3.4vw, 4.5rem); hyphens: manual; }
-  .legal__meta { display: grid; border-top: 1px solid var(--rule-strong); max-width: 30rem; }
-  .legal__meta div { display: grid; grid-template-columns: 8.5rem 1fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); align-items: baseline; }
-  .legal__meta dt { color: var(--ink-2); }
-  .legal__meta dd { font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .legal__meta { display: grid; max-width: 32rem; border-top: 1px solid var(--rule); }
+  .legal__meta div { display: grid; grid-template-columns: 8rem 1fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .legal__meta dt { color: var(--ink-2); font-size: var(--t-small); }
+  .legal__meta dd { font-weight: 600; overflow-wrap: anywhere; }
 
-  .legal { border-top: 1px solid var(--rule-strong); }
+  .legal-tool__panel { padding: clamp(1.25rem, 0.8rem + 2.4vw, 3rem); border-radius: calc(var(--radius) * 1.6); }
+
   .legal__grid { row-gap: var(--s-7); align-items: start; }
   .legal__toc { display: grid; gap: var(--s-4); }
   @media (min-width: 64rem) { .legal__toc { position: sticky; top: calc(var(--header-h) + var(--s-5)); } }
-  .legal__toc-title { color: var(--ink-2); }
+  .legal__toc-title { font-size: 1.125rem; font-weight: 650; letter-spacing: -0.01em; }
   .legal__toc ol { border-top: 1px solid var(--rule-strong); }
   .legal__toc li { border-bottom: 1px solid var(--rule); }
   .legal__toc ol a {
@@ -113,21 +135,24 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
     display: flex;
     align-items: center;
     min-height: 44px;
-    padding: 0.4rem 0 0.4rem 1rem;
+    padding: 0.4rem 0 0.4rem 1.25rem;
     color: var(--ink-2);
     font-size: var(--t-small);
     font-weight: 550;
     text-decoration: none;
     transition: color var(--t-ui) ease;
   }
-  .legal__toc ol a::before { content: ''; position: absolute; left: 0; top: 50%; width: 0.45rem; height: 0.45rem; margin-top: -0.225rem; border: 1px solid var(--ink-3); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease; }
-  .legal__toc ol a[aria-current] { color: var(--ink); }
-  .legal__toc ol a[aria-current]::before { background: var(--accent); border-color: var(--accent); }
+  .legal__toc ol a::before { content: ''; position: absolute; left: 0; top: 50%; width: 0.55rem; height: 0.55rem; margin-top: -0.275rem; border-radius: 50%; border: 1.5px solid var(--ink-3); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease; }
+  .legal__toc ol a[aria-current] { color: var(--ink); font-weight: 650; }
+  .legal__toc ol a[aria-current]::before { background: var(--mark); border-color: var(--ink); }
   @media (hover: hover) and (pointer: fine) { .legal__toc ol a:hover { color: var(--ink); } }
   @media (max-width: 63.99rem) {
     .legal__toc ol { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); column-gap: var(--gutter); }
     .legal__top { display: none; }
   }
-  .legal__body :global(h2) { scroll-margin-top: calc(var(--header-h) + var(--s-5)); padding-top: var(--s-4); border-top: 1px solid var(--rule); }
-  .legal__body > :global(:first-child) { margin-top: 0; font-size: var(--t-lead); line-height: 1.5; }
+  .legal__stamp { color: var(--ink-2); padding: 0.4rem 0.9rem; border-radius: var(--radius-pill); background: var(--plate-2); justify-self: start; display: inline-block; }
+  .legal__body { line-height: 1.72; }
+  .legal__body :global(h2) { scroll-margin-top: calc(var(--header-h) + var(--s-5)); padding-top: var(--s-5); border-top: 1px solid var(--rule); font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem); }
+  .legal__body :global(h3) { font-size: 1.2rem; }
+  .legal__body > :global(p:nth-child(2)) { font-size: var(--t-lead); line-height: 1.55; margin-top: var(--s-5); }
 </style>

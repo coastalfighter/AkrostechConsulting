@@ -180,7 +180,7 @@ export default function initLost(root: HTMLElement): void {
       a.href = r.path;
       a.tabIndex = -1;
       const g = document.createElement('span');
-      g.className = 'label wt__result-group';
+      g.className = 'wt__result-group';
       g.textContent = r.group;
       const t = document.createElement('span');
       t.className = 'wt__result-title';

@@ -86,8 +86,8 @@ const nodes: FlowNode[] = [
     name: 'Google Maps',
     who: 'Embedded map',
     party: 'third',
-    handles: 'Google may set cookies and collect data when the map loads on our contact and location pages.',
-    why: 'The map is embedded on our contact and location pages.',
+    handles: 'Google may set cookies and collect data when the map loads on our contact page.',
+    why: 'The map is embedded on our contact page.',
     kept: 'Under Google’s privacy policy, not ours.',
     ref: { id: 'what-we-collect', label: 'What we collect' },
   },
@@ -123,7 +123,7 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
             aria-controls={`flow-panel-${n.id}`}
             data-node={n.id}
           >
-            <span class="label flow__party">{partyLabel[n.party]}</span>
+            <span class="flow__party">{partyLabel[n.party]}</span>
             <span class="flow__name">{n.name}</span>
             <span class="flow__who">{n.who}</span>
           </button>
@@ -141,7 +141,7 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
       <span class="flow__bus-text flow__bus-text--b">Booking shared with us</span>
     </span>
     <span class:list={['flow__drop', { 'is-lit': lit.has('maps') }]} data-link="maps" data-from="browser" aria-hidden="true"><i /></span>
-    <p class="label flow__tp" aria-hidden="true">Third parties, under their own policies</p>
+    <p class="flow__tp" aria-hidden="true">Third parties, under their own policies</p>
 
     {
       [node('calendly'), node('maps')].map((n) => (
@@ -153,7 +153,7 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
           aria-controls={`flow-panel-${n.id}`}
           data-node={n.id}
         >
-          <span class="label flow__party">{partyLabel[n.party]}</span>
+          <span class="flow__party">{partyLabel[n.party]}</span>
           <span class="flow__name">{n.name}</span>
           <span class="flow__who">{n.who}</span>
         </button>
@@ -176,15 +176,15 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
           </header>
           <dl class="flow__facts">
             <div>
-              <dt class="label">What it handles</dt>
+              <dt>What it handles</dt>
               <dd>{n.handles}</dd>
             </div>
             <div>
-              <dt class="label">Why</dt>
+              <dt>Why</dt>
               <dd>{n.why}</dd>
             </div>
             <div class="flow__kept">
-              <dt class="label">How long it’s kept</dt>
+              <dt>How long it’s kept</dt>
               <dd>{n.kept}</dd>
             </div>
           </dl>
@@ -244,19 +244,20 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
     min-height: 44px;
     padding: var(--s-3);
     text-align: left;
-    background: var(--ground);
+    background: var(--plate);
     border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-sm);
     transition: transform var(--t-press) var(--ease-out), opacity var(--t-ui) ease, background-color var(--t-ui) ease, border-color var(--t-ui) ease, color var(--t-ui) ease;
   }
   @media (min-width: 40rem) { .flow__node { min-height: 7.5rem; } }
   .flow__node:active { transform: scale(0.97); }
   .flow__node--third { border-style: dashed; }
-  .flow__party { color: var(--ink-3); font-size: 0.6875rem; }
-  .flow__name { font-size: 1rem; font-weight: 700; font-stretch: 112%; line-height: 1.15; }
+  .flow__party { color: var(--ink-2); font-size: 0.8125rem; font-weight: 500; }
+  .flow__name { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 650; letter-spacing: -0.01em; line-height: 1.15; }
   .flow__who { font-size: 0.8125rem; color: var(--ink-2); line-height: 1.3; }
   @media (min-width: 40rem) { .flow__who { margin-top: auto; } }
   /* Isolate the selected path, dim the rest. */
-  .flow[data-instrument-ready] .flow__node:not(.is-lit) { opacity: 0.55; }
+  .flow[data-instrument-ready] .flow__node:not(.is-lit) { opacity: 0.6; }
   .flow__node.is-lit { border-color: var(--ink); border-style: solid; }
   .flow__node.is-sel {
     background: var(--field);
@@ -286,7 +287,7 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
   .flow__link[data-link='inbox']::after { transition-delay: 180ms; }
 
   .flow__bus, .flow__drop { display: none; }
-  .flow__tp { grid-area: tp; padding: var(--s-5) 0 var(--s-2); color: var(--ink-2); }
+  .flow__tp { grid-area: tp; padding: var(--s-5) 0 var(--s-2); color: var(--ink-2); font-size: var(--t-small); }
   .flow__legend { grid-area: legend; display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); padding-top: var(--s-4); font-size: 0.8125rem; color: var(--ink-2); }
   .flow__key { display: inline-block; width: 1.75rem; height: 0; margin-right: 0.5rem; border-top: 1px solid var(--ink); vertical-align: middle; }
   .flow__key--dash { border-top-style: dashed; }
@@ -308,7 +309,7 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
       transition: border-color var(--t-ui) ease;
     }
     .flow__bus.is-lit::before { border: 2px solid var(--accent); border-bottom: 0; }
-    .flow__bus-text { position: absolute; top: calc((100% - var(--gap)) / 2 - 1.35rem); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+    .flow__bus-text { position: absolute; top: calc((100% - var(--gap)) / 2 - 1.35rem); font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
     .flow__bus-text--a { left: calc((100% - 4 * var(--gap)) / 10 + 0.5rem); }
     .flow__bus-text--b { right: calc((100% - 4 * var(--gap)) / 10 + 0.5rem); }
     .flow__bus.is-lit .flow__bus-text { color: var(--ink); }
@@ -325,12 +326,12 @@ const node = (id: FlowNode['id']) => nodes.find((n) => n.id === id)!;
   :global(html.js) .flow__panel:not(.is-active) { display: none; }
   :global(html.js) .flow__panel + .flow__panel { margin-top: 0; }
   .flow__panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s-1) var(--s-4); }
-  .flow__panel-name { font-size: var(--t-h3); font-weight: 750; font-stretch: 125%; line-height: 1.1; text-transform: uppercase; letter-spacing: -0.01em; }
+  .flow__panel-name { font-family: var(--font-display); font-size: var(--t-h3); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
   .flow__panel-who { color: var(--ink-2); font-size: var(--t-small); }
-  .flow__facts { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .flow__facts { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
   @media (min-width: 40rem) { .flow__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .flow__facts > div { display: grid; align-content: start; gap: var(--s-2); padding: var(--s-4); background: var(--plate); }
-  .flow__facts dt { color: var(--ink-2); }
+  .flow__facts dt { color: var(--ink-2); font-size: var(--t-small); font-weight: 600; }
   .flow__facts dd { font-size: var(--t-small); line-height: 1.5; }
   .flow__facts > .flow__kept { background: var(--plate-2); }
   .flow__kept dd { font-weight: 600; }
