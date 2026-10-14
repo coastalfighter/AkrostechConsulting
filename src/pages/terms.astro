@@ -1,5 +1,6 @@
 ---
 import LegalLayout from '@/layouts/LegalLayout.astro';
+import ClauseIndex, { type Clause } from '@/components/heroes/ClauseIndex.astro';
 import { site, fullAddress } from '@/config/site';
 import { pages } from '@/data/pages';
 
@@ -7,9 +8,30 @@ const crumbs = [
   { name: 'Home', path: '/' },
   { name: 'Terms and conditions', path: '/terms' },
 ];
+
+/** The index: each section of the terms below, its topic and a one-line plain summary. */
+const groups = ['Using the site', 'Content and IP', 'Liability', 'Legal'];
+const clauses: Clause[] = [
+  { id: 'use-of-the-website', title: 'Use of the website', group: 'Using the site', summary: 'Use the site to learn about us and get in touch. Do not break the law, attack the site, spam the forms or scrape it at scale.' },
+  { id: 'content-and-intellectual-property', title: 'Content and intellectual property', group: 'Content and IP', summary: 'The text, design and code are ours or our licensors’. Link to pages and quote short extracts with attribution; anything else needs written permission.' },
+  { id: 'information-on-the-site', title: 'Information on the site', group: 'Content and IP', summary: 'General information, not professional advice. Prices are starting points and blueprints are not guarantees of results.' },
+  { id: 'third-party-links-and-services', title: 'Third-party links and services', group: 'Liability', summary: 'Calendly, Google Maps and LinkedIn run under their own terms and privacy practices, not ours.' },
+  { id: 'limitation-of-liability', title: 'Limitation of liability', group: 'Liability', summary: 'The site is provided as is. We are not liable for indirect loss, interruptions or errors, except where the law does not allow that limit.' },
+  { id: 'privacy', title: 'Privacy', group: 'Legal', summary: 'How we handle personal information is set out in the privacy policy.' },
+  { id: 'governing-law', title: 'Governing law', group: 'Legal', summary: 'Delaware law governs these terms, and Delaware courts decide any dispute about them.' },
+  { id: 'changes', title: 'Changes', group: 'Legal', summary: 'We may update these terms; the date at the top of the page shows the last change.' },
+  { id: 'contact', title: 'Contact', group: 'Using the site', summary: 'Questions about these terms go to our Wilmington office by post, email or phone.' },
+];
 ---
 
-<LegalLayout {...pages.terms} heading="Terms and conditions" updated="2026-10-13" crumbs={crumbs}>
+<LegalLayout
+  {...pages.terms}
+  heading="Terms and conditions"
+  lead="The rules for using this website: what you may do here, who owns the content, where our liability ends and which law applies."
+  updated="2026-10-13"
+  crumbs={crumbs}
+>
+  <ClauseIndex slot="instrument" clauses={clauses} groups={groups} />
   <p>
     These terms govern your use of the {site.legalName} website. By using the site you agree to them. They do not govern client engagements,
     which are covered by a separate services agreement.

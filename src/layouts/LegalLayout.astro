@@ -1,6 +1,13 @@
 ---
+/**
+ * Legal pages: the standard hero (the page's own instrument on the right), then the full text
+ * as long-form prose with a sticky contents list on desktop. Contents are read from the h2s of
+ * the rendered text; any h2 without an id gets one, so every section can be linked.
+ */
 import BaseLayout from './BaseLayout.astro';
-import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import Hero from '@/components/Hero.astro';
+import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
 import type { Crumb } from '@/lib/seo';
 
 interface Props {
@@ -8,30 +15,119 @@ interface Props {
   description: string;
   path: string;
   heading: string;
+  /** One-line summary under the heading. */
+  lead: string;
   updated: string;
   crumbs: Crumb[];
 }
-const { heading, updated, crumbs, ...meta } = Astro.props;
+const { heading, lead, updated, crumbs, ...meta } = Astro.props;
+
+const slugify = (t: string) =>
+  t
+    .toLowerCase()
+    .replace(/<[^>]+>/g, '')
+    .replace(/&[a-z#0-9]+;/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+const raw = await Astro.slots.render('default');
+const toc: { id: string; label: string }[] = [];
+const html = raw.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/g, (_m, attrs: string, inner: string) => {
+  const existing = attrs.match(/\sid="([^"]+)"/)?.[1];
+  const id = existing ?? slugify(inner);
+  toc.push({ id, label: inner.replace(/<[^>]+>/g, '').trim() });
+  return existing ? `<h2${attrs}>${inner}</h2>` : `<h2${attrs} id="${id}">${inner}</h2>`;
+});
+const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(updated));
 ---
 
 <BaseLayout {...meta} image="/og/legal.png" breadcrumbs={crumbs} preloader={false}>
-  <article class="legal wrap">
-    <header class="legal__head">
-      <Breadcrumbs items={crumbs} />
-      <h1 class="legal__title">{heading}</h1>
-      <p class="legal__updated">Last updated <time datetime={updated}>{new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(updated))}</time></p>
-    </header>
-    <div class="prose legal__body">
-      <slot />
+  <Hero labelledby="legal-title" split="5-7" crumbs={crumbs}>
+    <h1 class="h1 hero__title legal__title" id="legal-title">{heading}</h1>
+    <p class="hero__lead">{lead}</p>
+    <dl class="legal__meta">
+      <div><dt class="label">Last updated</dt><dd><time datetime={updated}>{updatedLabel}</time></dd></div>
+      <div><dt class="label">Sections</dt><dd>{toc.length}</dd></div>
+      <div><dt class="label">Questions</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
+    </dl>
+    <slot name="instrument" slot="instrument" />
+  </Hero>
+
+  <section class="section legal" aria-label={`${heading}: full text`}>
+    <div class="wrap grid legal__grid">
+      <nav class="legal__toc c-3" aria-labelledby="legal-toc-title">
+        <p class="label legal__toc-title" id="legal-toc-title">Contents</p>
+        <ol role="list">
+          {
+            toc.map((t) => (
+              <li>
+                <a href={`#${t.id}`} data-toc={t.id}>
+                  {t.label}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+        <a class="more legal__top" href="#main">Back to top <Icon name="arrow-right" /></a>
+      </nav>
+      <div class="prose legal__body c-7 s-5">
+        <Fragment set:html={html} />
+      </div>
     </div>
-  </article>
+  </section>
 </BaseLayout>
 
+<script>
+  // Mark the contents entry for the section being read.
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc]');
+  const heads = [...links].map((a) => document.getElementById(a.dataset.toc ?? '')).filter((h): h is HTMLElement => h !== null);
+  if (links.length && 'IntersectionObserver' in window) {
+    const set = (id: string) => links.forEach((a) => a.toggleAttribute('aria-current', a.dataset.toc === id));
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible) set(visible.target.id);
+      },
+      { rootMargin: '-20% 0px -65% 0px' },
+    );
+    heads.forEach((h) => io.observe(h));
+  }
+</script>
+
 <style>
-  .legal { padding-top: calc(var(--header-h) + var(--space-l)); padding-bottom: var(--section-gap); }
-  .legal__head { display: grid; gap: var(--space-m); margin-bottom: var(--space-2xl); }
-  .legal__title { margin-top: var(--space-l); font-family: var(--font-display); font-size: clamp(2.5rem, 1rem + 5vw, 6rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.05em; color: var(--ink-strong); }
-  .legal__updated { color: var(--muted); }
-  .legal__body { margin-inline: auto 0; max-width: 46rem; margin-left: clamp(0rem, 20vw, 22rem); }
-  @media (max-width: 1023px) { .legal__body { margin-left: 0; } }
+  h1.legal__title.hero__title { max-width: none; font-size: clamp(2.5rem, 1rem + 3.4vw, 4.5rem); hyphens: manual; }
+  .legal__meta { display: grid; border-top: 1px solid var(--rule-strong); max-width: 30rem; }
+  .legal__meta div { display: grid; grid-template-columns: 8.5rem 1fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .legal__meta dt { color: var(--ink-2); }
+  .legal__meta dd { font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+  .legal { border-top: 1px solid var(--rule-strong); }
+  .legal__grid { row-gap: var(--s-7); align-items: start; }
+  .legal__toc { display: grid; gap: var(--s-4); }
+  @media (min-width: 64rem) { .legal__toc { position: sticky; top: calc(var(--header-h) + var(--s-5)); } }
+  .legal__toc-title { color: var(--ink-2); }
+  .legal__toc ol { border-top: 1px solid var(--rule-strong); }
+  .legal__toc li { border-bottom: 1px solid var(--rule); }
+  .legal__toc ol a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.4rem 0 0.4rem 1rem;
+    color: var(--ink-2);
+    font-size: var(--t-small);
+    font-weight: 550;
+    text-decoration: none;
+    transition: color var(--t-ui) ease;
+  }
+  .legal__toc ol a::before { content: ''; position: absolute; left: 0; top: 50%; width: 0.45rem; height: 0.45rem; margin-top: -0.225rem; border: 1px solid var(--ink-3); transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease; }
+  .legal__toc ol a[aria-current] { color: var(--ink); }
+  .legal__toc ol a[aria-current]::before { background: var(--accent); border-color: var(--accent); }
+  @media (hover: hover) and (pointer: fine) { .legal__toc ol a:hover { color: var(--ink); } }
+  @media (max-width: 63.99rem) {
+    .legal__toc ol { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); column-gap: var(--gutter); }
+    .legal__top { display: none; }
+  }
+  .legal__body :global(h2) { scroll-margin-top: calc(var(--header-h) + var(--s-5)); padding-top: var(--s-4); border-top: 1px solid var(--rule); }
+  .legal__body > :global(:first-child) { margin-top: 0; font-size: var(--t-lead); line-height: 1.5; }
 </style>
