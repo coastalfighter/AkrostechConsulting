@@ -4,8 +4,9 @@
  *
  *   npm run og
  *
- * Card: near-black plate, the lime M-wave mark and wordmark, the page title set in Archivo
- * ExtraBold capitals, and the page's stock photograph on the right columns, joined by a lime rule.
+ * Card: paper ground (#f3f2ee), the ink M-wave mark and wordmark, the page title set in
+ * Bricolage Grotesque, a chartreuse (#dbde2e) highlight under the kicker, and the page's stock
+ * photograph in a rounded frame on the right, on a lavender (#c5baea) field.
  *
  * Output
  *   public/og/*.png                                   1200×630 social cards
@@ -23,22 +24,22 @@ import opentype from 'opentype.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OG_DIR = join(root, 'public/og');
 const PHOTO_DIR = join(root, 'src/assets/photos');
-const FONT_DIR = join(root, 'node_modules/@fontsource/archivo/files');
+const FONT_DIR = join(root, 'node_modules/@fontsource/bricolage-grotesque/files');
 
-const C = { ground: '#0b0c0a', plate: '#13150f', ink: '#f4f5ef', ink2: '#b5b9ab', lime: '#c9ff4a' };
+const C = { ground: '#f3f2ee', ink: '#161110', ink2: '#5c524d', mark: '#dbde2e', lavender: '#c5baea' };
 const W = 1200;
 const H = 630;
 const M = 64;
-const PHOTO_X = 760;
+const PHOTO_X = 740;
 
 const MARK_PATHS = `<path d="M213 1110 L 438 538 A 104 104 0 0 1 641 591 L 489 990 A 106 106 0 0 0 694 1050 L 873 586 Q 940 432 1004 468 A 104 104 0 0 1 1104 611 L 1001 876"/><path d="M1220 876 L 1349 550"/>`;
-const mark = (x, y, scale, color = C.lime) =>
+const mark = (x, y, scale, color = C.ink) =>
   `<g transform="translate(${x} ${y}) scale(${scale}) translate(-150 -400)" fill="none" stroke="${color}" stroke-width="102" stroke-linecap="round" stroke-linejoin="round">${MARK_PATHS}</g>`;
 
 let fonts;
 async function loadFonts() {
-  const load = async (w) => opentype.parse((await readFile(join(FONT_DIR, `archivo-latin-${w}-normal.woff`))).buffer);
-  fonts = { 600: await load(600), 800: await load(800) };
+  const load = async (w) => opentype.parse((await readFile(join(FONT_DIR, `bricolage-grotesque-latin-${w}-normal.woff`))).buffer);
+  fonts = { 600: await load(600), 800: await load(700) };
 }
 
 // opentype.js 2.0's toPathData() can emit "NaN" for some coordinates, so serialise commands here.
@@ -90,42 +91,48 @@ function wrap(font, text, size, maxWidth, tracking) {
 
 function cardSvg({ title, kicker }) {
   const font = fonts[800];
-  const tracking = -0.01;
+  const tracking = -0.03;
   const maxWidth = PHOTO_X - M * 2;
-  const upper = title.toUpperCase();
-  let size = 64;
-  let lines = wrap(font, upper, size, maxWidth, tracking);
+  let size = 66;
+  let lines = wrap(font, title, size, maxWidth, tracking);
   while ((lines.length > 4 || lines.some((l) => measure(font, l, size, tracking) > maxWidth)) && size > 34) {
     size -= 2;
-    lines = wrap(font, upper, size, maxWidth, tracking);
+    lines = wrap(font, title, size, maxWidth, tracking);
   }
-  const lead = size * 1.0;
+  const lead = size * 1.02;
   const bottom = H - M - 8;
   const top = bottom - lead * (lines.length - 1);
 
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
-  svg += `<rect width="${PHOTO_X}" height="${H}" fill="${C.ground}"/>`;
-  // Construction lines: the manual's grid.
-  for (let i = 1; i < 6; i++) svg += `<rect x="${M + ((PHOTO_X - M * 2) / 6) * i}" y="0" width="1" height="${H}" fill="${C.ink}" opacity="0.05"/>`;
+  svg += `<rect width="${W}" height="${H}" fill="${C.ground}"/>`;
+  svg += `<rect x="${PHOTO_X}" y="0" width="${W - PHOTO_X}" height="${H}" fill="${C.lavender}"/>`;
   svg += mark(M, M - 4, 0.042);
-  svg += textPath(fonts[800], 'Akrostech', M + 66, M + 22, 26, C.ink, -0.01);
-  svg += textPath(fonts[600], 'CONSULTING', M + 67, M + 40, 11, C.ink2, 0.3);
-  if (kicker) svg += textPath(fonts[600], kicker.toUpperCase(), M, top - size - 18, 18, C.lime, 0.08);
+  svg += textPath(fonts[800], 'Akrostech', M + 66, M + 22, 26, C.ink, -0.02);
+  svg += textPath(fonts[600], 'CONSULTING', M + 67, M + 40, 11, C.ink2, 0.28);
+  if (kicker) {
+    const ky = top - size - 18;
+    const kw = measure(fonts[600], kicker, 20, 0);
+    svg += `<rect x="${M - 6}" y="${ky - 17}" width="${kw + 12}" height="26" rx="13" fill="${C.mark}"/>`;
+    svg += textPath(fonts[600], kicker, M, ky + 2, 20, C.ink, 0);
+  }
   lines.forEach((line, i) => (svg += textPath(font, line, M, top + lead * i, size, C.ink, tracking)));
-  svg += `<rect x="${PHOTO_X}" y="0" width="8" height="${H}" fill="${C.lime}"/>`;
   svg += '</svg>';
   return svg;
 }
 
 async function renderCard(name, spec) {
+  const pw = W - PHOTO_X - 64;
+  const ph = H - 128;
+  const roundMask = Buffer.from(`<svg width="${pw}" height="${ph}"><rect width="${pw}" height="${ph}" rx="28" fill="#fff"/></svg>`);
   const photo = await sharp(join(PHOTO_DIR, `${spec.photo}.jpg`))
-    .resize(W - PHOTO_X, H, { fit: 'cover', position: 'attention' })
-    .modulate({ brightness: 0.92 })
+    .resize(pw, ph, { fit: 'cover', position: 'attention' })
+    .composite([{ input: roundMask, blend: 'dest-in' }])
+    .png()
     .toBuffer();
   const buf = await sharp({ create: { width: W, height: H, channels: 3, background: C.ground } })
     .composite([
-      { input: photo, left: PHOTO_X, top: 0 },
       { input: Buffer.from(cardSvg(spec)), left: 0, top: 0 },
+      { input: photo, left: PHOTO_X + 32, top: 64 },
     ])
     .png({ compressionLevel: 9, palette: false })
     .toBuffer();
@@ -136,7 +143,7 @@ function iconSvg(size, { padding = 0.16 } = {}) {
   const inner = size * (1 - padding * 2);
   const scale = inner / 1270;
   const y = (size - 800 * scale) / 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${C.ground}"/>${mark(size * padding, y, scale)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${C.mark}"/>${mark(size * padding, y, scale, C.ink)}</svg>`;
 }
 
 async function renderIcons() {
@@ -157,10 +164,16 @@ async function blogPosts() {
       const src = await readFile(join(dir, f), 'utf8');
       const fm = src.split('---')[1] ?? '';
       const get = (k) => (fm.match(new RegExp(`^${k}:\\s*["']?(.*?)["']?\\s*$`, 'm')) ?? [])[1] ?? '';
-      return { slug: f.replace(/\.md$/, ''), title: get('title'), art: get('art') || 'web', variant: Number(get('artVariant')) || 0, category: get('category') };
+      const service = get('service');
+      const title = get('title');
+      const variant = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 997, 7) % 4;
+      return { slug: f.replace(/\.md$/, ''), title, art: artFor[service] ?? 'va', variant, category: categoryFor[service] ?? 'Outsourcing' };
     }),
   );
 }
+
+const artFor = { 'virtual-assistance': 'va', recruitment: 'rpo', accounting: 'accounting', legal: 'legal', 'website-development': 'web' };
+const categoryFor = { 'virtual-assistance': 'Virtual assistance', recruitment: 'Recruitment', accounting: 'Accounting', legal: 'Legal', 'website-development': 'Web development' };
 
 /** Mirrors src/data/photos.ts (kept in plain JS so this script runs without a TS loader for .astro types). */
 const pools = {
@@ -177,24 +190,18 @@ async function main() {
   await loadFonts();
 
   const { services } = await import('../src/data/services.ts');
-  const { work } = await import('../src/data/work.ts');
-  const { locations } = await import('../src/data/locations.ts');
   const posts = await blogPosts();
 
   const cards = [
-    ['default', { title: 'Offshore talent. Onshore quality.', kicker: 'Akrostech Consulting', photo: 'team-laptops' }],
-    ['home', { title: 'Offshore talent. Onshore quality.', kicker: 'Your team in India, on U.S. hours', photo: 'team-laptops' }],
-    ['about', { title: 'Offshore teams held to an onshore standard.', kicker: 'About Akrostech', photo: 'meeting-presentation' }],
-    ['services', { title: 'Five practices. One standard.', kicker: 'Services', photo: 'pair-at-laptop' }],
-    ['work', { title: 'How we staff and run engagements.', kicker: 'Work', photo: 'sticky-notes' }],
-    ['blog', { title: 'Guides for outsourcing, hiring and the web.', kicker: 'Insights', photo: 'desk-window' }],
-    ['contact', { title: 'Book a 30-minute discovery call.', kicker: 'Contact', photo: 'handshake' }],
-    ['locations', { title: 'Wilmington, Philadelphia and New York.', kicker: 'Service areas', photo: 'office-hallway' }],
-    ['legal', { title: 'Privacy and terms.', kicker: 'Akrostech Consulting', photo: 'contract-signing' }],
+    ['default', { title: 'Your team in India. Working your U.S. hours.', kicker: 'Akrostech Consulting', photo: 'people-virtual-assistants' }],
+    ['home', { title: 'Your team in India. Working your U.S. hours.', kicker: 'Offshore talent. Onshore quality.', photo: 'people-virtual-assistants' }],
+    ['about', { title: 'Offshore teams for U.S. businesses, held to an onshore standard.', kicker: 'About Akrostech', photo: 'people-recruiters' }],
+    ['services', { title: 'Five services. One accountable partner.', kicker: 'Services', photo: 'people-developers' }],
+    ['blog', { title: 'Guides for outsourcing, hiring and the web.', kicker: 'Blog', photo: 'desk-window' }],
+    ['contact', { title: 'Build your offshore team in 48 hours.', kicker: 'Contact', photo: 'handshake' }],
+    ['legal', { title: 'Privacy and terms.', kicker: 'Akrostech Consulting', photo: 'svc-legal-work' }],
   ];
-  for (const s of services) cards.push([`service-${s.slug}`, { title: s.headline.join(' '), kicker: s.name, photo: photoFor(s.art, 0) }]);
-  for (const w of work) cards.push([`work-${w.slug}`, { title: w.title, kicker: 'Engagement blueprint', photo: photoFor(w.art, w.variant) }]);
-  for (const l of locations) cards.push([`location-${l.slug}`, { title: l.headline.join(' '), kicker: `${l.city}, ${l.region}`, photo: l.isHeadquarters ? 'office-lounge' : 'open-office' }]);
+  for (const s of services) cards.push([`service-${s.slug}`, { title: s.headline, kicker: s.name, photo: `svc-${s.slug}` }]);
   for (const p of posts) cards.push([`blog-${p.slug}`, { title: p.title, kicker: p.category, photo: photoFor(p.art, p.variant) }]);
 
   await Promise.all(cards.map(([name, spec]) => renderCard(name, spec)));

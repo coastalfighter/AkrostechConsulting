@@ -31,18 +31,20 @@ Buyers arrive from search, LinkedIn and referrals, often on a laptop during the 
 ## Capabilities and Constraints
 
 - Astro static site on Vercel with one serverless contact endpoint; content lives in `src/data/*` and `src/content/blog/*`.
-- Pages: home, about, services overview, four staffing service pages, website development, work (engagement blueprints), blog and articles, contact, three service-area pages (Wilmington, Philadelphia, New York), privacy, terms, 404.
-- Every page hero carries an interactive graphic with page-specific text; no two heroes share the same graphic (user requirement).
+- Pages: home, about, services hub, four staffing service pages, website development, blog and articles, contact, privacy, terms, 404 (Sample-3 sitemap). Former Work and Locations URLs redirect.
+- Every page hero carries an interactive generative graphic with page-specific text; the interactive instruments sit further down each page (user requirement).
 - Stock photography is used wherever imagery is needed (user requirement), credited and licensed for commercial use.
 - Must stay fast (Core Web Vitals), accessible (WCAG 2.1 AA), SEO-complete (structured data, metadata) and respect reduced motion.
 - Undecided: confirmed office hours (currently Mon–Fri 9:00–18:00 ET, assumed), the canonical email (akrostech.info vs akrosstech.info), website pricing tiers.
 
 ## Brand Commitments
 
-- Use the akrosstech.com identity: the lime "M-wave" mark and the "Akrostech / CONSULTING" wordmark; logo files at `public/brand/`.
-- Colours from the live site: near-black ground, brand lime `#C9FF4A` (live UI also uses `#BFF747`), white type.
-- Tagline in use: "Offshore talent. Onshore quality." Secondary line: "Built for startups, scaled by enterprises, trusted by leaders."
-- Real photography of professionals at work, as on the live site.
+- Use the akrosstech.com identity: the M-wave mark and the "Akrostech / CONSULTING" wordmark; logo files at `public/brand/`.
+- Client-supplied palette (v3): light theme (default) paper `#f3f2ee`, chartreuse `#dbde2e`, ink `#161110`, lavender `#c5baea`; dark theme ink `#161110`, chartreuse `#dbde2e`, paper `#f3f2ee`, violet `#6327c5`. Chartreuse is a fill (highlights, CTA band, selected states), never text on paper.
+- Taglines in use: "Your team in India. Working your U.S. hours." and "Offshore talent. Onshore quality." Secondary line: "Built for startups, scaled by enterprises, trusted by leaders."
+- Structure and copy follow the Sample-3 site (github.com/coastalfighter/Akrostech-Consulting-Sample-3): home, services hub, five service pages (short URLs), about, blog (18 guides), contact, privacy, terms.
+- Every page hero carries an interactive generative graphic (not an image, not an infographic). The interactive instruments (shift dial, comparison divider, service matrix, inbox triage, hiring funnel, reconciliation, clause abstractor, page builder, org chain, call week, article search and outline, data flow, clause index, page finder) live in page bodies.
+- Real photography of professionals at work (stock, never presented as Akrostech staff).
 
 ## Evidence on Hand
 
