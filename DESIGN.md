@@ -1,6 +1,6 @@
 ---
 name: Akrostech Consulting, v3
-description: Paper and ink with a chartreuse highlighter and lavender/violet fields; Sample-3 structure; a live generative field in every hero and the interactive instruments in the page bodies.
+description: Paper and ink with a chartreuse highlighter and lavender/violet fields; Sample-3 structure; a real-time 3D signature object in every hero and the interactive instruments in the page bodies.
 colors:
   paper: "#f3f2ee"
   ink: "#161110"
@@ -83,12 +83,14 @@ components:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
     rounded: "{rounded.pill}"
-  field-hero-panel:
-    backgroundColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-  field-hero-panel-dark:
+  hero-glow:
+    backgroundColor: "{colors.lavender}"
+  hero-glow-dark:
     backgroundColor: "{colors.violet}"
-    rounded: "{rounded.lg}"
+  hero-label:
+    backgroundColor: "{colors.plate-light}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.sm}"
   highlight-field:
     backgroundColor: "{colors.chartreuse}"
     textColor: "{colors.ink}"
@@ -113,7 +115,13 @@ components:
 
 ## Overview
 
-Daylight paper with an ink night window. The visitor reads on warm paper (`#f3f2ee`); each page opens beside a rounded ink panel (violet in the dark theme) holding a **generative field**: a canvas of particles that forms a page-specific shape (the M-wave mark on Home, five orbits on Services, sorting lanes for virtual assistance, a narrowing funnel for recruitment, balancing columns for accounting, lines of a page for legal, a wireframe for web, a team network on About, wave-line currents on the blog, two linked clusters on Contact, a boundary on Privacy, an index grid on Terms, a scattered "404"). The pointer parts the field and a press sends a ripple. These are interactive graphics, not images or infographics.
+Daylight paper, ink type, and one real object per page. Every page opens full-width: a large headline on the left and, behind and to the right of it, a **3D signature object** rendered live with three.js in the brand palette. The object tells the page's story and answers the hand: the pointer tilts it, dragging turns it, a press sends a pulse.
+
+- **Home**: the live Earth. Land as dots, the real day/night terminator for this minute, Wilmington and the India delivery centre pinned with their live local times, and work travelling a great-circle arc between them.
+- **Services**: a core with the five services on tilted orbits. **Virtual assistance**: task tiles sorting themselves into trays. **Recruitment**: a glass funnel that narrows a stream of candidates to a chartreuse shortlist. **Accounting**: a balance that levels coin stacks. **Legal**: a fan of paper with one clause highlighted. **Website development**: an exploded browser that assembles itself.
+- **About**: a constellation of people. **Blog**: drifting pages, arranged differently for every article. **Contact**: the U.S. and India as two linked globes. **Privacy**: a glass vault with locking rings. **Terms**: a clause index of keys that lifts under the pointer. **404**: blocks that drift apart and find their way back to "404".
+
+These are interactive graphics, not images or infographics.
 
 The site's working **instruments** (live shift dial, comparison divider, service matrix, inbox triage, hiring funnel, bank reconciliation, clause abstractor, page builder, org chain, call week, article search, reading outline, data flow, clause index, page finder) sit further down each page in their own sections, usually on an edge-to-edge ink band.
 
@@ -124,7 +132,7 @@ Structure and copy follow the Sample-3 site: home (ten sections), services hub, 
 - **Paper `#f3f2ee`** is the light ground (default theme); **ink `#161110`** is the text, the primary button and the hero/instrument panels.
 - **Chartreuse `#dbde2e`** is the highlighter: the "New" badge, the CTA band, selected states, the comparison's Akrostech column, button hover, the `.mark` stroke behind a word. It is a fill, never text on paper (text on chartreuse is always ink). On ink panels chartreuse can be text.
 - **Lavender `#c5baea`** (light) and **violet `#6327c5`** (dark) are the soft fields: a lead bento cell, the services-menu header, the mission panel, key-takeaway boxes, focus rings in light (`--focus` violet).
-- **Dark theme**: ink ground, paper text, chartreuse primary buttons, violet hero panels and soft fields; ink bands lift to `#1c1615` with a hairline.
+- **Dark theme**: ink ground, paper text, chartreuse primary buttons, violet hero glow and soft fields; ink bands lift to `#1c1615` with a hairline.
 - Secondary text: `#5c524d` on paper (7:1), `#bfb8b1` on ink (9:1). All body text ≥ 4.5:1 in both themes.
 
 ## Typography
@@ -136,24 +144,25 @@ Structure and copy follow the Sample-3 site: home (ten sections), services hub, 
 ## Layout
 
 - `.wrap` (max 1600px) + `.grid` (4 / 8 / 12 columns; `.c-N` spans, `.s-N` starts that keep the span).
-- `FieldHero`: words on 5 columns, field panel on 6 (switches with `wide` for long headlines); stacks on phones.
+- `Hero3D`: full-bleed, at least the viewport tall on wide screens. Words take the left (about 46% of the width, 50% with `wide`); the scene spans the whole section behind them and its projection is shifted right (`shift`), so the object sits beside the words without a box around it. On phones the scene follows the words in a square-ish stage and the camera pulls back to keep the object whole.
 - Section heads: h2 left, supporting paragraph right. Sections alternate paper, bands of ink (instruments) and one chartreuse CTA band per page.
 - Compositions vary by section: hover-photo service index, ink band with the dial and a shared-day timeline, a step track, a bento, tabs, the comparison divider, a sticky-heading FAQ.
 
 ## Elevation & Depth
 
-Flat with hairlines (`--rule`) and plate steps. Shadows only for floating UI (the services menu). Instrument bands are full-width section colour, so the instruments' own panels are first-level (no cards in cards).
+Flat UI with hairlines (`--rule`) and plate steps; shadows only for floating UI (the services menu, the hero's 3D labels). Depth lives in the hero objects: physical materials lit by a studio environment, a soft lavender (violet in dark) glow behind them. Instrument bands are full-width section colour, so the instruments' own panels are first-level (no cards in cards).
 
 ## Shapes
 
-Rounded: panels `1.25rem`, large panels and the field window `2rem`, inputs `0.75rem`, buttons and chips pills, icon buttons round. Icons are drawn with round caps and joins, matching the logo's line.
+Rounded: panels `1.25rem`, large panels `2rem`, inputs `0.75rem`, buttons and chips pills, icon buttons round. Icons are drawn with round caps and joins, matching the logo's line.
 
 ## Components
 
 - **Buttons**: `.btn--primary` (ink → chartreuse on hover; chartreuse in dark), `.btn--ghost` (outline), press `scale(.97)` at 160ms, hover only on fine pointers, `aria-busy` spinner.
 - **Header**: logo, Services disclosure menu (all services & comparison, then five services with "New"), About, Blog, Contact, New York and India clocks (wide screens), theme switch, Book a call. Mobile: full-screen dialog menu.
 - **Footer**: ink panel with brand column, Services, Company, Contact, legal line.
-- **FieldHero**: canvas field + caption + pause button (WCAG 2.2.2); static settled frame under reduced motion; starts after first paint at idle; pauses off-screen.
+- **Hero3D**: WebGL canvas + hint + pause button (WCAG 2.2.2). three.js and the scene load as separate chunks after the page has painted, only when the device draws WebGL on a GPU (software rasterisers keep the glow backdrop, as do browsers without WebGL or JavaScript). One settled still frame under reduced motion; pauses off-screen and in hidden tabs; re-colours on theme change without rebuilding. Scenes may pin live HTML labels to the object (`.h3d__label`: plate pill, small title, tabular figure).
+- **Scene craft**: one composed object filling about two thirds of the stage height; physical glossy/glass materials for solids, crisp unlit lines and dots for data; chartreuse only for the one thing that matters (the shortlist, the reconciling coin, the travelling work); slow purposeful idle loops with damped responses; seeded randomness so still frames are stable.
 - **Compare**: draggable divider, option switch (in-house hire / freelance marketplace), keyboard slider.
 - **Photo**: AVIF/WebP via Astro, rounded, clip reveal; stock photography never presented as Akrostech people.
 
@@ -161,10 +170,10 @@ Rounded: panels `1.25rem`, large panels and the field window `2rem`, inputs `0.7
 
 **Do**
 - Keep chartreuse as a fill; let lavender/violet carry the soft emphasis.
-- Give every new page a field formation of its own and put any working tool in the body, on an ink band.
+- Give every new page a 3D object of its own (a scene in `src/scripts/hero3d/scenes/`) and put any working tool in the body, on an ink band.
 - Use the Sample-3 copy and the published figures only.
 - Keep motion purposeful: one authored moment per view, ease-out curves, under 300ms for UI, everything usable with reduced motion and without JavaScript.
 
 **Don't**
-- No chartreuse text on paper, no gradient text, no glass, no side-stripe borders, no eyebrows above headings, no decorative numbering, no cards inside cards, no logo walls or invented proof.
-- No images or infographics in hero sections; the hero graphic is the field.
+- No chartreuse text on paper, no gradient text, no glassmorphism UI (glass is a material for 3D objects only), no side-stripe borders, no eyebrows above headings, no decorative numbering, no cards inside cards, no logo walls or invented proof.
+- No images or infographics in hero sections, and no boxed widget: the hero graphic is the page's 3D object, free on the ground.

@@ -179,7 +179,6 @@ const {
     color: var(--ink);
     background: color-mix(in srgb, var(--ground) 70%, transparent);
     border: 1px solid var(--rule);
-    backdrop-filter: blur(6px);
     transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease;
   }
   .h3d__pause:active { transform: scale(0.94); }
@@ -208,10 +207,9 @@ const {
     padding: 0.45rem 0.75rem 0.5rem;
     margin: -3.4rem 0 0 0.85rem;
     border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--plate) 88%, transparent);
+    background: var(--plate);
     border: 1px solid var(--rule);
     box-shadow: 0 10px 30px -14px rgb(22 17 16 / 0.35);
-    backdrop-filter: blur(8px);
     color: var(--ink);
     white-space: nowrap;
     pointer-events: none;

@@ -48,19 +48,19 @@
     "maxWidth": "1600px"
   },
   "heroes": {
-    "type": "generative field (canvas)",
+    "type": "real-time 3D signature object (three.js, full-bleed, GPU only)",
     "scenes": {
-      "/": "wave",
+      "/": "globe",
       "/services": "orbits",
-      "/services/virtual-assistance": "lanes",
+      "/services/virtual-assistance": "va",
       "/services/recruitment": "funnel",
       "/services/accounting": "ledger",
       "/services/legal": "document",
       "/services/website-development": "wireframe",
       "/about": "network",
-      "/blog": "flow",
-      "/blog/[slug]": "flow-article",
-      "/contact": "relay",
+      "/blog": "pages",
+      "/blog/[slug]": "pages (seeded by slug)",
+      "/contact": "twin",
       "/privacy": "shield",
       "/terms": "index",
       "/404": "lost"

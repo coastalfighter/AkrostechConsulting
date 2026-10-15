@@ -2,7 +2,7 @@
 
 Marketing website for **Akrostech Consulting**: vetted professionals in India working U.S. business hours (virtual assistance, recruitment process outsourcing, accounting, legal process outsourcing and website development). Headquartered at 1207 Delaware Ave, Wilmington, DE 19806.
 
-Structure and copy follow the Sample-3 site ([coastalfighter/Akrostech-Consulting-Sample-3](https://github.com/coastalfighter/Akrostech-Consulting-Sample-3)): home, services hub, five service pages, about, a blog of 18 guides, contact and the legal pages. The look uses the client palette: paper `#f3f2ee`, ink `#161110`, chartreuse `#dbde2e` and lavender `#c5baea` (light, the default) with violet `#6327c5` in the dark theme, set in Bricolage Grotesque and Figtree. **Every page hero is a generative field**: an interactive canvas graphic of particles that forms a page-specific shape and parts around the pointer. The site's working tools (live shift dial, comparison divider, service matrix, inbox triage, hiring funnel, reconciliation, clause abstractor, page builder, org chain, call week, article search and outline, data flow, clause index, page finder) live further down each page.
+Structure and copy follow the Sample-3 site ([coastalfighter/Akrostech-Consulting-Sample-3](https://github.com/coastalfighter/Akrostech-Consulting-Sample-3)): home, services hub, five service pages, about, a blog of 18 guides, contact and the legal pages. The look uses the client palette: paper `#f3f2ee`, ink `#161110`, chartreuse `#dbde2e` and lavender `#c5baea` (light, the default) with violet `#6327c5` in the dark theme, set in Bricolage Grotesque and Figtree. **Every page hero is a real-time 3D signature object** (three.js) in the brand palette: a live Earth with the real day/night line and live clocks on Home, a glass recruitment funnel, a balancing ledger, an exploded browser and so on. The pointer tilts it, dragging turns it, a press sends a pulse. The site's working tools (live shift dial, comparison divider, service matrix, inbox triage, hiring funnel, reconciliation, clause abstractor, page builder, org chain, call week, article search and outline, data flow, clause index, page finder) live further down each page.
 
 ---
 
@@ -14,7 +14,7 @@ Structure and copy follow the Sample-3 site ([coastalfighter/Akrostech-Consultin
 | Hosting | Vercel (`@astrojs/vercel`); static pages plus one serverless function (`/api/contact`) |
 | Type | Bricolage Grotesque (display, variable with optical size) and Figtree (text), self-hosted WOFF2 with metric-matched fallbacks |
 | Motion | Lenis smooth scroll (fine pointers), IntersectionObserver reveals, CSS transitions, cross-document View Transitions |
-| Heroes | Generative canvas field (`src/scripts/field/`), one formation per page, started at idle, paused off-screen, static under reduced motion |
+| Heroes | three.js scenes (`src/scripts/hero3d/`), one per page, loaded as separate chunks at idle after load and only on GPU WebGL, paused off-screen, one still frame under reduced motion |
 | Instruments | One lazy-loaded module per tool in `src/scripts/instruments/`, loaded as its section nears the viewport, server-rendered in a working default state |
 | Images | Stock photography (Unsplash License, `src/assets/photos/credits.json`) → Astro `<Picture>` (AVIF + WebP srcsets) |
 | Tests | Vitest (time-zone maths, SEO metadata lengths and schema, contact validation, rate limiting) |
@@ -28,6 +28,7 @@ Structure and copy follow the Sample-3 site ([coastalfighter/Akrostech-Consultin
 ├── .env.example              # copy to .env for local development
 ├── scripts/
 │   ├── generate-og.mjs       # npm run og → Open Graph cards and app icons
+│   ├── generate-land-dots.mjs # npm run land → src/scripts/hero3d/land.json (globe land dots)
 │   └── fetch-photos.mjs      # downloads the stock photographs and writes credits.json
 ├── public/                   # fonts, OG images, icons, manifest
 ├── src/
@@ -37,8 +38,8 @@ Structure and copy follow the Sample-3 site ([coastalfighter/Akrostech-Consultin
 │   ├── lib/                  # seo.ts (JSON-LD), time.ts (shift maths), contact.ts, rate-limit.ts, blog.ts
 │   ├── styles/               # tokens.css (design system), base.css (global components)
 │   ├── assets/photos/        # stock photographs + credits.json (licence and source per photo)
-│   ├── scripts/              # main.ts, field/ (hero engine + scenes), instruments/*.ts (lazy), motion.ts (lazy), theme, menu, header
-│   ├── components/           # Logo, Header, Footer, FieldHero, instruments/*, Photo, Compare, PostCard, GuideCard, TrailSteps, Faq, CtaBand…
+│   ├── scripts/              # main.ts, hero3d/ (3D engine, geo, land dots, scenes/*.ts), instruments/*.ts (lazy), motion.ts (lazy), theme, menu, header
+│   ├── components/           # Logo, Header, Footer, Hero3D, instruments/*, Photo, Compare, PostCard, GuideCard, TrailSteps, Faq, CtaBand…
 │   ├── layouts/              # BaseLayout (SEO head, schema graph, shell), LegalLayout
 │   └── pages/                # routes, incl. api/contact.ts, rss.xml.ts, robots.txt.ts
 └── tests/                    # Vitest suites
@@ -66,6 +67,7 @@ npm run dev                   # http://localhost:4321
 | `npm run build` | Production build to `dist/` and `.vercel/output/` |
 | `npm run preview` | Preview the production build |
 | `npm run check` | Type-check `.astro` and `.ts` files |
+| `npm run land` | Rebuild the globe's land dots from Natural Earth (world-atlas) |
 | `npm test` | Run the Vitest suites |
 | `npm run og` | Regenerate Open Graph cards and icons (after adding services or posts) |
 
@@ -107,13 +109,13 @@ Documented in `DESIGN.md` (with a machine-readable sidecar in `.impeccable/desig
 - **Colour** (`src/styles/tokens.css`): the client palette as primitive scales (`--lime-*` = chartreuse, `--carbon-*` = ink/paper, `--violet-*`) mapped to semantic roles (`--ground`, `--plate`, `--ink`, `--ink-2`, `--rule`, `--accent`, `--mark`, `--field`, `--second`). Light is the default; `data-theme="dark"` is stored when chosen. `.lime` is a chartreuse field, `.violet` a lavender/violet field, `.ink-plate` an ink panel; a section containing a `.band` is painted ink edge to edge for instruments.
 - **Type:** Bricolage Grotesque for headings and figures, Figtree for text; two-part headlines with a quieter second phrase.
 - **Shape:** rounded panels, pill buttons and chips, round icon buttons.
-- **Motion:** Emil Kowalski's curves, 160 ms press feedback, UI motion under 300 ms, one authored moment per view (the hero field); reduced motion keeps everything static and usable, and the field shows a settled formation.
+- **Motion:** Emil Kowalski's curves, 160 ms press feedback, UI motion under 300 ms, one authored moment per view (the hero object); reduced motion keeps everything static and usable, and the hero renders one settled frame.
 
 ## SEO, local SEO and accessibility
 
 - Unique 50–60 character titles and 150–160 character descriptions on every page (tested), canonical URLs, Open Graph and Twitter cards with a generated 1200×630 image per page.
 - One JSON-LD `@graph` per page: Organization, WebSite, ProfessionalService/LocalBusiness (full NAP, geo, hours, service area), WebPage, BreadcrumbList, plus Service, FAQPage, Article/Blog and ItemList where relevant. AggregateRating appears only with real reviews.
-- Semantic landmarks, one H1 per page, skip link, visible focus, 44 px targets, native `<dialog>` menu, `<details>` FAQs, accessible tabs, form errors shown after interaction, `prefers-reduced-motion` respected throughout (no smooth scroll, static hero field), and a pause control on every moving hero graphic.
+- Semantic landmarks, one H1 per page, skip link, visible focus, 44 px targets, native `<dialog>` menu, `<details>` FAQs, accessible tabs, form errors shown after interaction, `prefers-reduced-motion` respected throughout (no smooth scroll, still hero frame), and a pause control on every moving hero graphic.
 
 ### Lighthouse (mobile, simulated throttling, production build behind gzip)
 
@@ -128,7 +130,7 @@ Documented in `DESIGN.md` (with a machine-readable sidecar in `.impeccable/desig
 | Guide (website cost) | 99 | 100 | 100 | 100 |
 | Contact | 100 | 100 | 100 | 100 |
 
-CLS 0; LCP 1.7–2.3 s; TBT 0–190 ms (the homepage's hero field starts at idle after load). Scores vary a few points between runs; re-measure on the deployed site.
+CLS 0; LCP 1.7–2.3 s; TBT 0–190 ms (the hero scene starts at idle after load, and only where WebGL runs on a GPU, so lab tools on software rendering measure the page without it). Scores vary a few points between runs; re-measure on the deployed site.
 
 ## Before launch: confirm with the business
 
