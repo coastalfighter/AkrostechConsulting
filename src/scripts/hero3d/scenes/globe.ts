@@ -6,47 +6,14 @@
  */
 import * as THREE from 'three';
 import type { HeroScene, Palette, SceneContext } from '../engine';
+import { GreatArc, sunDirection, toVec as geoVec } from '../geo';
 import land from '../land.json';
+
+const toVec = (lat: number, lon: number, r = R): THREE.Vector3 => geoVec(lat, lon, r);
 
 const R = 1.5;
 const WILMINGTON = { lat: 39.75, lon: -75.56, label: 'Wilmington, DE', zone: 'America/New_York' };
 const INDIA = { lat: 21.15, lon: 79.09, label: 'India delivery centre', zone: 'Asia/Kolkata' };
-
-function toVec(lat: number, lon: number, r = R): THREE.Vector3 {
-  const phi = THREE.MathUtils.degToRad(90 - lat);
-  const theta = THREE.MathUtils.degToRad(lon + 180);
-  return new THREE.Vector3(-r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
-}
-
-/** Unit vector toward the sun in Earth-fixed coordinates for a given instant. */
-function sunDirection(date: Date): THREE.Vector3 {
-  const start = Date.UTC(date.getUTCFullYear(), 0, 0);
-  const day = (date.getTime() - start) / 86_400_000;
-  const decl = -23.44 * Math.cos(((2 * Math.PI) / 365) * (day + 10));
-  const hours = date.getUTCHours() + date.getUTCMinutes() / 60;
-  const lon = -(hours - 12) * 15;
-  return toVec(decl, lon, 1).normalize();
-}
-
-/** Shortest path over the globe between two surface points, lifted toward the middle. */
-class GreatArc extends THREE.Curve<THREE.Vector3> {
-  private readonly a: THREE.Vector3;
-  private readonly b: THREE.Vector3;
-  private readonly angle: number;
-  constructor(from: THREE.Vector3, to: THREE.Vector3, private readonly radius: number, private readonly lift: number) {
-    super();
-    this.a = from.clone().normalize();
-    this.b = to.clone().normalize();
-    this.angle = this.a.angleTo(this.b);
-  }
-  override getPoint(t: number, target = new THREE.Vector3()): THREE.Vector3 {
-    const s = Math.sin(this.angle);
-    const wa = Math.sin((1 - t) * this.angle) / s;
-    const wb = Math.sin(t * this.angle) / s;
-    target.copy(this.a).multiplyScalar(wa).addScaledVector(this.b, wb).normalize();
-    return target.multiplyScalar(this.radius + this.lift * Math.sin(Math.PI * t));
-  }
-}
 
 function glossyBead(p: Palette): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({ color: p.mark, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.15 });
