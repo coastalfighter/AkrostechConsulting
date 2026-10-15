@@ -1,0 +1,286 @@
+---
+/**
+ * Page hero: the page's words over a full-width, real-time 3D scene (three.js), a signature
+ * object of its own on every page. On wide screens the object sits to the right of the words
+ * (the projection is shifted, so the scene still spans the whole section); on phones it
+ * follows the words. The pointer tilts the object, dragging turns it, a press sends a pulse.
+ *
+ * The scene is decorative for assistive technology; the words carry the meaning. Without
+ * WebGL or JavaScript the section keeps its glow backdrop, and under reduced motion the scene
+ * renders one still frame.
+ */
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import type { Crumb } from '@/lib/seo';
+
+export type HeroSceneName =
+  | 'globe'
+  | 'orbits'
+  | 'va'
+  | 'funnel'
+  | 'ledger'
+  | 'document'
+  | 'wireframe'
+  | 'network'
+  | 'pages'
+  | 'twin'
+  | 'shield'
+  | 'index'
+  | 'lost';
+
+interface Props {
+  scene: HeroSceneName;
+  /** Accessible name for the hero region (the h1 id). */
+  labelledby: string;
+  crumbs?: Crumb[];
+  /** Extra seed so pages sharing a scene still differ (e.g. an article slug). */
+  seed?: string;
+  /** Short instruction shown beside the pause button. */
+  hint?: string;
+  /** Wider words column for long headlines. */
+  wide?: boolean;
+  /** How far right the object sits on wide screens, as a fraction of the section width. */
+  shift?: number;
+  class?: string;
+}
+
+const {
+  scene,
+  labelledby,
+  crumbs,
+  seed,
+  hint = 'Drag to turn it. Press for a pulse.',
+  wide = false,
+  shift = wide ? 0.24 : 0.2,
+  class: className,
+} = Astro.props;
+---
+
+<section
+  class:list={['h3d', className, { 'h3d--wide': wide }]}
+  aria-labelledby={labelledby}
+  data-hero3d={scene}
+  data-hero3d-seed={seed}
+  data-hero3d-shift={shift}
+>
+  <div class="h3d__stage" aria-hidden="true">
+    <div class="h3d__glow"></div>
+    <canvas class="h3d__canvas" data-hero3d-canvas></canvas>
+  </div>
+
+  <div class="h3d__content">
+    <div class="wrap h3d__wrap">
+      {crumbs && <div class="h3d__crumbs"><Breadcrumbs items={crumbs} /></div>}
+      <div class="h3d__words">
+        <slot />
+      </div>
+    </div>
+  </div>
+
+  <div class="h3d__bar">
+    <p class="h3d__hint">{hint}</p>
+    <button class="h3d__pause" type="button" aria-pressed="false" data-hero3d-pause>
+      <span class="h3d__pause-icon" aria-hidden="true"><Icon name="pause" class="icon h3d__i-pause" /><Icon name="play" class="icon h3d__i-play" /></span>
+      <span class="sr-only">Pause the moving graphic</span>
+    </button>
+  </div>
+
+  {Astro.slots.has('after') && <div class="wrap h3d__after"><slot name="after" /></div>}
+</section>
+
+<style>
+  .h3d {
+    --h3d-glow: var(--violet-300);
+    --h3d-glow-2: var(--lime-400);
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(var(--header-h) + var(--s-5));
+    overflow: clip;
+  }
+  :global(:root[data-theme='dark']) .h3d {
+    --h3d-glow: var(--violet-600);
+    --h3d-glow-2: var(--lime-400);
+  }
+
+  /* ---- Scene stage */
+  .h3d__stage {
+    position: relative;
+    order: 2;
+    height: min(108vw, 30rem);
+    margin-top: var(--s-5);
+    touch-action: pan-y;
+    cursor: grab;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .h3d__stage:active { cursor: grabbing; }
+  .h3d__glow {
+    position: absolute;
+    inset: -10% -20%;
+    z-index: -1;
+    background:
+      radial-gradient(closest-side at 50% 52%, color-mix(in srgb, var(--h3d-glow) 70%, transparent), transparent 72%),
+      radial-gradient(closest-side at 62% 70%, color-mix(in srgb, var(--h3d-glow-2) 16%, transparent), transparent 60%);
+    filter: blur(8px);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  .h3d__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: scale(0.97);
+    transition: opacity 900ms var(--ease-out), transform 1200ms var(--ease-out);
+  }
+  .h3d[data-hero3d-ready='true'] .h3d__canvas { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .h3d__canvas { transition: none; transform: none; }
+    .h3d__stage { cursor: default; }
+  }
+
+  /* ---- Words */
+  .h3d__content { position: relative; order: 1; }
+  .h3d__crumbs { margin-bottom: var(--s-4); }
+  .h3d__words { display: grid; gap: var(--s-6); max-width: 40rem; }
+  .h3d :global(.hero__title) {
+    font-size: clamp(2.75rem, 1.2rem + 5.6vw, 6.25rem);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+    max-width: 12ch;
+    text-wrap: balance;
+  }
+  .h3d--wide :global(.hero__title) { max-width: 16ch; font-size: clamp(2.4rem, 1.2rem + 3.6vw, 4.75rem); }
+  .h3d :global(.hero__lead) { font-size: var(--t-lead); line-height: 1.5; color: var(--ink-2); max-width: 40ch; }
+
+  /* ---- Pause control */
+  .h3d__bar {
+    order: 3;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--s-4);
+    padding: 0 var(--margin) var(--s-5);
+    margin-top: calc(-44px - var(--s-5));
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .h3d__hint { font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); }
+  .h3d__pause {
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ground) 70%, transparent);
+    border: 1px solid var(--rule);
+    backdrop-filter: blur(6px);
+    transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease;
+  }
+  .h3d__pause:active { transform: scale(0.94); }
+  @media (hover: hover) and (pointer: fine) { .h3d__pause:hover { background: var(--plate); } }
+  .h3d__pause-icon { display: grid; }
+  .h3d__pause-icon :global(.icon) { grid-area: 1 / 1; width: 1rem; height: 1rem; }
+  .h3d__pause :global(.h3d__i-play) { display: none; }
+  .h3d__pause[aria-pressed='true'] :global(.h3d__i-play) { display: block; }
+  .h3d__pause[aria-pressed='true'] :global(.h3d__i-pause) { display: none; }
+  @media (prefers-reduced-motion: reduce) { .h3d__bar { display: none; } }
+  :global(html:not(.js)) .h3d__bar,
+  .h3d[data-hero3d-fallback='true'] .h3d__bar { display: none; }
+  .h3d__hint { display: none; }
+
+  .h3d__after { order: 4; position: relative; margin-top: var(--s-6); padding-bottom: var(--s-8); }
+  .h3d:not(:has(.h3d__after)) { padding-bottom: var(--s-6); }
+
+  /* ---- Live labels a scene pins to its object (e.g. city clocks on the globe) */
+  .h3d :global(.h3d__label) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    gap: 1px;
+    padding: 0.45rem 0.75rem 0.5rem;
+    margin: -3.4rem 0 0 0.85rem;
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--plate) 88%, transparent);
+    border: 1px solid var(--rule);
+    box-shadow: 0 10px 30px -14px rgb(22 17 16 / 0.35);
+    backdrop-filter: blur(8px);
+    color: var(--ink);
+    white-space: nowrap;
+    pointer-events: none;
+    will-change: transform;
+    transition: opacity 220ms ease;
+  }
+  .h3d :global(.h3d__label[data-side='left']) { margin-left: -0.85rem; }
+  .h3d :global(.h3d__label[data-below='true']) { margin-top: 0.85rem; }
+  .h3d :global(.h3d__label-title) { font-size: 0.75rem; font-weight: 600; color: var(--ink-2); }
+  .h3d :global(.h3d__label-time) {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 40rem) {
+    .h3d :global(.h3d__label) { padding: 0.3rem 0.55rem; margin-top: -2.6rem; }
+    .h3d :global(.h3d__label[data-below='true']) { margin-top: 0.7rem; }
+    .h3d :global(.h3d__label-title) { font-size: 0.6875rem; }
+    .h3d :global(.h3d__label-time) { font-size: 0.9375rem; }
+  }
+
+  /* ---- Wide screens: the scene fills the section behind the words */
+  @media (min-width: 64rem) {
+    .h3d {
+      min-height: max(40rem, min(100svh, 62rem));
+      padding-bottom: 0;
+    }
+    .h3d:not(:has(.h3d__after)) { padding-bottom: 0; }
+    .h3d__stage {
+      position: absolute;
+      inset: 0;
+      height: auto;
+      margin: 0;
+      z-index: 0;
+    }
+    .h3d__glow { inset: 0; }
+    .h3d__glow {
+      background:
+        radial-gradient(34% 52% at 70% 50%, color-mix(in srgb, var(--h3d-glow) 72%, transparent), transparent 100%),
+        radial-gradient(22% 30% at 78% 74%, color-mix(in srgb, var(--h3d-glow-2) 14%, transparent), transparent 100%);
+    }
+    .h3d--wide .h3d__glow {
+      background:
+        radial-gradient(30% 50% at 74% 50%, color-mix(in srgb, var(--h3d-glow) 72%, transparent), transparent 100%),
+        radial-gradient(20% 28% at 82% 74%, color-mix(in srgb, var(--h3d-glow-2) 14%, transparent), transparent 100%);
+    }
+    .h3d__content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      z-index: 1;
+      pointer-events: none;
+      padding-block: var(--s-6) var(--s-9);
+    }
+    .h3d__wrap { width: 100%; }
+    .h3d__crumbs,
+    .h3d__words { pointer-events: auto; }
+    .h3d__words { max-width: min(46%, 40rem); }
+    .h3d--wide .h3d__words { max-width: min(50%, 44rem); }
+    .h3d__bar {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 0 var(--margin) var(--s-6);
+    }
+    .h3d__hint { display: block; }
+    .h3d__after { z-index: 1; margin-top: calc(var(--s-9) * -1 + var(--s-6)); }
+  }
+</style>

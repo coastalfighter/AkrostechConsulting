@@ -9,7 +9,7 @@ const hash = (s: string): number => [...s].reduce((h, c) => (Math.imul(h, 31) + 
 /** The field is decorative: start it once the page has painted and the main thread is idle. */
 export function initFields(): void {
   const start = () => startFields();
-  const idle = () => ('requestIdleCallback' in window ? window.requestIdleCallback(start, { timeout: 1500 }) : window.setTimeout(start, 300));
+  const idle = () => ('requestIdleCallback' in window ? window.requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 300));
   if (document.readyState === 'complete') idle();
   else window.addEventListener('load', idle, { once: true });
 }

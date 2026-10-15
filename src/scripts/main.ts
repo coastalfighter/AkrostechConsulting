@@ -7,6 +7,7 @@ import { initTheme } from './theme';
 import { initMenu } from './menu';
 import { initHeader, initServicesMenu } from './header';
 import { initFields } from './field';
+import { initHero3d } from './hero3d';
 
 declare global {
   interface Window {
@@ -60,6 +61,7 @@ function boot(): void {
   initHeader();
   initServicesMenu();
   initFields();
+  initHero3d();
   initInstruments();
 
   if (!reduceMotion()) {

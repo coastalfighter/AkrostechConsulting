@@ -6,7 +6,7 @@
  * (service index, live shift dial, comparison divider, audience tabs) sit in the body.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import ShiftDial from '@/components/instruments/ShiftDial.astro';
 import Photo from '@/components/Photo.astro';
 import Compare from '@/components/Compare.astro';
@@ -38,15 +38,15 @@ const clock = (hoursAfterNine: number) => {
 ---
 
 <BaseLayout {...pages.home} image="/og/home.png" schema={[faqSchema(faqs)]}>
-  <FieldHero scene="wave" labelledby="home-title">
-    <h1 class="fhero__title" id="home-title">Your team in India. <span class="quiet">Working your U.S. hours.</span></h1>
-    <p class="fhero__lead">Vetted specialists for admin, hiring, accounting, legal and web. Live on your calls and ready in 48 hours.</p>
+  <Hero3D scene="globe" labelledby="home-title" hint="Drag to turn the planet. Times are live.">
+    <h1 class="hero__title" id="home-title">Your team in India. <span class="quiet">Working your U.S. hours.</span></h1>
+    <p class="hero__lead">Vetted specialists for admin, hiring, accounting, legal and web. Live on your calls and ready in 48 hours.</p>
     <div class="actions">
       <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></a>
       <a class="btn btn--ghost" href="/contact">Get a proposal <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
     </div>
     <p class="hero-note small muted">Built for startups, scaled by enterprises, trusted by leaders.</p>
-  </FieldHero>
+  </Hero3D>
 
   <!-- Proof -->
   <section class="proof" aria-labelledby="proof-title">
