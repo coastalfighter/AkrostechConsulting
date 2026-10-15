@@ -130,7 +130,7 @@ Documented in `DESIGN.md` (with a machine-readable sidecar in `.impeccable/desig
 | Guide (website cost) | 99 | 100 | 100 | 100 |
 | Contact | 100 | 100 | 100 | 100 |
 
-CLS 0; LCP 1.7–2.3 s; TBT 0–190 ms (the hero scene starts at idle after load, and only where WebGL runs on a GPU, so lab tools on software rendering measure the page without it). Scores vary a few points between runs; re-measure on the deployed site.
+CLS 0; LCP 2.4–2.7 s; TBT 10–80 ms (the hero scene starts at idle after load, and only where WebGL runs on a GPU, so lab tools on software rendering measure the page without it). Scores vary a few points between runs; re-measure on the deployed site.
 
 ## Before launch: confirm with the business
 
