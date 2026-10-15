@@ -2,11 +2,11 @@
 /**
  * Website development, in the Sample-3 order: hero, why teams choose us, Core Web Vitals with
  * the page builder instrument, what we build, the process, the stack, engagement models,
- * guides, questions, the other teams, contact. The hero carries the wireframe field; the page
+ * guides, questions, the other teams, contact. The hero carries the exploded-browser 3D scene; the page
  * builder (key `builder`) sits in the vitals panel in the body.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import PageBuilder from '@/components/instruments/PageBuilder.astro';
 import Photo from '@/components/Photo.astro';
 import PostCard from '@/components/PostCard.astro';
@@ -52,9 +52,9 @@ const serviceNode = serviceSchema(s, {
 ---
 
 <BaseLayout {...s.meta} path={path} image="/og/service-website-development.png" breadcrumbs={crumbs} schema={[serviceNode, faqSchema(faqs)]}>
-  <FieldHero scene="wireframe" labelledby="wd-title" crumbs={crumbs}>
-    <h1 class="fhero__title" id="wd-title">Websites that work <span class="quiet">as hard as your team.</span></h1>
-    <p class="fhero__lead">{s.intro}</p>
+  <Hero3D scene="wireframe" labelledby="wd-title" crumbs={crumbs} hint="Drag to turn it. Press to build it.">
+    <h1 class="hero__title" id="wd-title">Websites that work <span class="quiet">as hard as your team.</span></h1>
+    <p class="hero__lead">{s.intro}</p>
     <ul class="wd-points" role="list" aria-label="Why teams choose this service">
       {['Vetted and NDA-backed', 'Works your U.S. hours', `Starts with a ${s.facts.startsIn}`].map((p) => <li>{p}</li>)}
     </ul>
@@ -68,7 +68,7 @@ const serviceNode = serviceSchema(s, {
       <div><dt>Cost savings</dt><dd>{s.facts.savings}</dd></div>
       <div><dt>Ownership</dt><dd>Code, design and hosting in your name</dd></div>
     </dl>
-  </FieldHero>
+  </Hero3D>
 
   <!-- Why teams choose us: a photograph with the day's hand-offs, six benefits beside it -->
   <section class="section" aria-labelledby="benefits-title">
