@@ -66,7 +66,7 @@ export default function va(ctx: SceneContext): HeroScene {
   const group = new THREE.Group();
   const board = new THREE.Group();
   board.rotation.set(0.14, -0.28, 0);
-  group.scale.setScalar(0.8);
+  group.scale.setScalar(0.9);
   group.add(board);
 
   // ---- Days of sorting: which column each tile goes to, and its slot there
@@ -215,7 +215,7 @@ export default function va(ctx: SceneContext): HeroScene {
 
   return {
     object: group,
-    camera: { z: 8.6, y: -0.15, fov: 32 },
+    camera: { z: 8.6, y: 0.45, fov: 32 },
     tilt: 0.24,
     update(t, dt, input) {
       if (!input.dragging) input.rotY += (0 - input.rotY) * (1 - Math.pow(0.6, dt));

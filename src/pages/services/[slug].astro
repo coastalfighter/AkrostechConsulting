@@ -39,7 +39,7 @@ const crumbs = [
 ];
 
 const scenes = { 'virtual-assistance': 'va', recruitment: 'funnel', accounting: 'ledger', legal: 'document' } as const;
-const hints = { 'virtual-assistance': 'Drag to turn it. Press to reshuffle.', recruitment: 'Drag to turn it. Press to pour.', accounting: 'Drag to turn it. Press to reconcile.', legal: 'Drag to turn it. Press to review.' } as const;
+const hints = { 'virtual-assistance': 'Drag to turn it. Press to reshuffle.', recruitment: 'Drag to turn it. Press to pour.', accounting: 'Press to tip it. Watch it level.', legal: 'Drag to turn it. Press to fan them.' } as const;
 const scene = scenes[s.slug as keyof typeof scenes];
 const instruments = { 'virtual-assistance': InboxTriage, recruitment: HiringFunnel, accounting: LedgerReconcile, legal: ClauseAbstract } as const;
 const Instrument = instruments[s.slug as keyof typeof instruments];

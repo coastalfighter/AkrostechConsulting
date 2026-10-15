@@ -8,7 +8,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { contactShadow, glossy, type HeroScene, type Palette, type SceneContext } from '../engine';
-import { framer } from '../frame';
 
 const W = 1.62;
 const H = 2.2;
@@ -217,14 +216,12 @@ export default function pages(ctx: SceneContext): HeroScene {
   step(2.5, Infinity);
   paint(palette);
 
-  const frame = framer(ctx.renderer.domElement, ctx.camera, group, 1.3);
 
   return {
     object: group,
     camera: { z: 8.6, fov: 32 },
     tilt: 0.25,
     update(t, _dt, input) {
-      frame.update(t);
       // Dragging turns the book; it eases back to its composed angle.
       if (!input.dragging) input.rotY += (0 - input.rotY) * (1 - Math.pow(0.6, _dt));
       step(t, input.sincePulse);

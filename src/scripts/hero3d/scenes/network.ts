@@ -8,7 +8,6 @@
  */
 import * as THREE from 'three';
 import { glossy, type HeroScene, type Palette, type SceneContext } from '../engine';
-import { framer } from '../frame';
 
 const R = 1.42;
 const CORE = 0.2;
@@ -277,14 +276,12 @@ export default function network(ctx: SceneContext): HeroScene {
   // Settle a few seconds so the first (and the reduced-motion) frame shows a living network.
   for (let i = 0; i < 75; i++) step(i / 30, 1 / 30);
 
-  const frame = framer(ctx.renderer.domElement, ctx.camera, group);
 
   return {
     object: group,
     camera: { z: 8.6, fov: 32 },
     tilt: 0.25,
     update(t, dt, input) {
-      frame.update(t);
       if (dt > 0) step(t, dt);
       wave = input.sincePulse < 6 ? input.sincePulse * 3.2 : Infinity;
       shell.rotation.y = t * 0.07;

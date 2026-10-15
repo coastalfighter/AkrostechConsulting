@@ -1,12 +1,11 @@
 /**
  * Site-wide behaviour that must be ready immediately: theme, menu, header. The motion layer
  * (Lenis, reveals) and each page's interactive instruments load afterwards as separate chunks;
- * the hero's generative field starts immediately.
+ * the hero's 3D scene loads at idle after the page has painted.
  */
 import { initTheme } from './theme';
 import { initMenu } from './menu';
 import { initHeader, initServicesMenu } from './header';
-import { initFields } from './field';
 import { initHero3d } from './hero3d';
 
 declare global {
@@ -60,7 +59,6 @@ function boot(): void {
   initMenu();
   initHeader();
   initServicesMenu();
-  initFields();
   initHero3d();
   initInstruments();
 

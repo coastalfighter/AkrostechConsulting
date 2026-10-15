@@ -7,7 +7,6 @@
  */
 import * as THREE from 'three';
 import type { HeroScene, Palette, SceneContext } from '../engine';
-import { framer } from '../frame';
 import land from '../land.json';
 
 const R = 0.8;
@@ -244,14 +243,12 @@ export default function twin(ctx: SceneContext): HeroScene {
   };
 
   let lastClock = 0;
-  const frame = framer(ctx.renderer.domElement, ctx.camera, outer, 1.2);
 
   return {
     object: outer,
     camera: { z: 8.4, fov: 32 },
     tilt: 0.2,
     update(t, dt, input) {
-      frame.update(t);
       if (!input.dragging) input.rotY += (0 - input.rotY) * (1 - Math.pow(0.55, dt));
       // Each world breathes on its own slow rhythm.
       a.g.position.y = -0.12 + Math.sin(t * 0.5) * 0.035;

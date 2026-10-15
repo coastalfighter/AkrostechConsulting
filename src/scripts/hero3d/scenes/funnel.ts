@@ -50,7 +50,7 @@ export default function funnel(ctx: SceneContext): HeroScene {
   // Tip the mouth toward the viewer so the spiral inside reads.
   rig.rotation.set(0.34, 0, 0.04);
   group.add(rig);
-  group.scale.setScalar(0.82);
+  group.scale.setScalar(0.9);
 
   // ---- The glass funnel
   const pts: THREE.Vector2[] = [];
@@ -208,7 +208,7 @@ export default function funnel(ctx: SceneContext): HeroScene {
 
   return {
     object: group,
-    camera: { z: 9.0, y: -0.1, fov: 32 },
+    camera: { z: 9.0, y: 0.05, fov: 32 },
     tilt: 0.22,
     update(t, _dt, input) {
       if (!input.dragging) input.rotY += (0 - input.rotY) * (1 - Math.pow(0.6, _dt));
