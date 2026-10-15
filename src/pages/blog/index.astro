@@ -5,7 +5,7 @@
  * the guide finder instrument sits in the body directly above the grid it filters.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import ArticleSearch from '@/components/instruments/ArticleSearch.astro';
 import GuideCard from '@/components/GuideCard.astro';
 import CtaBand from '@/components/CtaBand.astro';
@@ -54,9 +54,9 @@ const listSchema = {
   schema={[blogSchema, listSchema]}
   webPage={{ '@type': ['WebPage', 'CollectionPage'], mainEntity: { '@id': `${canonical('/blog')}#list` } }}
 >
-  <FieldHero scene="flow" labelledby="blog-title" crumbs={crumbs}>
-    <h1 class="fhero__title" id="blog-title">Guides for building <span class="quiet">lean, global teams.</span></h1>
-    <p class="fhero__lead">Practical guides on offshore talent, operations, hiring and websites, from the team that does the work every day.</p>
+  <Hero3D scene="pages" hint="Drag to turn them. Press to riffle." labelledby="blog-title" crumbs={crumbs}>
+    <h1 class="hero__title" id="blog-title">Guides for building <span class="quiet">lean, global teams.</span></h1>
+    <p class="hero__lead">Practical guides on offshore talent, operations, hiring and websites, from the team that does the work every day.</p>
     <div class="actions">
       <a class="btn btn--primary" href="#guides">Browse all guides <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
       <a class="btn btn--ghost" href="/rss.xml">RSS feed <Icon name="arrow-up-right" class="btn__arrow" /></a>
@@ -70,7 +70,7 @@ const listSchema = {
         <dd><time datetime={latest.data.published.toISOString()}>{formatDate(latest.data.published)}</time></dd>
       </div>
     </dl>
-  </FieldHero>
+  </Hero3D>
 
   <section class="section guides" id="guides" aria-labelledby="guides-title">
     <div class="wrap">

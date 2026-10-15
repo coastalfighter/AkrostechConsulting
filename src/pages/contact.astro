@@ -6,7 +6,7 @@
  * with the same fields, names, honeypot and timing field as before; only its styling changed.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import CallWeek from '@/components/instruments/CallWeek.astro';
 import Photo from '@/components/Photo.astro';
 import Faq from '@/components/Faq.astro';
@@ -45,9 +45,9 @@ const tips = ['The roles or tasks you want covered', 'Tools you use today (CRM, 
 ---
 
 <BaseLayout {...pages.contact} image="/og/contact.png" breadcrumbs={crumbs} webPage={contactPage} schema={[faqSchema(faqs)]}>
-  <FieldHero scene="relay" labelledby="contact-title" crumbs={crumbs} wide>
-    <h1 class="fhero__title" id="contact-title">Tell us what’s slowing you down. <span class="quiet">We’ll staff the fix.</span></h1>
-    <p class="fhero__lead">
+  <Hero3D scene="twin" hint="Drag to turn it. Press to send one." labelledby="contact-title" crumbs={crumbs} wide>
+    <h1 class="hero__title" id="contact-title">Tell us what’s slowing you down. <span class="quiet">We’ll staff the fix.</span></h1>
+    <p class="hero__lead">
       Share the work you want off your plate. Within one business day you’ll get a recommended team shape, a start date and clear next steps. No
       obligation.
     </p>
@@ -87,7 +87,7 @@ const tips = ['The roles or tasks you want covered', 'Tools you use today (CRM, 
         <p class="small muted reach__note"><Icon name="clock" /> A real person replies within one business day.</p>
       </aside>
     </div>
-  </FieldHero>
+  </Hero3D>
 
   <!-- Enquiry form beside the sticky timeline -->
   <section class="section section--flush-top ct" id="enquiry" aria-labelledby="form-title">
