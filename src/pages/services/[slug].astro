@@ -7,7 +7,7 @@
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import InboxTriage from '@/components/instruments/InboxTriage.astro';
 import HiringFunnel from '@/components/instruments/HiringFunnel.astro';
 import LedgerReconcile from '@/components/instruments/LedgerReconcile.astro';
@@ -38,7 +38,8 @@ const crumbs = [
   { name: s.name, path },
 ];
 
-const scenes = { 'virtual-assistance': 'lanes', recruitment: 'funnel', accounting: 'ledger', legal: 'document' } as const;
+const scenes = { 'virtual-assistance': 'va', recruitment: 'funnel', accounting: 'ledger', legal: 'document' } as const;
+const hints = { 'virtual-assistance': 'Drag to turn it. Press to reshuffle.', recruitment: 'Drag to turn it. Press to pour.', accounting: 'Drag to turn it. Press to reconcile.', legal: 'Drag to turn it. Press to review.' } as const;
 const scene = scenes[s.slug as keyof typeof scenes];
 const instruments = { 'virtual-assistance': InboxTriage, recruitment: HiringFunnel, accounting: LedgerReconcile, legal: ClauseAbstract } as const;
 const Instrument = instruments[s.slug as keyof typeof instruments];
@@ -63,9 +64,9 @@ const faqs = s.faqs.map((f) => ({ q: f.q, a: f.a }));
 ---
 
 <BaseLayout {...s.meta} path={path} image={media.og} breadcrumbs={crumbs} schema={[serviceSchema(s), faqSchema(faqs)]}>
-  <FieldHero scene={scene} labelledby="service-title" crumbs={crumbs} wide>
-    <h1 class="fhero__title" id="service-title">{media.title[0]} <span class="quiet">{media.title[1]}</span></h1>
-    <p class="fhero__lead">{s.summary}</p>
+  <Hero3D scene={scene} labelledby="service-title" crumbs={crumbs} hint={hints[s.slug as keyof typeof hints]} wide>
+    <h1 class="hero__title" id="service-title">{media.title[0]} <span class="quiet">{media.title[1]}</span></h1>
+    <p class="hero__lead">{s.summary}</p>
     <ul class="proof" role="list" aria-label="Why teams choose this service">
       {
         proof.map((p) => (
@@ -92,7 +93,7 @@ const faqs = s.faqs.map((f) => ({ q: f.q, a: f.a }));
         ))
       }
     </dl>
-  </FieldHero>
+  </Hero3D>
 
   <!-- The specialist on shift -->
   <section class="section section--flush-top" aria-labelledby="shift-title">

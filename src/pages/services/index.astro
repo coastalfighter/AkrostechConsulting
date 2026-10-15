@@ -5,7 +5,7 @@
  * the comparison at a glance, the four-step process, the tools we work in, and the call.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import ServiceMatrix from '@/components/instruments/ServiceMatrix.astro';
 import TrailSteps from '@/components/TrailSteps.astro';
 import Photo from '@/components/Photo.astro';
@@ -41,9 +41,9 @@ const rowY = [10, 30, 50];
 ---
 
 <BaseLayout {...pages.services} image="/og/services.png" breadcrumbs={crumbs} schema={[itemList, ...services.map((s) => serviceSchema(s))]}>
-  <FieldHero scene="orbits" labelledby="services-title" crumbs={crumbs} hint="Five orbits, one centre. Move through them; press to send a ripple.">
-    <h1 class="fhero__title" id="services-title">One partner. <span class="quiet">Five specialist teams.</span></h1>
-    <p class="fhero__lead">{site.promise} Every team is dedicated to you, works your U.S. hours and is backed by process-driven quality checks.</p>
+  <Hero3D scene="orbits" labelledby="services-title" crumbs={crumbs} hint="Drag to turn it. Press for a ripple.">
+    <h1 class="hero__title" id="services-title">One partner. <span class="quiet">Five specialist teams.</span></h1>
+    <p class="hero__lead">{site.promise} Every team is dedicated to you, works your U.S. hours and is backed by process-driven quality checks.</p>
     <div class="actions">
       <a class="btn btn--primary" href={site.calendly} target="_blank" rel="noopener">Book a call <Icon name="arrow-up-right" class="btn__arrow" /></a>
       <a class="btn btn--ghost" href="#compare-title">Compare at a glance <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
@@ -67,7 +67,7 @@ const rowY = [10, 30, 50];
         </a>
       )
     }
-  </FieldHero>
+  </Hero3D>
 
   <!-- Services index: one generous row per service -->
   <section class="section" aria-labelledby="route-title">
