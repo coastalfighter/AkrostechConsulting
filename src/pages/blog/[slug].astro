@@ -10,7 +10,7 @@ import { render } from 'astro:content';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import ArticleOutline from '@/components/instruments/ArticleOutline.astro';
 import Photo from '@/components/Photo.astro';
 import GuideCard from '@/components/GuideCard.astro';
@@ -109,7 +109,7 @@ const schema = {
   breadcrumbs={crumbs}
   schema={[schema, faqSchema(faqs)]}
 >
-  <FieldHero scene="flow-article" seed={post.id} wide labelledby="article-title" crumbs={crumbs} class="ahero">
+  <Hero3D scene="pages" seed={post.id} hint="Drag to turn them. Press to riffle." wide labelledby="article-title" crumbs={crumbs} class="ahero">
     <ul class="ahero__tags" role="list" aria-label="Topics">
       {d.tags.map((t) => <li class="chip">{t}</li>)}
     </ul>
@@ -127,7 +127,7 @@ const schema = {
     <div class="ahero__cover" slot="after">
       <Photo name={cover} alt="" fill priority sizes="(min-width: 100rem) 1500px, 100vw" />
     </div>
-  </FieldHero>
+  </Hero3D>
 
   <article class="read" aria-labelledby="article-title">
     <div class="wrap">

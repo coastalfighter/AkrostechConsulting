@@ -6,7 +6,7 @@
  * network field.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import OrgChain from '@/components/instruments/OrgChain.astro';
 import Photo from '@/components/Photo.astro';
 import type { PhotoName } from '@/components/Photo.astro';
@@ -40,9 +40,9 @@ const { address } = site;
 ---
 
 <BaseLayout {...pages.about} image="/og/about.png" breadcrumbs={crumbs} webPage={{ '@type': ['WebPage', 'AboutPage'] }}>
-  <FieldHero scene="network" labelledby="about-title" crumbs={crumbs}>
-    <h1 class="fhero__title" id="about-title">Global teams. <span class="quiet">Local impact.</span></h1>
-    <p class="fhero__lead">
+  <Hero3D scene="network" hint="Drag to turn it. Press to send word." labelledby="about-title" crumbs={crumbs}>
+    <h1 class="hero__title" id="about-title">Global teams. <span class="quiet">Local impact.</span></h1>
+    <p class="hero__lead">
       Akrostech specializes in recruitment, virtual assistance, accounting, legal support and now website development. We help startups and enterprises
       scale while keeping quality, compliance and flexibility at the center.
     </p>
@@ -64,7 +64,7 @@ const { address } = site;
       </ul>
       <figcaption class="small muted roster__cap">Every client gets all three layers. Representative stock photography.</figcaption>
     </figure>
-  </FieldHero>
+  </Hero3D>
 
   <!-- Mission: a lavender field with a photograph -->
   <section class="section section--flush-top" aria-labelledby="mission-title">
