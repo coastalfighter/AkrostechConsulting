@@ -6,7 +6,7 @@
  * text; any h2 without an id gets one, so every section can be linked.
  */
 import BaseLayout from './BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
 import type { Crumb } from '@/lib/seo';
@@ -50,15 +50,15 @@ const updatedLabel = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZ
 ---
 
 <BaseLayout {...meta} image="/og/legal.png" breadcrumbs={crumbs} preloader={false}>
-  <FieldHero scene={scene} labelledby="legal-title" crumbs={crumbs} wide>
-    <h1 class="fhero__title" id="legal-title">{heading}{quiet && <> <span class="quiet">{quiet}</span></>}</h1>
-    <p class="fhero__lead">{lead}</p>
+  <Hero3D scene={scene} labelledby="legal-title" crumbs={crumbs} hint={scene === 'shield' ? 'Drag to turn it. Press to lock it.' : 'Move across the clauses. Press to ripple.'} wide>
+    <h1 class="hero__title" id="legal-title">{heading}{quiet && <> <span class="quiet">{quiet}</span></>}</h1>
+    <p class="hero__lead">{lead}</p>
     <dl class="legal__meta">
       <div><dt>Last updated</dt><dd><time datetime={updated}>{updatedLabel}</time></dd></div>
       <div><dt>Sections</dt><dd class="tabular">{toc.length}</dd></div>
       <div><dt>Questions</dt><dd><a class="link" href={`mailto:${site.email}`}>{site.email}</a></dd></div>
     </dl>
-  </FieldHero>
+  </Hero3D>
 
   <section class="section legal-tool" aria-labelledby="legal-tool-title">
     <div class="wrap">
