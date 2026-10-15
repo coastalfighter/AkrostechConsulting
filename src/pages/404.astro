@@ -5,7 +5,7 @@
  * and a type-to-find over every page on the site) and the site map on one sheet.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import FieldHero from '@/components/FieldHero.astro';
+import Hero3D from '@/components/Hero3D.astro';
 import WrongTurn from '@/components/instruments/WrongTurn.astro';
 import Icon from '@/components/Icon.astro';
 import { pages } from '@/data/pages';
@@ -65,14 +65,14 @@ const starters: SearchEntry[] = links.map((l) => ({ title: l.label, path: l.href
 ---
 
 <BaseLayout {...pages.notFound} noindex preloader={false}>
-  <FieldHero scene="lost" labelledby="nf-title" hint="The field has lost its pattern. Move through it to pull it back together.">
-    <h1 class="fhero__title" id="nf-title">Off the trail. <span class="quiet">Let’s get you back.</span></h1>
-    <p class="fhero__lead">Error 404: the page you are looking for has moved or no longer exists. Everything else is open for business: find it by name below, or start again from a page we know is there.</p>
+  <Hero3D scene="lost" labelledby="nf-title" hint="Drag to turn it. Press to scatter.">
+    <h1 class="hero__title" id="nf-title">Off the trail. <span class="quiet">Let’s get you back.</span></h1>
+    <p class="hero__lead">Error 404: the page you are looking for has moved or no longer exists. Everything else is open for business: find it by name below, or start again from a page we know is there.</p>
     <div class="actions">
       <a class="btn btn--primary" href="/">Back to home <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
       <a class="btn btn--ghost" href="/services">Explore services <Icon name="arrow-right" class="btn__arrow btn__arrow--right" /></a>
     </div>
-  </FieldHero>
+  </Hero3D>
 
   <section class="section" aria-labelledby="find-title">
     <div class="wrap">
